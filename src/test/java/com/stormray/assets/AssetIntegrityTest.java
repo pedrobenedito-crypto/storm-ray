@@ -83,10 +83,22 @@ class AssetIntegrityTest {
     }
 
     @Test
+    void dimensionDataExists() {
+        Path data = Path.of("src", "main", "resources", "data", "stormray");
+        for (String path : new String[]{"dimension/ashen_reflection.json", "dimension_type/ashen_reflection.json",
+                "worldgen/configured_feature/ashen_rot.json", "worldgen/placed_feature/ashen_rot.json",
+                "forge/biome_modifier/ashen_rot.json"}) {
+            assertTrue(Files.exists(data.resolve(path)), "missing data " + path);
+        }
+    }
+
+    @Test
     void textureFilesExist() {
         for (String path : new String[]{"textures/entity/storm_ray.png", "textures/entity/storm_ray_glowmask.png",
                 "textures/environment/storm_clouds.png", "textures/misc/petrified_stone.png",
-                "textures/misc/petrify_overlay.png", "lang/en_us.json", "lang/pt_br.json"}) {
+                "textures/misc/petrify_overlay.png", "lang/en_us.json", "lang/pt_br.json",
+                "textures/block/ashen_portal.png", "textures/block/ashen_portal.png.mcmeta",
+                "blockstates/ashen_portal.json", "models/block/ashen_portal.json"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

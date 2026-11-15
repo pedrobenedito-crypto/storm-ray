@@ -21,6 +21,10 @@ public final class ModParticles {
     public static final RegistryObject<SimpleParticleType> RITUAL_RUNE =
             PARTICLE_TYPES.register("ritual_rune", () -> new SimpleParticleType(true));
 
+    /** Dark flakes of soot drifting through the Ashen Reflection. */
+    public static final RegistryObject<SimpleParticleType> SOOT =
+            PARTICLE_TYPES.register("soot", () -> new SimpleParticleType(false));
+
     private ModParticles() {
     }
 }

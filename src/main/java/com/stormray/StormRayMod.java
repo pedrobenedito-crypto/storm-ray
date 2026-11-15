@@ -4,7 +4,9 @@ import com.mojang.logging.LogUtils;
 import com.stormray.config.StormRayClientConfig;
 import com.stormray.config.StormRayConfig;
 import com.stormray.network.ModNetwork;
+import com.stormray.registry.ModBlocks;
 import com.stormray.registry.ModEntities;
+import com.stormray.registry.ModFeatures;
 import com.stormray.registry.ModItems;
 import com.stormray.registry.ModParticles;
 import com.stormray.registry.ModSounds;
@@ -29,6 +31,8 @@ public final class StormRayMod {
     public StormRayMod() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        ModBlocks.BLOCKS.register(modBus);
+        ModFeatures.FEATURES.register(modBus);
         ModEntities.ENTITY_TYPES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModSounds.SOUND_EVENTS.register(modBus);

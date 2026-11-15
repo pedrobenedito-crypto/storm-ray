@@ -18,5 +18,11 @@
   "subtitles.stormray.petrify": "Flesh turns to stone",
   "subtitles.stormray.lightning": "Red lightning strikes",
   "subtitles.stormray.storm": "Storm howls",
-  "subtitles.stormray.ritual": "Ritual ignites"
+  "subtitles.stormray.ritual": "Ritual ignites",
+  "block.stormray.ashen_portal": "Ashen Portal",
+  "message.stormray.portal.opened": "The reflection tears open...",
+  "message.stormray.portal.missing": "The Ashen Reflection could not be reached.",
+  "subtitles.stormray.portal_open": "Ashen portal opens",
+  "subtitles.stormray.portal_travel": "Something passes through the reflection",
+  "subtitles.stormray.portal_ambient": "Ashen portal hums"
 }

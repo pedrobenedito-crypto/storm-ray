@@ -121,5 +121,32 @@
         "stream": false
       }
     ]
+  },
+  "block.ashen_portal.open": {
+    "subtitle": "subtitles.stormray.portal_open",
+    "sounds": [
+      {
+        "name": "stormray:block/portal_open",
+        "stream": false
+      }
+    ]
+  },
+  "block.ashen_portal.travel": {
+    "subtitle": "subtitles.stormray.portal_travel",
+    "sounds": [
+      {
+        "name": "stormray:block/portal_travel",
+        "stream": false
+      }
+    ]
+  },
+  "block.ashen_portal.ambient": {
+    "subtitle": "subtitles.stormray.portal_ambient",
+    "sounds": [
+      {
+        "name": "stormray:block/portal_ambient",
+        "stream": false
+      }
+    ]
   }
 }

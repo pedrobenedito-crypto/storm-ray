@@ -532,6 +532,48 @@ def environment_textures():
     Image.fromarray(np.clip(ov, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(misc, "petrify_overlay.png"))
 
 
+def portal_and_soot_textures():
+    """Animated portal surface (swirling blood-red void) and soot flakes."""
+    out = os.path.join(ASSETS, "textures", "block")
+    os.makedirs(out, exist_ok=True)
+    frames = 32
+    size = 16
+    big = 64
+    base = fbm(big, 4, 4, NP_RNG)
+    yy, xx = np.mgrid[0:size, 0:size]
+    sheet = np.zeros((size * frames, size, 4))
+    for f in range(frames):
+        t = f / frames
+        # sample the tileable noise along a slowly rotating, scrolling path
+        u = (xx * 2 + int(t * big)) % big
+        v = (yy * 2 + int(t * big * 0.5)) % big
+        n = base[v, u]
+        swirl = 0.5 + 0.5 * np.sin((xx + yy) * 0.6 + t * 2 * np.pi + n * 6)
+        glow = np.clip(n * 0.9 + swirl * 0.4 - 0.25, 0, 1)
+        frame = np.zeros((size, size, 4))
+        frame[..., 0] = 40 + 200 * glow
+        frame[..., 1] = 4 + 30 * glow ** 2
+        frame[..., 2] = 10 + 40 * glow ** 3
+        frame[..., 3] = 170 + 80 * glow
+        sheet[f * size:(f + 1) * size] = frame
+    Image.fromarray(np.clip(sheet, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "ashen_portal.png"))
+    write_json(os.path.join(out, "ashen_portal.png.mcmeta"), {"animation": {"frametime": 3, "interpolate": True}})
+
+    pout = os.path.join(ASSETS, "textures", "particle")
+    for frame in range(4):
+        img = np.zeros((8, 8, 4))
+        cx, cy = 3.5 + NP_RNG.uniform(-0.6, 0.6), 3.5 + NP_RNG.uniform(-0.6, 0.6)
+        d = np.sqrt((np.mgrid[0:8, 0:8][1] - cx) ** 2 + ((np.mgrid[0:8, 0:8][0] - cy) * 1.6) ** 2)
+        mask = (d < 2.6 - frame * 0.35) & (NP_RNG.random((8, 8)) > 0.15)
+        tone = 22 + 30 * NP_RNG.random((8, 8))
+        img[..., 0] = tone + 6
+        img[..., 1] = tone
+        img[..., 2] = tone
+        img[..., 3] = np.where(mask, 235, 0)
+        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(pout, f"soot_{frame}.png"))
+    write_json(os.path.join(ASSETS, "particles", "soot.json"), {"textures": [f"stormray:soot_{i}" for i in range(4)]})
+
+
 def main():
     geo = build_geometry()
     write_json(os.path.join(ASSETS, "geo", "entity", "storm_ray.geo.json"), geo.to_json())
@@ -539,6 +581,7 @@ def main():
     entity_textures()
     particle_sprites()
     environment_textures()
+    portal_and_soot_textures()
     bones = geo.bones
     print(f"geometry: {len(bones)} bones, {sum(len(b['cubes']) for b in bones)} cubes")
 

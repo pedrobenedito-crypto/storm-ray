@@ -293,6 +293,33 @@ def make_summon():
     return reverb(soft_clip(x, 1.4), 2.6, 0.45)
 
 
+def make_portal_open():
+    seconds = 4.5
+    x = make_whoosh(seconds, 90, 700, 2400) * 0.6
+    place(x, make_thunder(1)[: int(3.5 * SR)] * 0.9, 0.05)
+    drone = lowpass(saw(env(seconds, [(0, 38), (seconds, 52)])) + sine(np.full(int(seconds * SR), 76.0)), 300)
+    x += drone * env(seconds, [(0, 0), (0.6, 0.5), (3.5, 0.4), (seconds, 0)])
+    return reverb(soft_clip(x, 1.4), 2.4, 0.45)
+
+
+def make_portal_travel():
+    seconds = 2.2
+    x = make_whoosh(seconds, 2500, 500, 120)
+    t = t_axis(seconds)
+    x += sine(env(seconds, [(0, 220), (seconds, 55)])) * np.exp(-t * 1.5) * 0.4
+    return reverb(x, 1.6, 0.45)
+
+
+def make_portal_ambient():
+    seconds = 3.5
+    t = t_axis(seconds)
+    hum = sine(np.full_like(t, 55.0)) + 0.5 * sine(np.full_like(t, 82.5)) + 0.25 * sine(np.full_like(t, 110.7))
+    hum *= 0.7 + 0.3 * np.sin(2 * np.pi * 0.8 * t)
+    hiss = bandpass(noise(seconds), 800, 3000) * 0.08
+    x = (hum * 0.6 + hiss + crackle(seconds, 6, 2500) * 0.4) * env(seconds, [(0, 0), (0.6, 1), (2.8, 1), (seconds, 0)])
+    return reverb(x, 1.2, 0.3)
+
+
 # --------------------------------------------------------------------------- export
 
 def export(name, data):
@@ -326,6 +353,9 @@ def main():
         "environment/lightning2": make_thunder(1),
         "environment/storm_loop": make_storm_loop(),
         "ritual/ignite": make_ritual(),
+        "block/portal_open": make_portal_open(),
+        "block/portal_travel": make_portal_travel(),
+        "block/portal_ambient": make_portal_ambient(),
     }
     for name, data in files.items():
         export(name, data)
@@ -345,6 +375,9 @@ def main():
         "environment.storm.lightning": entry("subtitles.stormray.lightning", ["environment/lightning1", "environment/lightning2"]),
         "environment.storm.loop": entry("subtitles.stormray.storm", ["environment/storm_loop"], stream=True),
         "ritual.ignite": entry("subtitles.stormray.ritual", ["ritual/ignite"]),
+        "block.ashen_portal.open": entry("subtitles.stormray.portal_open", ["block/portal_open"]),
+        "block.ashen_portal.travel": entry("subtitles.stormray.portal_travel", ["block/portal_travel"]),
+        "block.ashen_portal.ambient": entry("subtitles.stormray.portal_ambient", ["block/portal_ambient"]),
     }
     with open(os.path.join(ASSETS, "sounds.json"), "w", encoding="utf-8") as f:
         json.dump(sounds_json, f, indent=2)

@@ -1,9 +1,9 @@
 package com.stormray.ritual;
 
-import com.mojang.authlib.GameProfile;
 import com.stormray.StormRayMod;
 import com.stormray.config.StormRayConfig;
 import com.stormray.entity.StormRayEntity;
+import com.stormray.portal.SteveHeads;
 import com.stormray.registry.ModEntities;
 import com.stormray.registry.ModParticles;
 import com.stormray.registry.ModSounds;
@@ -168,18 +168,7 @@ public final class SummoningRitualHandler {
 
     /** A head without an owner renders as Steve; heads explicitly owned by "Steve"/"MHF_Steve" also count. */
     private static boolean isSteveHead(Level level, BlockPos pos) {
-        if (!(level.getBlockEntity(pos) instanceof SkullBlockEntity skull)) {
-            return false;
-        }
-        GameProfile owner = skull.getOwnerProfile();
-        if (owner == null) {
-            return true;
-        }
-        String name = owner.getName();
-        if (name == null || name.isBlank()) {
-            return owner.getId() == null;
-        }
-        return "Steve".equalsIgnoreCase(name) || "MHF_Steve".equalsIgnoreCase(name);
+        return level.getBlockEntity(pos) instanceof SkullBlockEntity skull && SteveHeads.isSteve(skull.getOwnerProfile());
     }
 
     private static void tell(@Nullable Player player, Component message) {

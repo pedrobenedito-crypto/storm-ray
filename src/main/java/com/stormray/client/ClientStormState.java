@@ -1,6 +1,8 @@
 package com.stormray.client;
 
 import com.stormray.config.StormRayClientConfig;
+import com.stormray.dimension.ModDimensions;
+import net.minecraft.client.Minecraft;
 import com.stormray.util.StormMath;
 import net.minecraft.util.Mth;
 
@@ -44,6 +46,10 @@ public final class ClientStormState {
             targetIntensity = 0.0F;
             targetCharge = 0.0F;
         }
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null && ModDimensions.isMirror(mc.level)) {
+            targetIntensity = 1.0F; // the Ashen Reflection is always under the red storm
+        }
         intensity = StormMath.approach(intensity, targetIntensity, 0.02F);
         charge = StormMath.approach(charge, targetCharge, 0.08F);
         flash = Math.max(0.0F, flash * 0.75F - 0.01F);
@@ -66,6 +72,11 @@ public final class ClientStormState {
 
     public static float flash(float partialTick) {
         return Mth.lerp(partialTick, prevFlash, flash);
+    }
+
+    public static boolean inMirror() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.level != null && ModDimensions.isMirror(mc.level);
     }
 
     public static boolean active() {

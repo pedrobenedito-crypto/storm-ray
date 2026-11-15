@@ -18,5 +18,11 @@
   "subtitles.stormray.petrify": "Carne vira pedra",
   "subtitles.stormray.lightning": "Raio vermelho cai",
   "subtitles.stormray.storm": "Tempestade uiva",
-  "subtitles.stormray.ritual": "Ritual se acende"
+  "subtitles.stormray.ritual": "Ritual se acende",
+  "block.stormray.ashen_portal": "Portal de Cinzas",
+  "message.stormray.portal.opened": "O reflexo se rasga...",
+  "message.stormray.portal.missing": "Não foi possível alcançar o Reflexo de Cinzas.",
+  "subtitles.stormray.portal_open": "Portal de cinzas se abre",
+  "subtitles.stormray.portal_travel": "Algo atravessa o reflexo",
+  "subtitles.stormray.portal_ambient": "Portal de cinzas zumbe"
 }

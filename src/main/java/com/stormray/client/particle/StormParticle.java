@@ -61,6 +61,12 @@ public class StormParticle extends TextureSheetParticle {
                 new StormParticle(level, x, y, z, dx, dy, dz, sprites, 35, 0.16F, 0.04F, 0.92F, false);
     }
 
+    /** Dark flakes that drift and tumble slowly; not emissive, so they read as soot against the red sky. */
+    public static ParticleProvider<SimpleParticleType> soot(SpriteSet sprites) {
+        return (type, level, x, y, z, dx, dy, dz) ->
+                new StormParticle(level, x, y, z, dx, dy, dz, sprites, 90, 0.11F, 0.002F, 0.985F, false);
+    }
+
     public static ParticleProvider<SimpleParticleType> ritualRune(SpriteSet sprites) {
         return (type, level, x, y, z, dx, dy, dz) ->
                 new StormParticle(level, x, y, z, dx, dy, dz, sprites, 40, 0.3F, -0.01F, 0.96F, true);

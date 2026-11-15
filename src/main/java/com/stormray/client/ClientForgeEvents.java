@@ -67,6 +67,17 @@ public final class ClientForgeEvents {
             mc.level.addParticle(ModParticles.STORM_EMBER.get(), x, y, z, 0.04D + random.nextDouble() * 0.03D,
                     -0.02D - random.nextDouble() * 0.03D, 0.015D);
         }
+        if (ClientStormState.inMirror()) {
+            // the mirror is thick with drifting soot
+            int soot = (int) (StormRayClientConfig.AMBIENT_PARTICLES.get() * 7.0D);
+            for (int i = 0; i < soot; i++) {
+                double x = player.getX() + random.nextGaussian() * 12.0D;
+                double y = player.getY() + random.nextDouble() * 14.0D - 2.0D;
+                double z = player.getZ() + random.nextGaussian() * 12.0D;
+                mc.level.addParticle(ModParticles.SOOT.get(), x, y, z, 0.01D + random.nextGaussian() * 0.01D,
+                        -0.01D - random.nextDouble() * 0.015D, random.nextGaussian() * 0.01D);
+            }
+        }
     }
 
     @SubscribeEvent

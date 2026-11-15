@@ -64,6 +64,38 @@ Jogadores em criativo/espectador não são alvo nem são petrificados (dá para 
 
 ---
 
+## 3b. Reflexo de Cinzas (a dimensão espelhada)
+
+Uma cópia 1:1 do seu mundo, apodrecida e presa debaixo da tempestade vermelha.
+
+### Abrir o portal
+1. No chão, deixe um espaço vazio de **4x4**.
+2. Cerque esse espaço com **Blocos de Redstone**, na mesma altura: 4 de cada lado, 16 no total. Os cantos são opcionais.
+3. **Jogue** uma cabeça do Steve lá dentro (tecla **Q**).
+
+Quando a cabeça cai no chão, ela é consumida, cai um raio e o portal se abre. É só pisar nele para atravessar.
+
+```
+    R R R R
+  R . . . . R       R = Bloco de Redstone
+  R . . . . R       . = espaço vazio (o portal)
+  R . . . . R
+  R . . . . R
+    R R R R
+```
+
+### Como é lá dentro
+- **Mesmo mundo, mesmas coordenadas:** mesma seed, então relevo, biomas, cavernas, vilas e estruturas são idênticos. Ao entrar, você aparece no mesmo X/Z, ao lado de um portal de volta, que é construído automaticamente se ainda não existir.
+- **Suas construções também estão lá:** na primeira vez que um chunk do reflexo é carregado, o que foi construído ou alterado nesse chunk do mundo original é copiado. O conteúdo de baús e outros recipientes **não** é copiado, para não duplicar itens. Depois disso, cada mundo segue independente. Construções feitas no mundo original depois da primeira visita não aparecem lá.
+- **Mundo apodrecido:** a grama vira terra grossa, podzol e manchas de nylium carmesim; flores e plantas viram arbustos secos e raízes carmesim; quase metade das folhas cai; cipós vermelhos pendem das árvores; e a vegetação que sobra fica marrom-acinzentada.
+- **Atmosfera:** céu vermelho permanente com nuvens de tempestade, névoa vermelha, raios e clarões, fuligem e brasas no ar, luz avermelhada e o som da tempestade. É sempre noite.
+- **Vazio e hostil:** não há animais, aldeões, peixes nem morcegos, só monstros. Mobs trazidos de propósito (ovo gerador, comando, balde, com nome, na coleira ou domados) são mantidos.
+- **Voltar:** pise no portal de volta. Se quebrar um bloco de redstone de um portal aberto, o portal fecha e esse bloco não dropa nada, para os portais não virarem fonte de redstone grátis.
+
+Limitações conhecidas: a cor da água continua a normal (mudar isso exigiria mixins), e na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar.
+
+---
+
 ## 4. Configuração
 
 Arquivos gerados na primeira execução:
@@ -91,6 +123,11 @@ Arquivos gerados na primeira execução:
 | petrification | `cooldownTicks` | 600 | Intervalo entre pulsos |
 | petrification | `instantKill` / `damage` | true / 30 | Matar ou só causar dano |
 | petrification | `affectPlayers` / `affectMobs` / `affectCreativePlayers` | true / true / false | Quem é afetado |
+| dimension | `enablePortal` | true | Liga/desliga o portal |
+| dimension | `copyBuilds` | true | Copia as construções do mundo original no primeiro carregamento de cada chunk |
+| dimension | `hostileOnly` | true | Só monstros no reflexo |
+| dimension | `syncChunksPerTick` / `syncMillisPerTick` | 4 / 8 | Limite de trabalho da cópia por tick (desempenho) |
+| dimension | `lightningAverageIntervalTicks` | 90 | Frequência dos raios vermelhos no reflexo |
 | client | `skyTintStrength`, `screenTintStrength`, `thickFog`, `lightningFlashes`, `ambientParticles`, `ambienceVolume` | | Intensidade visual e sonora. `lightningFlashes = false` desliga os clarões de tela (fotossensibilidade) |
 
 20 ticks = 1 segundo.
@@ -118,7 +155,7 @@ Comandos úteis:
 Todos os assets são originais e gerados por código:
 
 - `tools/generate_assets.py`: modelo GeckoLib (46 bones), 7 animações, textura + glowmask, partículas, nuvens e overlays de pedra.
-- `tools/generate_sounds.py`: 17 efeitos sonoros sintetizados (sem samples de terceiros).
+- `tools/generate_sounds.py`: 20 efeitos sonoros sintetizados (sem samples de terceiros).
 
 Para regerar: `pip install numpy pillow scipy`, ter o `ffmpeg` instalado e rodar `python3 tools/generate_assets.py` e `python3 tools/generate_sounds.py`. O modelo (`src/main/resources/assets/stormray/geo/entity/storm_ray.geo.json`) abre no **Blockbench** (plugin GeckoLib). Para trocar por um modelo feito à mão, mantenha os mesmos nomes de bones e de animações (`animation.storm_ray.idle`, `summon`, `swoop`, `lash`, `charge`, `release`, `death`).
 
@@ -173,12 +210,14 @@ src/main/java/com/stormray/
 ├── entity/                       # StormRayEntity (IA, fases, ataques, GeckoLib) + efeitos do cliente
 ├── petrify/                      # petrificação (servidor), espelho no cliente, bloqueio de ações
 ├── storm/                        # evento do céu vermelho no servidor (sincronização, raios)
+├── dimension/                    # Reflexo de Cinzas: apodrecimento, cópia de chunks, regras de mobs
+├── portal/                       # portal 4x4: ignição pela cabeça jogada, bloco do portal, viagem
 ├── network/                      # canal + pacotes servidor→cliente
 ├── util/                         # matemática pura (testada)
-└── client/                       # renderer GeckoLib, céu/névoa, overlays, boss bar, partículas, som
+└── client/                       # renderer GeckoLib, céu/névoa, overlays, boss bar, partículas, som, efeitos da dimensão
 src/main/resources/
-├── assets/stormray/              # geo, animações, texturas, sons, partículas, idiomas (en_us, pt_br)
-└── data/                         # damage type, tags, loot table, receita da cabeça
+├── assets/stormray/              # geo, animações, texturas, sons, partículas, portal, idiomas (en_us, pt_br)
+└── data/                         # dimensão, tipo de dimensão, feature de apodrecimento, biome modifier, damage type, tags, loot, receita
 src/test/java/                    # testes JUnit 5 (ritual, matemática, dificuldade, integridade de assets)
 tools/                            # geradores de assets e sons
 .github/workflows/build.yml       # CI
@@ -193,5 +232,5 @@ tools/                            # geradores de assets e sons
 
 ## 8. Status de testes
 
-- Os testes unitários (`src/test`) passam: formato do ritual, matemática do céu, presets de dificuldade e integridade dos assets (todo som, sprite e bone referenciado existe).
+- Os testes unitários (`src/test`) passam: formato do ritual e do portal, matemática do céu, ruído determinístico do apodrecimento, presets de dificuldade e integridade dos assets e dados (todo som, sprite, bone e arquivo de dimensão referenciado existe).
 - A compilação completa contra o Forge e o GeckoLib acontece no GitHub Actions. Abra uma issue com o log se algo falhar.

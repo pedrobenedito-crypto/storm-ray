@@ -21,6 +21,9 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> LIGHTNING = register("environment.storm.lightning");
     public static final RegistryObject<SoundEvent> STORM_LOOP = register("environment.storm.loop");
     public static final RegistryObject<SoundEvent> RITUAL_IGNITE = register("ritual.ignite");
+    public static final RegistryObject<SoundEvent> PORTAL_OPEN = register("block.ashen_portal.open");
+    public static final RegistryObject<SoundEvent> PORTAL_TRAVEL = register("block.ashen_portal.travel");
+    public static final RegistryObject<SoundEvent> PORTAL_AMBIENT = register("block.ashen_portal.ambient");
 
     private static RegistryObject<SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(StormRayMod.id(name)));

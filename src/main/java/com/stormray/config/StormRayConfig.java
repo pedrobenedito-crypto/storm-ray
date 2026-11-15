@@ -42,6 +42,14 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.BooleanValue AFFECT_MOBS;
     public static final ForgeConfigSpec.BooleanValue AFFECT_CREATIVE;
 
+    // Ashen Reflection dimension
+    public static final ForgeConfigSpec.BooleanValue PORTAL_ENABLED;
+    public static final ForgeConfigSpec.BooleanValue COPY_BUILDS;
+    public static final ForgeConfigSpec.BooleanValue HOSTILE_ONLY;
+    public static final ForgeConfigSpec.IntValue SYNC_CHUNKS_PER_TICK;
+    public static final ForgeConfigSpec.IntValue SYNC_MILLIS_PER_TICK;
+    public static final ForgeConfigSpec.IntValue MIRROR_LIGHTNING_INTERVAL;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -110,6 +118,22 @@ public final class StormRayConfig {
                 .define("affectMobs", true);
         AFFECT_CREATIVE = b.comment("Whether creative-mode players can be petrified.")
                 .define("affectCreativePlayers", false);
+        b.pop();
+
+        b.comment("Ashen Reflection: the decayed mirror of the overworld").push("dimension");
+        PORTAL_ENABLED = b.comment("Allow opening portals: a 4x4 hole ringed with redstone blocks, then throw a Steve head inside.")
+                .define("enablePortal", true);
+        COPY_BUILDS = b.comment("Copy player-made changes from the overworld the first time a mirror chunk is loaded.",
+                        "Container contents are never copied, so items cannot be duplicated.")
+                .define("copyBuilds", true);
+        HOSTILE_ONLY = b.comment("Only hostile monsters may exist in the mirror (no animals, villagers, fish or bats).")
+                .define("hostileOnly", true);
+        SYNC_CHUNKS_PER_TICK = b.comment("Maximum mirror chunks synchronised with the overworld per server tick.")
+                .defineInRange("syncChunksPerTick", 4, 1, 64);
+        SYNC_MILLIS_PER_TICK = b.comment("Time budget in milliseconds for chunk synchronisation per server tick.")
+                .defineInRange("syncMillisPerTick", 8, 1, 45);
+        MIRROR_LIGHTNING_INTERVAL = b.comment("Average ticks between harmless red lightning strikes near each player in the mirror.")
+                .defineInRange("lightningAverageIntervalTicks", 90, 5, 24000);
         b.pop();
 
         SPEC = b.build();
