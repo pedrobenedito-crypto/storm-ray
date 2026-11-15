@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:bone_block" },
+    { "item": "minecraft:leather" },
+    { "item": "minecraft:brown_dye" },
+    { "item": "minecraft:cyan_dye" }
+  ],
+  "result": {
+    "item": "minecraft:player_head"
+  }
+}

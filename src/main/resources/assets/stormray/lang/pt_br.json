@@ -1,0 +1,22 @@
+{
+  "entity.stormray.storm_ray": "Arraia da Tempestade",
+  "boss.stormray.storm_ray": "A Arraia da Tempestade",
+  "item.stormray.storm_ray_spawn_egg": "Ovo Gerador de Arraia da Tempestade",
+  "message.stormray.ritual.success": "O céu se rasga...",
+  "message.stormray.ritual.already_active": "Uma Arraia da Tempestade já escurece este céu.",
+  "message.stormray.ritual.wrong_head": "O ritual exige uma cabeça comum de Steve.",
+  "death.attack.stormray.petrification": "%1$s foi transformado em pedra por %2$s",
+  "death.attack.stormray.petrification.player": "%1$s virou pedra enquanto lutava contra %2$s",
+  "death.attack.stormray.petrification.item": "%1$s foi transformado em pedra por %2$s usando %3$s",
+  "subtitles.stormray.summon": "Arraia da Tempestade emerge",
+  "subtitles.stormray.ambient": "Arraia da Tempestade geme",
+  "subtitles.stormray.hurt": "Arraia da Tempestade grita",
+  "subtitles.stormray.death": "Arraia da Tempestade desaba",
+  "subtitles.stormray.tentacle": "Filamentos chicoteiam",
+  "subtitles.stormray.charge": "Arraia da Tempestade acumula poder",
+  "subtitles.stormray.pulse": "Pulso petrificante",
+  "subtitles.stormray.petrify": "Carne vira pedra",
+  "subtitles.stormray.lightning": "Raio vermelho cai",
+  "subtitles.stormray.storm": "Tempestade uiva",
+  "subtitles.stormray.ritual": "Ritual se acende"
+}

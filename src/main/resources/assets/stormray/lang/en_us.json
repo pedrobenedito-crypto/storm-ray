@@ -1,0 +1,22 @@
+{
+  "entity.stormray.storm_ray": "Storm Ray",
+  "boss.stormray.storm_ray": "The Storm Ray",
+  "item.stormray.storm_ray_spawn_egg": "Storm Ray Spawn Egg",
+  "message.stormray.ritual.success": "The sky tears open...",
+  "message.stormray.ritual.already_active": "A Storm Ray already darkens this sky.",
+  "message.stormray.ritual.wrong_head": "The ritual demands an ordinary Steve head.",
+  "death.attack.stormray.petrification": "%1$s was turned to stone by %2$s",
+  "death.attack.stormray.petrification.player": "%1$s was turned to stone while fighting %2$s",
+  "death.attack.stormray.petrification.item": "%1$s was turned to stone by %2$s using %3$s",
+  "subtitles.stormray.summon": "Storm Ray emerges",
+  "subtitles.stormray.ambient": "Storm Ray groans",
+  "subtitles.stormray.hurt": "Storm Ray shrieks",
+  "subtitles.stormray.death": "Storm Ray collapses",
+  "subtitles.stormray.tentacle": "Filaments lash",
+  "subtitles.stormray.charge": "Storm Ray gathers power",
+  "subtitles.stormray.pulse": "Petrifying pulse",
+  "subtitles.stormray.petrify": "Flesh turns to stone",
+  "subtitles.stormray.lightning": "Red lightning strikes",
+  "subtitles.stormray.storm": "Storm howls",
+  "subtitles.stormray.ritual": "Ritual ignites"
+}

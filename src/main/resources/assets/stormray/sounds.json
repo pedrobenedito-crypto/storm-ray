@@ -1,0 +1,125 @@
+{
+  "entity.storm_ray.summon": {
+    "subtitle": "subtitles.stormray.summon",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/summon",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.ambient": {
+    "subtitle": "subtitles.stormray.ambient",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/ambient1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/storm_ray/ambient2",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/storm_ray/ambient3",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.hurt": {
+    "subtitle": "subtitles.stormray.hurt",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/hurt1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/storm_ray/hurt2",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.death": {
+    "subtitle": "subtitles.stormray.death",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/death",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.tentacle": {
+    "subtitle": "subtitles.stormray.tentacle",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/tentacle1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/storm_ray/tentacle2",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.charge": {
+    "subtitle": "subtitles.stormray.charge",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/charge",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.pulse": {
+    "subtitle": "subtitles.stormray.pulse",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/pulse",
+        "stream": false
+      }
+    ]
+  },
+  "entity.storm_ray.petrify": {
+    "subtitle": "subtitles.stormray.petrify",
+    "sounds": [
+      {
+        "name": "stormray:entity/storm_ray/petrify1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/storm_ray/petrify2",
+        "stream": false
+      }
+    ]
+  },
+  "environment.storm.lightning": {
+    "subtitle": "subtitles.stormray.lightning",
+    "sounds": [
+      {
+        "name": "stormray:environment/lightning1",
+        "stream": false
+      },
+      {
+        "name": "stormray:environment/lightning2",
+        "stream": false
+      }
+    ]
+  },
+  "environment.storm.loop": {
+    "subtitle": "subtitles.stormray.storm",
+    "sounds": [
+      {
+        "name": "stormray:environment/storm_loop",
+        "stream": true
+      }
+    ]
+  },
+  "ritual.ignite": {
+    "subtitle": "subtitles.stormray.ritual",
+    "sounds": [
+      {
+        "name": "stormray:ritual/ignite",
+        "stream": false
+      }
+    ]
+  }
+}
