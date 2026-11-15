@@ -1,0 +1,20 @@
+{
+  "render_type": "minecraft:translucent",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "stormray:block/ashen_portal",
+    "portal": "stormray:block/ashen_portal"
+  },
+  "elements": [
+    {
+      "from": [0, 11.5, 0],
+      "to": [16, 12, 16],
+      "shade": false,
+      "forge_data": { "block_light": 15, "sky_light": 15 },
+      "faces": {
+        "up": { "uv": [0, 0, 16, 16], "texture": "#portal" },
+        "down": { "uv": [0, 0, 16, 16], "texture": "#portal" }
+      }
+    }
+  ]
+}
