@@ -23,6 +23,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Validate GeckoLib animations
+        run: python3 tools/validate_animations.py
+
       - name: Configure Gradle (wrapper validation + cache)
         uses: gradle/actions/setup-gradle@v4
 

@@ -169,7 +169,7 @@ Todos os assets são originais e gerados por código:
 - `tools/generate_assets.py`: modelo GeckoLib (46 bones), 7 animações, textura + glowmask, partículas, nuvens e overlays de pedra.
 - `tools/generate_sounds.py`: 28 efeitos sonoros sintetizados (sem samples de terceiros).
 
-Para regerar: `pip install numpy pillow scipy`, ter o `ffmpeg` instalado e rodar `python3 tools/generate_assets.py` e `python3 tools/generate_sounds.py`. O modelo (`src/main/resources/assets/stormray/geo/entity/storm_ray.geo.json`) abre no **Blockbench** (plugin GeckoLib). Para trocar por um modelo feito à mão, mantenha os mesmos nomes de bones e de animações (`animation.storm_ray.idle`, `summon`, `swoop`, `lash`, `charge`, `release`, `death`).
+Antes de compilar, `python3 tools/validate_animations.py` confere as animações com as mesmas regras que o GeckoLib usa ao carregar o jogo (o GitHub Actions também roda essa checagem). Para regerar: `pip install numpy pillow scipy`, ter o `ffmpeg` instalado e rodar `python3 tools/generate_assets.py` e `python3 tools/generate_sounds.py`. O modelo (`src/main/resources/assets/stormray/geo/entity/storm_ray.geo.json`) abre no **Blockbench** (plugin GeckoLib). Para trocar por um modelo feito à mão, mantenha os mesmos nomes de bones e de animações (`animation.storm_ray.idle`, `summon`, `swoop`, `lash`, `charge`, `release`, `death`).
 
 ---
 

@@ -691,8 +691,9 @@ def build_phantom_animations():
     # four alternating slashes, hits land at 0.15 / 0.40 / 0.65 / 0.90 s
     def slash(start):
         return {f"{start:.2f}": vec(-130, 0, 0), f"{start + 0.15:.2f}": vec(35, 0, 0), f"{start + 0.25:.2f}": vec(10, 0, 0)}
-    right = {"0.0": vec(0, 0, 0)}
-    left = {"0.0": vec(0, 0, 0)}
+    # keys always formatted with 2 decimals: GeckoLib rejects two keyframes at the same time ("0.0" and "0.00")
+    right = {"0.00": vec(0, 0, 0)}
+    left = {"0.00": vec(0, 0, 0)}
     for i, start in enumerate((0.0, 0.25, 0.5, 0.75)):
         (right if i % 2 == 0 else left).update(slash(start))
     right["1.05"] = vec(0, 0, 0)
