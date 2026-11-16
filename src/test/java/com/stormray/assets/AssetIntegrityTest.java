@@ -85,6 +85,7 @@ class AssetIntegrityTest {
     void animationsOnlyReferenceExistingBones() throws IOException {
         checkAnimations("storm_ray", new String[]{"idle", "summon", "swoop", "lash", "charge", "release", "death"});
         checkAnimations("phantom_x", new String[]{"idle", "move", "combo", "reveal", "death"});
+        checkAnimations("phantom_sea", new String[]{"idle", "swim", "grab", "lunge", "death"});
     }
 
     @Test
@@ -105,7 +106,8 @@ class AssetIntegrityTest {
                 "textures/block/ashen_portal.png", "textures/block/ashen_portal.png.mcmeta",
                 "blockstates/ashen_portal.json", "models/block/ashen_portal.json",
                 "textures/entity/phantom_x.png", "textures/entity/phantom_x_glowmask.png",
-                "models/item/phantom_x_spawn_egg.json"}) {
+                "models/item/phantom_x_spawn_egg.json", "textures/entity/phantom_sea.png",
+                "textures/entity/phantom_sea_glowmask.png", "models/item/phantom_sea_spawn_egg.json"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

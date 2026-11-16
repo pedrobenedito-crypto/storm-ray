@@ -32,5 +32,11 @@
   "subtitles.stormray.phantom_death": "Phantom X dissolves",
   "subtitles.stormray.phantom_slash": "Claws slash",
   "subtitles.stormray.phantom_cloak": "Something fades away",
-  "subtitles.stormray.phantom_reveal": "Phantom X appears"
+  "subtitles.stormray.phantom_reveal": "Phantom X appears",
+  "entity.stormray.phantom_sea": "Phantom Sea",
+  "item.stormray.phantom_sea_spawn_egg": "Phantom Sea Spawn Egg",
+  "subtitles.stormray.sea_ambient": "Phantom Sea gurgles",
+  "subtitles.stormray.sea_hurt": "Phantom Sea shrieks",
+  "subtitles.stormray.sea_death": "Phantom Sea sinks",
+  "subtitles.stormray.sea_grab": "Phantom Sea grabs"
 }

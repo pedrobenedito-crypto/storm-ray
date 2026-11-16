@@ -210,5 +210,45 @@
         "stream": false
       }
     ]
+  },
+  "entity.phantom_sea.ambient": {
+    "subtitle": "subtitles.stormray.sea_ambient",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_sea/ambient1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/phantom_sea/ambient2",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_sea.hurt": {
+    "subtitle": "subtitles.stormray.sea_hurt",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_sea/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_sea.death": {
+    "subtitle": "subtitles.stormray.sea_death",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_sea/death",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_sea.grab": {
+    "subtitle": "subtitles.stormray.sea_grab",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_sea/grab",
+        "stream": false
+      }
+    ]
   }
 }

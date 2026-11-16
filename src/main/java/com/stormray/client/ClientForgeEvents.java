@@ -83,6 +83,13 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void onFogColor(ViewportEvent.ComputeFogColor event) {
         float partialTick = (float) event.getPartialTick();
+        if (event.getCamera().getFluidInCamera() == FogType.WATER && ClientStormState.inMirror()) {
+            // the mirror's ocean is a deep, almost black blue
+            event.setRed(0.015F);
+            event.setGreen(0.035F);
+            event.setBlue(0.11F);
+            return;
+        }
         float intensity = ClientStormState.intensity(partialTick) * StormRayClientConfig.SKY_TINT.get().floatValue();
         if (intensity <= 0.001F || event.getCamera().getFluidInCamera() != FogType.NONE) {
             return;
@@ -99,6 +106,12 @@ public final class ClientForgeEvents {
 
     @SubscribeEvent
     public static void onRenderFog(ViewportEvent.RenderFog event) {
+        if (event.getType() == FogType.WATER && ClientStormState.inMirror()) {
+            event.setNearPlaneDistance(-4.0F);
+            event.setFarPlaneDistance(Math.min(event.getFarPlaneDistance(), 22.0F));
+            event.setCanceled(true);
+            return;
+        }
         if (!StormRayClientConfig.THICK_FOG.get() || event.getType() != FogType.NONE) {
             return;
         }

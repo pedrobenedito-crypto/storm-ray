@@ -32,6 +32,11 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> PHANTOM_CLOAK = register("entity.phantom_x.cloak");
     public static final RegistryObject<SoundEvent> PHANTOM_REVEAL = register("entity.phantom_x.reveal");
 
+    public static final RegistryObject<SoundEvent> SEA_AMBIENT = register("entity.phantom_sea.ambient");
+    public static final RegistryObject<SoundEvent> SEA_HURT = register("entity.phantom_sea.hurt");
+    public static final RegistryObject<SoundEvent> SEA_DEATH = register("entity.phantom_sea.death");
+    public static final RegistryObject<SoundEvent> SEA_GRAB = register("entity.phantom_sea.grab");
+
     private static RegistryObject<SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(StormRayMod.id(name)));
     }

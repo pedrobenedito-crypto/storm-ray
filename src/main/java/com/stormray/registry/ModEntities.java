@@ -1,6 +1,7 @@
 package com.stormray.registry;
 
 import com.stormray.StormRayMod;
+import com.stormray.entity.PhantomSeaEntity;
 import com.stormray.entity.PhantomXEntity;
 import com.stormray.entity.StormRayEntity;
 import net.minecraft.world.entity.EntityType;
@@ -30,7 +31,15 @@ public final class ModEntities {
                     .clientTrackingRange(8)
                     .build(StormRayMod.id("phantom_x").toString()));
 
+    /** Drowned wraith of the mirror's oceans; drags swimmers to the sea floor. */
+    public static final RegistryObject<EntityType<PhantomSeaEntity>> PHANTOM_SEA = ENTITY_TYPES.register("phantom_sea",
+            () -> EntityType.Builder.<PhantomSeaEntity>of(PhantomSeaEntity::new, MobCategory.MONSTER)
+                    .sized(1.1F, 0.9F)
+                    .clientTrackingRange(8)
+                    .build(StormRayMod.id("phantom_sea").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
+        event.put(PHANTOM_SEA.get(), PhantomSeaEntity.createAttributes().build());
         event.put(STORM_RAY.get(), StormRayEntity.createAttributes().build());
         event.put(PHANTOM_X.get(), PhantomXEntity.createAttributes().build());
     }

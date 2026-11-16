@@ -57,6 +57,14 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.IntValue PHANTOM_COMBO_COOLDOWN;
     public static final ForgeConfigSpec.IntValue PHANTOM_SPAWN_WEIGHT;
 
+    // Phantom Sea
+    public static final ForgeConfigSpec.DoubleValue SEA_HEALTH;
+    public static final ForgeConfigSpec.DoubleValue SEA_BITE_DAMAGE;
+    public static final ForgeConfigSpec.DoubleValue SEA_PULL_STRENGTH;
+    public static final ForgeConfigSpec.IntValue SEA_GRAB_TICKS;
+    public static final ForgeConfigSpec.DoubleValue SEA_BREAK_FREE_DAMAGE;
+    public static final ForgeConfigSpec.IntValue SEA_SPAWN_WEIGHT;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -154,6 +162,21 @@ public final class StormRayConfig {
                 .defineInRange("comboCooldownTicks", 50, 10, 1200);
         PHANTOM_SPAWN_WEIGHT = b.comment("Natural spawn weight in the Ashen Reflection (zombie = 95, skeleton = 100). 0 disables.")
                 .defineInRange("spawnWeight", 100, 0, 1000);
+        b.pop();
+
+        b.comment("Phantom Sea: drowned wraith that drags swimmers to the sea floor").push("phantom_sea");
+        SEA_HEALTH = b.comment("Max health.")
+                .defineInRange("health", 30.0D, 1.0D, 1024.0D);
+        SEA_BITE_DAMAGE = b.comment("Damage of each bite while holding its prey (once per second).")
+                .defineInRange("biteDamage", 3.0D, 0.0D, 1000.0D);
+        SEA_PULL_STRENGTH = b.comment("Downward speed it drags its prey with (blocks per tick).")
+                .defineInRange("pullStrength", 0.2D, 0.01D, 2.0D);
+        SEA_GRAB_TICKS = b.comment("Maximum ticks it holds on before letting go.")
+                .defineInRange("grabDurationTicks", 120, 10, 2400);
+        SEA_BREAK_FREE_DAMAGE = b.comment("Damage the prey must deal to it to break free early.")
+                .defineInRange("breakFreeDamage", 6.0D, 0.0D, 1000.0D);
+        SEA_SPAWN_WEIGHT = b.comment("Spawn weight in the Ashen Reflection's water (only counted for underwater positions). 0 disables.")
+                .defineInRange("spawnWeight", 150, 0, 1000);
         b.pop();
 
         SPEC = b.build();

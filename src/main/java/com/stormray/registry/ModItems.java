@@ -18,10 +18,14 @@ public final class ModItems {
     public static final RegistryObject<Item> PHANTOM_X_SPAWN_EGG = ITEMS.register("phantom_x_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.PHANTOM_X, 0x16151A, 0x9A1420, new Item.Properties()));
 
+    public static final RegistryObject<Item> PHANTOM_SEA_SPAWN_EGG = ITEMS.register("phantom_sea_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.PHANTOM_SEA, 0x0E1626, 0x9A1420, new Item.Properties()));
+
     public static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(STORM_RAY_SPAWN_EGG);
             event.accept(PHANTOM_X_SPAWN_EGG);
+            event.accept(PHANTOM_SEA_SPAWN_EGG);
         }
     }
 

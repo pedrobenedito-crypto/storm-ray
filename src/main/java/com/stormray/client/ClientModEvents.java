@@ -3,8 +3,10 @@ package com.stormray.client;
 import com.stormray.StormRayMod;
 import com.stormray.client.dimension.AshenFoliageColors;
 import com.stormray.client.dimension.AshenSkyEffects;
+import com.stormray.client.dimension.DarkWaterExtensions;
 import com.stormray.client.particle.StormParticle;
 import com.stormray.dimension.ModDimensions;
+import com.stormray.client.render.PhantomSeaRenderer;
 import com.stormray.client.render.PhantomXRenderer;
 import com.stormray.client.render.StormOverlays;
 import com.stormray.client.render.StormRayRenderer;
@@ -18,6 +20,7 @@ import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = StormRayMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientModEvents {
@@ -25,9 +28,15 @@ public final class ClientModEvents {
     }
 
     @SubscribeEvent
+    public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(DarkWaterExtensions::install);
+    }
+
+    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.STORM_RAY.get(), StormRayRenderer::new);
         event.registerEntityRenderer(ModEntities.PHANTOM_X.get(), PhantomXRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHANTOM_SEA.get(), PhantomSeaRenderer::new);
     }
 
     @SubscribeEvent

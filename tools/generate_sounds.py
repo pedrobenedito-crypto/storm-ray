@@ -377,6 +377,46 @@ def make_phantom_reveal():
     return reverb(x, 1.0, 0.35, 6000)
 
 
+def bubbles(seconds, density):
+    x = np.zeros(int(seconds * SR))
+    for _ in range(int(seconds * density)):
+        d = rng.uniform(0.03, 0.08)
+        t = t_axis(d)
+        f0 = rng.uniform(300, 900)
+        chirp = np.sin(2 * np.pi * np.cumsum(f0 * (1 + 2.5 * t / d)) / SR) * np.exp(-t * 40)
+        place(x, chirp * rng.uniform(0.2, 0.6), rng.uniform(0, seconds - d))
+    return x
+
+
+def make_sea_ambient(i):
+    seconds = 3.0 + 0.5 * i
+    x = lowpass(whisper(seconds, 2.0 + i), 1600) * 1.6 + bubbles(seconds, 9)
+    x *= env(seconds, [(0, 0), (0.4, 1), (seconds - 0.5, 0.8), (seconds, 0)])
+    return reverb(x, 2.0, 0.55, 1800)
+
+
+def make_sea_hurt():
+    x = lowpass(make_phantom_hurt(), 2200)
+    x = x + bubbles(len(x) / SR, 25)[: len(x)] * 0.6
+    return reverb(x, 1.0, 0.4, 2000)
+
+
+def make_sea_death():
+    x = lowpass(make_phantom_death(), 1800)
+    x = x + bubbles(len(x) / SR, 30)[: len(x)] * 0.7
+    return reverb(x, 2.2, 0.5, 1500)
+
+
+def make_sea_grab():
+    seconds = 1.6
+    splash = lowpass(make_whoosh(seconds, 300, 1200, 200), 1500) * 0.8
+    gurgle = growl(1.0, env(1.0, [(0, 160), (0.3, 220), (1.0, 110)]), rough=40,
+                   formants=((300, 800), (900, 1600))) * env(1.0, [(0, 0), (0.1, 1), (1.0, 0)])
+    place(splash, gurgle * 0.9, 0.2)
+    splash += bubbles(seconds, 40) * 0.8
+    return reverb(lowpass(splash, 2500), 1.6, 0.5, 1500)
+
+
 # --------------------------------------------------------------------------- export
 
 def export(name, data):
@@ -421,6 +461,11 @@ def main():
         "entity/phantom_x/slash2": make_phantom_slash(1),
         "entity/phantom_x/cloak": make_phantom_cloak(),
         "entity/phantom_x/reveal": make_phantom_reveal(),
+        "entity/phantom_sea/ambient1": make_sea_ambient(0),
+        "entity/phantom_sea/ambient2": make_sea_ambient(1),
+        "entity/phantom_sea/hurt": make_sea_hurt(),
+        "entity/phantom_sea/death": make_sea_death(),
+        "entity/phantom_sea/grab": make_sea_grab(),
     }
     for name, data in files.items():
         export(name, data)
@@ -449,6 +494,10 @@ def main():
         "entity.phantom_x.slash": entry("subtitles.stormray.phantom_slash", ["entity/phantom_x/slash1", "entity/phantom_x/slash2"]),
         "entity.phantom_x.cloak": entry("subtitles.stormray.phantom_cloak", ["entity/phantom_x/cloak"]),
         "entity.phantom_x.reveal": entry("subtitles.stormray.phantom_reveal", ["entity/phantom_x/reveal"]),
+        "entity.phantom_sea.ambient": entry("subtitles.stormray.sea_ambient", ["entity/phantom_sea/ambient1", "entity/phantom_sea/ambient2"]),
+        "entity.phantom_sea.hurt": entry("subtitles.stormray.sea_hurt", ["entity/phantom_sea/hurt"]),
+        "entity.phantom_sea.death": entry("subtitles.stormray.sea_death", ["entity/phantom_sea/death"]),
+        "entity.phantom_sea.grab": entry("subtitles.stormray.sea_grab", ["entity/phantom_sea/grab"]),
     }
     with open(os.path.join(ASSETS, "sounds.json"), "w", encoding="utf-8") as f:
         json.dump(sounds_json, f, indent=2)

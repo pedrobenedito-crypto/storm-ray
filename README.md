@@ -46,7 +46,7 @@ No vanilla não existe cabeça de jogador no survival, então o mod adiciona uma
 
 Uma cabeça sem dono é a cabeça do Steve. Cabeças com a skin de outro jogador não funcionam, a não ser que `requireSteveHead = false` na config.
 
-Para testes no criativo também existem o **Ovo Gerador de Arraia da Tempestade** e o **Ovo Gerador de Phantom X**.
+Para testes no criativo também existem o **Ovo Gerador de Arraia da Tempestade** o **Ovo Gerador de Phantom X** e o **Ovo Gerador de Phantom Sea**.
 
 ---
 
@@ -100,9 +100,17 @@ O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só
 - **Ferido:** quando leva dano, perde a invisibilidade por um instante.
 - **Status:** 40 de vida (como um Enderman), mas não é um chefe.
 
+### Oceano escuro e Phantom Sea
+- **Água azul-escura:** no Reflexo, a água de oceanos, rios e lagos fica num azul-marinho profundo. Debaixo d'água, a névoa é quase preta e a visibilidade cai para cerca de 20 blocos. No mundo normal, a água continua igual.
+- **Phantom Sea:** um espectro afogado, parente do Phantom X, com capuz encharcado, rachadura vermelha no rosto, guelras brilhantes, braços de garras e cauda de enguia. Aparece naturalmente **só na água do Reflexo**, em grupos de 1 a 3.
+  - Caça quem estiver nadando. Quando chega perto, **agarra e puxa para o fundo**, mordendo a cada segundo enquanto segura.
+  - **Para se soltar:** cause 6 de dano nele enquanto ele te segura. Senão, ele solta sozinho depois de 6 segundos. Depois de soltar, demora uns 4 segundos para agarrar de novo.
+  - Fora d'água ele resseca e perde vida aos poucos.
+  - Tem 30 de vida.
+
 ---
 
-Limitações conhecidas: a cor da água continua a normal (mudar isso exigiria mixins), e na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar.
+Limitações conhecidas: na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar.
 
 ---
 
@@ -140,6 +148,8 @@ Arquivos gerados na primeira execução:
 | dimension | `lightningAverageIntervalTicks` | 90 | Frequência dos raios vermelhos no reflexo |
 | phantom_x | `health` / `hitDamage` / `comboHits` / `comboCooldownTicks` | 40 / 3 / 4 / 50 | Força do Phantom X |
 | phantom_x | `spawnWeight` | 100 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
+| phantom_sea | `health` / `biteDamage` / `pullStrength` / `grabDurationTicks` / `breakFreeDamage` | 30 / 3 / 0,2 / 120 / 6 | Força e agarrão do Phantom Sea |
+| phantom_sea | `spawnWeight` | 150 | Frequência de spawn na água do Reflexo (0 desliga) |
 | client | `skyTintStrength`, `screenTintStrength`, `thickFog`, `lightningFlashes`, `ambientParticles`, `ambienceVolume` | | Intensidade visual e sonora. `lightningFlashes = false` desliga os clarões de tela (fotossensibilidade) |
 
 20 ticks = 1 segundo.
@@ -167,7 +177,7 @@ Comandos úteis:
 Todos os assets são originais e gerados por código:
 
 - `tools/generate_assets.py`: modelo GeckoLib (46 bones), 7 animações, textura + glowmask, partículas, nuvens e overlays de pedra.
-- `tools/generate_sounds.py`: 28 efeitos sonoros sintetizados (sem samples de terceiros).
+- `tools/generate_sounds.py`: 33 efeitos sonoros sintetizados (sem samples de terceiros).
 
 Antes de compilar, `python3 tools/validate_animations.py` confere as animações com as mesmas regras que o GeckoLib usa ao carregar o jogo (o GitHub Actions também roda essa checagem). Para regerar: `pip install numpy pillow scipy`, ter o `ffmpeg` instalado e rodar `python3 tools/generate_assets.py` e `python3 tools/generate_sounds.py`. O modelo (`src/main/resources/assets/stormray/geo/entity/storm_ray.geo.json`) abre no **Blockbench** (plugin GeckoLib). Para trocar por um modelo feito à mão, mantenha os mesmos nomes de bones e de animações (`animation.storm_ray.idle`, `summon`, `swoop`, `lash`, `charge`, `release`, `death`).
 
@@ -219,7 +229,7 @@ src/main/java/com/stormray/
 ├── config/                       # StormRayConfig (comum), StormRayClientConfig, DifficultyPreset
 ├── registry/                     # entidades, itens (ovo), sons, partículas, damage type
 ├── ritual/                       # forma do T + detecção/consumo do ritual
-├── entity/                       # StormRayEntity e PhantomXEntity (IA, ataques, GeckoLib), spawn do Phantom X
+├── entity/                       # Storm Ray, Phantom X e Phantom Sea (IA, ataques, GeckoLib) e spawn natural
 ├── petrify/                      # petrificação (servidor), espelho no cliente, bloqueio de ações
 ├── storm/                        # evento do céu vermelho no servidor (sincronização, raios)
 ├── dimension/                    # Reflexo de Cinzas: apodrecimento, cópia de chunks, regras de mobs

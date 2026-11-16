@@ -768,6 +768,146 @@ def phantom_textures():
     Image.fromarray(np.clip(glow, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_x_glowmask.png"))
 
 
+# --------------------------------------------------------------------------- Phantom Sea (drowned wraith)
+
+def build_sea_geometry():
+    g = Geo("geometry.phantom_sea", PX_TEX, PX_GLOW, PX_VEIN, PX_ORGANIC_MAX_Y, max_uv=48.0, bounds=(4, 2, 0.5),
+            min_uv=2.0, vein_max=(PX_VEIN[2] - 1.0, PX_VEIN[3] - 1.0))
+    g.bone("root", None, [0, 0, 0])
+    body = g.bone("body", "root", [0, 8, 0])
+    g.cube(body, [-3.5, 5, -6], [7, 6, 10])                      # hunched torso, swimming flat
+    g.cube(body, [-4.2, 9.5, -5.5], [8.4, 2, 6])                  # ragged shoulder mantle
+    for z in (-3.5, -1.5, 0.5):                                   # glowing gill slits
+        g.cube(body, [3.45, 7, z], [0.2, 2.2, 0.6], zone="glow")
+        g.cube(body, [-3.65, 7, z], [0.2, 2.2, 0.6], zone="glow")
+    for z in (-4, -1, 2):
+        g.cube(body, [-0.5, 11, z], [1, 2.2 - abs(z) * 0.2, 1.6])  # dorsal spines
+    head = g.bone("head", "body", [0, 8, -6])
+    g.cube(head, [-3.5, 4.5, -13], [7, 7, 7])                     # drowned hood
+    g.cube(head, [-3.8, 4, -13.4], [7.6, 1.6, 7.8])               # sodden hood rim
+    g.cube(head, [-2.2, 5.5, -13.25], [4.4, 5, 0.3])              # hollow face
+    for o, sz in (([-0.6, 8.3], [0.8, 2.2]), ([-0.1, 6.6], [0.8, 1.9]), ([-0.7, 5.6], [0.8, 1.2]),
+                  ([0.5, 9.0], [1.0, 0.5]), ([-1.6, 7.2], [1.0, 0.5])):
+        g.cube(head, [o[0], o[1], -13.45], [sz[0], sz[1], 0.2], zone="glow")
+    for k, x in enumerate((-2.5, -0.5, 1.5)):                      # drifting strands under the hood
+        strand = g.bone(f"strand_{k}", "head", [x + 0.5, 4.5, -11])
+        g.cube(strand, [x, 0.5 - k * 0.6, -11.5], [1, 4 + k * 0.6, 0.6])
+    for side, name in ((-1, "arm_r"), (1, "arm_l")):
+        upper = g.bone(name, "body", [3.6 * side, 7, -5])
+        o, s = [3.5, 6.2, -13], [1.5, 1.5, 8]
+        g.cube(upper, o if side > 0 else mirror(o, s), s)
+        lower = g.bone(name + "_lower", name, [4.25 * side, 6.9, -13])
+        o, s = [3.65, 6.3, -21], [1.2, 1.2, 8]
+        g.cube(lower, o if side > 0 else mirror(o, s), s)
+        for k, cy in enumerate((6.0, 6.7, 7.4)):
+            o, s = [3.9 + (k - 1) * 0.35, cy, -25], [0.4, 0.4, 4]
+            g.cube(lower, o if side > 0 else mirror(o, s), s)
+            o, s = [3.9 + (k - 1) * 0.35, cy, -25.6], [0.4, 0.4, 0.6]
+            g.cube(lower, o if side > 0 else mirror(o, s), s, zone="glow")
+    for side, name in ((-1, "fin_r"), (1, "fin_l")):
+        fin = g.bone(name, "body", [3.5 * side, 9, -1])
+        o, s = [3.5, 8.6, -5], [5, 0.6, 7]
+        g.cube(fin, o if side > 0 else mirror(o, s), s)
+        z = -4.5
+        while z < 2.0:                                            # tattered trailing edge
+            w = RNG.uniform(1.0, 1.8)
+            o, s = [3.5 + RNG.uniform(0, 1.5), 8.7, z], [RNG.uniform(3.5, 6.5), 0.4, w]
+            g.cube(fin, o if side > 0 else mirror(o, s), s)
+            z += w + RNG.uniform(0.1, 0.4)
+    parent = "body"
+    segments = [(4, 8, 5, 5), (12, 8, 4, 4), (20, 8, 3, 3), (28, 8, 2, 2)]
+    for i, (z0, length, w, h) in enumerate(segments, start=1):
+        seg = g.bone(f"tail_{i}", parent, [0, 8, z0])
+        g.cube(seg, [-w / 2, 8 - h / 2, z0], [w, h, length])
+        g.cube(seg, [-0.3, 8 + h / 2, z0], [0.6, 0.2, length], zone="vein")
+        parent = f"tail_{i}"
+    fluke = g.bone("tail_fin", parent, [0, 8, 36])
+    g.cube(fluke, [-3.5, 7.8, 36], [7, 0.4, 5])
+    g.cube(fluke, [-4.5, 7.8, 39], [2, 0.4, 3])
+    g.cube(fluke, [2.5, 7.8, 39], [2, 0.4, 3])
+    return g
+
+
+def build_sea_animations():
+    tails = ["tail_1", "tail_2", "tail_3", "tail_4", "tail_fin"]
+    strands = ["strand_0", "strand_1", "strand_2"]
+    anims = {}
+
+    def swim(speed, amp, length):
+        bones = {"root": {"position": vec(0, f"math.sin(query.anim_time * {speed}) * 0.6", 0)},
+                 "body": {"rotation": vec(0, f"math.sin(query.anim_time * {speed} + 90) * {amp * 0.25}", 0)},
+                 "head": {"rotation": vec(f"math.sin(query.anim_time * {speed}) * 3", f"math.sin(query.anim_time * {speed} - 60) * {amp * 0.3}", 0)},
+                 "arm_r": {"rotation": vec(f"math.sin(query.anim_time * {speed}) * 6", f"-6 + math.sin(query.anim_time * {speed} + 40) * 5", 0)},
+                 "arm_l": {"rotation": vec(f"math.sin(query.anim_time * {speed} + 90) * 6", f"6 - math.sin(query.anim_time * {speed} + 40) * 5", 0)},
+                 "fin_r": {"rotation": vec(0, 0, f"math.sin(query.anim_time * {speed}) * {amp}")},
+                 "fin_l": {"rotation": vec(0, 0, f"-1 * math.sin(query.anim_time * {speed}) * {amp}")}}
+        for k, t in enumerate(tails):
+            bones[t] = {"rotation": vec(0, f"math.sin(query.anim_time * {speed} - {k * 45}) * {amp * (0.6 + k * 0.25):.1f}", 0)}
+        for k, st in enumerate(strands):
+            bones[st] = {"rotation": vec(f"20 + math.sin(query.anim_time * {speed} - {k * 60}) * 10", 0, 0)}
+        return {"loop": True, "animation_length": length, "bones": bones}
+
+    anims["animation.phantom_sea.idle"] = swim(120, 8, 3.0)
+    anims["animation.phantom_sea.swim"] = swim(360, 16, 1.0)
+
+    bones = {"head": {"rotation": vec(f"25 + math.sin(query.anim_time * 720) * 4", 0, 0)},
+             "body": {"rotation": vec(18, 0, f"math.sin(query.anim_time * 720) * 4")},
+             "arm_r": {"rotation": vec("55 + math.sin(query.anim_time * 720) * 6", 14, 0)},
+             "arm_l": {"rotation": vec("55 + math.sin(query.anim_time * 720 + 90) * 6", -14, 0)},
+             "arm_r_lower": {"rotation": vec(40, 0, 0)},
+             "arm_l_lower": {"rotation": vec(40, 0, 0)},
+             "fin_r": {"rotation": vec(0, 0, "math.sin(query.anim_time * 720) * 25")},
+             "fin_l": {"rotation": vec(0, 0, "-1 * math.sin(query.anim_time * 720) * 25")}}
+    for k, t in enumerate(tails):
+        bones[t] = {"rotation": vec(f"-8 - {k * 4}", f"math.sin(query.anim_time * 720 - {k * 50}) * {14 + k * 6}", 0)}
+    anims["animation.phantom_sea.grab"] = {"loop": True, "animation_length": 1.0, "bones": bones}
+
+    bones = {"arm_r": {"rotation": {"0.00": vec(-40, 30, 0), "0.15": vec(-50, 40, 0), "0.30": vec(50, 10, 0), "0.50": vec(55, 14, 0)}},
+             "arm_l": {"rotation": {"0.00": vec(-40, -30, 0), "0.15": vec(-50, -40, 0), "0.30": vec(50, -10, 0), "0.50": vec(55, -14, 0)}},
+             "head": {"rotation": {"0.00": vec(-20, 0, 0), "0.30": vec(25, 0, 0), "0.50": vec(25, 0, 0)}},
+             "root": {"position": {"0.00": vec(0, 0, 0), "0.30": vec(0, 0, -3), "0.50": vec(0, 0, 0)}}}
+    anims["animation.phantom_sea.lunge"] = {"loop": False, "animation_length": 0.5, "bones": bones}
+
+    bones = {"root": {"position": {"0.00": vec(0, 0, 0), "1.50": vec(0, -4, 0)}},
+             "body": {"rotation": {"0.00": vec(0, 0, 0), "0.40": vec(-20, 0, 30), "1.50": vec(10, 0, 160)}},
+             "arm_r": {"rotation": {"0.00": vec(0, 0, 0), "1.50": vec(30, 20, 0)}},
+             "arm_l": {"rotation": {"0.00": vec(0, 0, 0), "1.50": vec(30, -20, 0)}}}
+    for k, t in enumerate(tails):
+        bones[t] = {"rotation": {"0.00": vec(0, 0, 0), "0.40": vec(0, 25 - k * 10, 0), "1.50": vec(6, 0, 0)}}
+    anims["animation.phantom_sea.death"] = {"loop": "hold_on_last_frame", "animation_length": 1.5, "bones": bones}
+    return {"format_version": "1.8.0", "animations": anims, "geckolib_format_version": 2}
+
+
+def sea_textures():
+    rng = np.random.default_rng(909)
+    n = PX_TEX
+    base = fbm(n, 4, 5, rng)
+    ripple = fbm(n, 12, 3, rng)
+    scales = 1.0 - np.abs(fbm(n, 24, 2, rng) - 0.5) * 2.0
+    shade = 0.25 + 0.5 * base * (0.7 + 0.3 * ripple)
+    shade = shade * (1 - 0.35 * np.clip((scales - 0.85) / 0.15, 0, 1))
+    r = 10 + 24 * shade
+    g = 16 + 34 * shade
+    b = 26 + 52 * shade
+    img = np.stack([r, g, b, np.full_like(r, 255)], axis=-1)
+    glow = np.zeros((n, n, 4))
+    x, y, w, h = PX_GLOW
+    img[y:y + h, x:x + w] = [255, 70, 40, 255]
+    glow[y:y + h, x:x + w] = [255, 90, 50, 255]
+    x, y, w, h = PX_VEIN
+    vz = 1.0 - np.abs(fbm(64, 4, 3, rng)[:h, :w] - 0.5) * 2.0
+    vmask = np.clip((vz - 0.75) / 0.25, 0, 1)
+    img[y:y + h, x:x + w, 0] = 18 + 140 * vmask
+    img[y:y + h, x:x + w, 1] = 16 + 10 * vmask
+    img[y:y + h, x:x + w, 2] = 30 + 10 * vmask
+    glow[y:y + h, x:x + w, 0] = 190 * vmask
+    glow[y:y + h, x:x + w, 1] = 25 * vmask
+    glow[y:y + h, x:x + w, 3] = 255 * vmask
+    out = os.path.join(ASSETS, "textures", "entity")
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_sea.png"))
+    Image.fromarray(np.clip(glow, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_sea_glowmask.png"))
+
+
 def main():
     geo = build_geometry()
     write_json(os.path.join(ASSETS, "geo", "entity", "storm_ray.geo.json"), geo.to_json())
@@ -781,6 +921,11 @@ def main():
     write_json(os.path.join(ASSETS, "animations", "entity", "phantom_x.animation.json"), build_phantom_animations())
     phantom_textures()
     print(f"phantom_x: {len(phantom.bones)} bones, {sum(len(b['cubes']) for b in phantom.bones)} cubes")
+    sea = build_sea_geometry()
+    write_json(os.path.join(ASSETS, "geo", "entity", "phantom_sea.geo.json"), sea.to_json())
+    write_json(os.path.join(ASSETS, "animations", "entity", "phantom_sea.animation.json"), build_sea_animations())
+    sea_textures()
+    print(f"phantom_sea: {len(sea.bones)} bones, {sum(len(b['cubes']) for b in sea.bones)} cubes")
     bones = geo.bones
     print(f"geometry: {len(bones)} bones, {sum(len(b['cubes']) for b in bones)} cubes")
 

@@ -32,6 +32,11 @@ public final class AshenFoliageColors {
         event.register(wither((state, level, pos, tint) -> level != null && pos != null
                         ? BiomeColors.getAverageFoliageColor(level, pos) : FoliageColor.getDefaultColor()),
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES);
+        // water in cauldrons and bubble columns follows the dark ocean too
+        event.register((state, level, pos, tint) -> {
+            int color = level != null && pos != null ? BiomeColors.getAverageWaterColor(level, pos) : -1;
+            return color != -1 && MirrorColors.inMirror() ? MirrorColors.deepWater(color) & 0xFFFFFF : color;
+        }, Blocks.WATER, Blocks.BUBBLE_COLUMN, Blocks.WATER_CAULDRON);
     }
 
     private static BlockColor wither(BlockColor vanilla) {
