@@ -1,6 +1,7 @@
 package com.stormray.registry;
 
 import com.stormray.StormRayMod;
+import com.stormray.entity.PhantomXEntity;
 import com.stormray.entity.StormRayEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -22,8 +23,16 @@ public final class ModEntities {
                     .updateInterval(1)
                     .build(StormRayMod.id("storm_ray").toString()));
 
+    /** Soot wraith of the Ashen Reflection; spawns naturally only there (see PhantomXSpawning). */
+    public static final RegistryObject<EntityType<PhantomXEntity>> PHANTOM_X = ENTITY_TYPES.register("phantom_x",
+            () -> EntityType.Builder.<PhantomXEntity>of(PhantomXEntity::new, MobCategory.MONSTER)
+                    .sized(0.7F, 2.6F)
+                    .clientTrackingRange(8)
+                    .build(StormRayMod.id("phantom_x").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(STORM_RAY.get(), StormRayEntity.createAttributes().build());
+        event.put(PHANTOM_X.get(), PhantomXEntity.createAttributes().build());
     }
 
     private ModEntities() {

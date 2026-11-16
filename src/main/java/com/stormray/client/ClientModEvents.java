@@ -5,6 +5,7 @@ import com.stormray.client.dimension.AshenFoliageColors;
 import com.stormray.client.dimension.AshenSkyEffects;
 import com.stormray.client.particle.StormParticle;
 import com.stormray.dimension.ModDimensions;
+import com.stormray.client.render.PhantomXRenderer;
 import com.stormray.client.render.StormOverlays;
 import com.stormray.client.render.StormRayRenderer;
 import com.stormray.registry.ModEntities;
@@ -26,6 +27,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.STORM_RAY.get(), StormRayRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHANTOM_X.get(), PhantomXRenderer::new);
     }
 
     @SubscribeEvent

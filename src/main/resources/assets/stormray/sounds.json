@@ -148,5 +148,67 @@
         "stream": false
       }
     ]
+  },
+  "entity.phantom_x.ambient": {
+    "subtitle": "subtitles.stormray.phantom_ambient",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_x/ambient1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/phantom_x/ambient2",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_x.hurt": {
+    "subtitle": "subtitles.stormray.phantom_hurt",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_x/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_x.death": {
+    "subtitle": "subtitles.stormray.phantom_death",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_x/death",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_x.slash": {
+    "subtitle": "subtitles.stormray.phantom_slash",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_x/slash1",
+        "stream": false
+      },
+      {
+        "name": "stormray:entity/phantom_x/slash2",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_x.cloak": {
+    "subtitle": "subtitles.stormray.phantom_cloak",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_x/cloak",
+        "stream": false
+      }
+    ]
+  },
+  "entity.phantom_x.reveal": {
+    "subtitle": "subtitles.stormray.phantom_reveal",
+    "sounds": [
+      {
+        "name": "stormray:entity/phantom_x/reveal",
+        "stream": false
+      }
+    ]
   }
 }

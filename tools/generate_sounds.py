@@ -320,6 +320,63 @@ def make_portal_ambient():
     return reverb(x, 1.2, 0.3)
 
 
+def whisper(seconds, density=3.0):
+    """Breathy, unintelligible whispering: band-passed noise shaped by syllable-like envelopes."""
+    t = t_axis(seconds)
+    syllables = np.abs(np.sin(2 * np.pi * density * t + 3 * np.sin(2 * np.pi * 0.7 * t))) ** 3
+    centers = 900 + 700 * np.abs(np.sin(2 * np.pi * 1.3 * t))
+    x = sweep_bandpass(noise(seconds), centers, q=4.0) * syllables
+    x += bandpass(noise(seconds), 2500, 6000) * syllables * 0.25
+    return x
+
+
+def make_phantom_ambient(i):
+    seconds = 2.6 + 0.4 * i
+    x = whisper(seconds, 2.5 + i) * env(seconds, [(0, 0), (0.3, 1), (seconds - 0.4, 0.8), (seconds, 0)])
+    return reverb(x, 1.6, 0.5, 5000)
+
+
+def make_phantom_hurt():
+    seconds = 0.7
+    f = env(seconds, [(0, 900), (0.1, 1200), (seconds, 500)])
+    x = growl(seconds, f, rough=60, formants=((1200, 2600), (2800, 5000)), bright=3.0)
+    x *= env(seconds, [(0, 0), (0.02, 1), (seconds, 0)])
+    return reverb(x, 0.8, 0.3, 6000)
+
+
+def make_phantom_death():
+    seconds = 2.8
+    f = env(seconds, [(0, 800), (0.3, 950), (seconds, 180)])
+    x = growl(seconds, f, rough=50, formants=((900, 2200), (2400, 4500)), bright=2.5)
+    x *= env(seconds, [(0, 0), (0.05, 1), (1.5, 0.6), (seconds, 0)])
+    x += make_whoosh(seconds, 3000, 900, 200) * 0.6
+    return reverb(x, 1.8, 0.45, 5000)
+
+
+def make_phantom_slash(i):
+    seconds = 0.35
+    t = t_axis(seconds)
+    x = make_whoosh(seconds, 1500 + 400 * i, 5000, 2000) * 1.2
+    rasp = bandpass(noise(seconds), 3000, 9000) * np.exp(-((t - 0.16) ** 2) / 0.0008) * 0.8
+    return normalize(x + rasp)
+
+
+def make_phantom_cloak():
+    seconds = 1.2
+    x = make_whoosh(seconds, 6000, 2500, 400)[::-1] * 0.5 + whisper(seconds, 5) * 0.5
+    x *= env(seconds, [(0, 1), (seconds, 0)])
+    return reverb(x, 1.2, 0.5, 6000)
+
+
+def make_phantom_reveal():
+    seconds = 0.9
+    x = make_whoosh(seconds, 400, 4000, 6000) * 0.7
+    shriek = growl(0.6, env(0.6, [(0, 700), (0.2, 1400), (0.6, 900)]), rough=70,
+                   formants=((1400, 3000), (3200, 6000)), bright=3.0) * env(0.6, [(0, 0), (0.05, 1), (0.6, 0)])
+    place(x, shriek * 0.8, 0.2)
+    return reverb(x, 1.0, 0.35, 6000)
+
+
 # --------------------------------------------------------------------------- export
 
 def export(name, data):
@@ -356,6 +413,14 @@ def main():
         "block/portal_open": make_portal_open(),
         "block/portal_travel": make_portal_travel(),
         "block/portal_ambient": make_portal_ambient(),
+        "entity/phantom_x/ambient1": make_phantom_ambient(0),
+        "entity/phantom_x/ambient2": make_phantom_ambient(1),
+        "entity/phantom_x/hurt": make_phantom_hurt(),
+        "entity/phantom_x/death": make_phantom_death(),
+        "entity/phantom_x/slash1": make_phantom_slash(0),
+        "entity/phantom_x/slash2": make_phantom_slash(1),
+        "entity/phantom_x/cloak": make_phantom_cloak(),
+        "entity/phantom_x/reveal": make_phantom_reveal(),
     }
     for name, data in files.items():
         export(name, data)
@@ -378,6 +443,12 @@ def main():
         "block.ashen_portal.open": entry("subtitles.stormray.portal_open", ["block/portal_open"]),
         "block.ashen_portal.travel": entry("subtitles.stormray.portal_travel", ["block/portal_travel"]),
         "block.ashen_portal.ambient": entry("subtitles.stormray.portal_ambient", ["block/portal_ambient"]),
+        "entity.phantom_x.ambient": entry("subtitles.stormray.phantom_ambient", ["entity/phantom_x/ambient1", "entity/phantom_x/ambient2"]),
+        "entity.phantom_x.hurt": entry("subtitles.stormray.phantom_hurt", ["entity/phantom_x/hurt"]),
+        "entity.phantom_x.death": entry("subtitles.stormray.phantom_death", ["entity/phantom_x/death"]),
+        "entity.phantom_x.slash": entry("subtitles.stormray.phantom_slash", ["entity/phantom_x/slash1", "entity/phantom_x/slash2"]),
+        "entity.phantom_x.cloak": entry("subtitles.stormray.phantom_cloak", ["entity/phantom_x/cloak"]),
+        "entity.phantom_x.reveal": entry("subtitles.stormray.phantom_reveal", ["entity/phantom_x/reveal"]),
     }
     with open(os.path.join(ASSETS, "sounds.json"), "w", encoding="utf-8") as f:
         json.dump(sounds_json, f, indent=2)

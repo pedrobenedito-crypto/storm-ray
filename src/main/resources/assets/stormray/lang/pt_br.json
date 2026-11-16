@@ -24,5 +24,13 @@
   "message.stormray.portal.missing": "Não foi possível alcançar o Reflexo de Cinzas.",
   "subtitles.stormray.portal_open": "Portal de cinzas se abre",
   "subtitles.stormray.portal_travel": "Algo atravessa o reflexo",
-  "subtitles.stormray.portal_ambient": "Portal de cinzas zumbe"
+  "subtitles.stormray.portal_ambient": "Portal de cinzas zumbe",
+  "entity.stormray.phantom_x": "Phantom X",
+  "item.stormray.phantom_x_spawn_egg": "Ovo Gerador de Phantom X",
+  "subtitles.stormray.phantom_ambient": "Phantom X sussurra",
+  "subtitles.stormray.phantom_hurt": "Phantom X grita",
+  "subtitles.stormray.phantom_death": "Phantom X se desfaz",
+  "subtitles.stormray.phantom_slash": "Garras cortam",
+  "subtitles.stormray.phantom_cloak": "Algo desaparece",
+  "subtitles.stormray.phantom_reveal": "Phantom X aparece"
 }

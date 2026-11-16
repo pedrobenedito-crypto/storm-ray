@@ -1,0 +1,54 @@
+package com.stormray.entity;
+
+import com.stormray.StormRayMod;
+import com.stormray.config.StormRayConfig;
+import com.stormray.dimension.ModDimensions;
+import com.stormray.registry.ModEntities;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+/**
+ * Natural spawning of the Phantom X. It is added to the monster spawn list only for positions
+ * inside the Ashen Reflection, so the overworld (which shares the same biomes) is untouched.
+ */
+public final class PhantomXSpawning {
+    private PhantomXSpawning() {
+    }
+
+    @Mod.EventBusSubscriber(modid = StormRayMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    public static final class ForgeEvents {
+        private ForgeEvents() {
+        }
+
+        @SubscribeEvent
+        public static void onPotentialSpawns(LevelEvent.PotentialSpawns event) {
+            if (event.getMobCategory() != MobCategory.MONSTER || !ModDimensions.isMirror(event.getLevel())) {
+                return;
+            }
+            int weight = StormRayConfig.PHANTOM_SPAWN_WEIGHT.get();
+            if (weight > 0) {
+                event.addSpawnerData(new MobSpawnSettings.SpawnerData(ModEntities.PHANTOM_X.get(), weight, 1, 2));
+            }
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = StormRayMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static final class ModEvents {
+        private ModEvents() {
+        }
+
+        @SubscribeEvent
+        public static void registerPlacements(SpawnPlacementRegisterEvent event) {
+            event.register(ModEntities.PHANTOM_X.get(), SpawnPlacements.Type.ON_GROUND,
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules,
+                    SpawnPlacementRegisterEvent.Operation.REPLACE);
+        }
+    }
+}

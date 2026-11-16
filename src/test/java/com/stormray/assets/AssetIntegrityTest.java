@@ -56,10 +56,9 @@ class AssetIntegrityTest {
         assertTrue(missing.isEmpty(), "missing particle textures: " + missing);
     }
 
-    @Test
-    void animationsOnlyReferenceExistingBones() throws IOException {
-        String geo = read(ASSETS.resolve("geo/entity/storm_ray.geo.json"));
-        String anim = read(ASSETS.resolve("animations/entity/storm_ray.animation.json"));
+    private static void checkAnimations(String entity, String[] required) throws IOException {
+        String geo = read(ASSETS.resolve("geo/entity/" + entity + ".geo.json"));
+        String anim = read(ASSETS.resolve("animations/entity/" + entity + ".animation.json"));
         List<String> bones = new ArrayList<>();
         Matcher bm = Pattern.compile("\"name\":\\s*\"([^\"]+)\"").matcher(geo);
         while (bm.find()) {
@@ -75,11 +74,17 @@ class AssetIntegrityTest {
                 unknown.add(am.group(1));
             }
         }
-        assertTrue(count > 0, "no animated bones found");
-        assertTrue(unknown.isEmpty(), "animations reference unknown bones: " + unknown);
-        for (String name : new String[]{"idle", "summon", "swoop", "lash", "charge", "release", "death"}) {
-            assertTrue(anim.contains("\"animation.storm_ray." + name + "\""), "missing animation " + name);
+        assertTrue(count > 0, entity + ": no animated bones found");
+        assertTrue(unknown.isEmpty(), entity + ": animations reference unknown bones: " + unknown);
+        for (String name : required) {
+            assertTrue(anim.contains("\"animation." + entity + "." + name + "\""), entity + ": missing animation " + name);
         }
+    }
+
+    @Test
+    void animationsOnlyReferenceExistingBones() throws IOException {
+        checkAnimations("storm_ray", new String[]{"idle", "summon", "swoop", "lash", "charge", "release", "death"});
+        checkAnimations("phantom_x", new String[]{"idle", "move", "combo", "reveal", "death"});
     }
 
     @Test
@@ -98,7 +103,9 @@ class AssetIntegrityTest {
                 "textures/environment/storm_clouds.png", "textures/misc/petrified_stone.png",
                 "textures/misc/petrify_overlay.png", "lang/en_us.json", "lang/pt_br.json",
                 "textures/block/ashen_portal.png", "textures/block/ashen_portal.png.mcmeta",
-                "blockstates/ashen_portal.json", "models/block/ashen_portal.json"}) {
+                "blockstates/ashen_portal.json", "models/block/ashen_portal.json",
+                "textures/entity/phantom_x.png", "textures/entity/phantom_x_glowmask.png",
+                "models/item/phantom_x_spawn_egg.json"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

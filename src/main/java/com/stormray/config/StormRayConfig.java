@@ -50,6 +50,13 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.IntValue SYNC_MILLIS_PER_TICK;
     public static final ForgeConfigSpec.IntValue MIRROR_LIGHTNING_INTERVAL;
 
+    // Phantom X
+    public static final ForgeConfigSpec.DoubleValue PHANTOM_HEALTH;
+    public static final ForgeConfigSpec.DoubleValue PHANTOM_HIT_DAMAGE;
+    public static final ForgeConfigSpec.IntValue PHANTOM_COMBO_HITS;
+    public static final ForgeConfigSpec.IntValue PHANTOM_COMBO_COOLDOWN;
+    public static final ForgeConfigSpec.IntValue PHANTOM_SPAWN_WEIGHT;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -134,6 +141,19 @@ public final class StormRayConfig {
                 .defineInRange("syncMillisPerTick", 8, 1, 45);
         MIRROR_LIGHTNING_INTERVAL = b.comment("Average ticks between harmless red lightning strikes near each player in the mirror.")
                 .defineInRange("lightningAverageIntervalTicks", 90, 5, 24000);
+        b.pop();
+
+        b.comment("Phantom X: the soot wraith of the Ashen Reflection").push("phantom_x");
+        PHANTOM_HEALTH = b.comment("Max health (vanilla Enderman has 40).")
+                .defineInRange("health", 40.0D, 1.0D, 1024.0D);
+        PHANTOM_HIT_DAMAGE = b.comment("Damage of each hit in the combo (2 = one heart).")
+                .defineInRange("hitDamage", 3.0D, 0.0D, 1000.0D);
+        PHANTOM_COMBO_HITS = b.comment("Hits per combo.")
+                .defineInRange("comboHits", 4, 1, 8);
+        PHANTOM_COMBO_COOLDOWN = b.comment("Ticks between combos.")
+                .defineInRange("comboCooldownTicks", 50, 10, 1200);
+        PHANTOM_SPAWN_WEIGHT = b.comment("Natural spawn weight in the Ashen Reflection (zombie = 95, skeleton = 100). 0 disables.")
+                .defineInRange("spawnWeight", 100, 0, 1000);
         b.pop();
 
         SPEC = b.build();

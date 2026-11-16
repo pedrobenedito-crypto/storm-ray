@@ -24,5 +24,13 @@
   "message.stormray.portal.missing": "The Ashen Reflection could not be reached.",
   "subtitles.stormray.portal_open": "Ashen portal opens",
   "subtitles.stormray.portal_travel": "Something passes through the reflection",
-  "subtitles.stormray.portal_ambient": "Ashen portal hums"
+  "subtitles.stormray.portal_ambient": "Ashen portal hums",
+  "entity.stormray.phantom_x": "Phantom X",
+  "item.stormray.phantom_x_spawn_egg": "Phantom X Spawn Egg",
+  "subtitles.stormray.phantom_ambient": "Phantom X whispers",
+  "subtitles.stormray.phantom_hurt": "Phantom X shrieks",
+  "subtitles.stormray.phantom_death": "Phantom X dissolves",
+  "subtitles.stormray.phantom_slash": "Claws slash",
+  "subtitles.stormray.phantom_cloak": "Something fades away",
+  "subtitles.stormray.phantom_reveal": "Phantom X appears"
 }

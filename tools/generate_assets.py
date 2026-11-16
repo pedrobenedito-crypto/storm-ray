@@ -69,9 +69,18 @@ def fbm(size, base_cells, octaves, rng, persistence=0.5):
 # --------------------------------------------------------------------------- geometry
 
 class Geo:
-    def __init__(self):
+    def __init__(self, identifier="geometry.storm_ray", tex=None, glow_zone=None, vein_zone=None, organic_max_y=None,
+                 max_uv=160.0, bounds=(80, 30, 8), min_uv=4.0, vein_max=(120.0, 56.0)):
         self.bones = []
-        self.uv_cursor = []
+        self.identifier = identifier
+        self.tex = tex or TEX
+        self.glow_zone = glow_zone or GLOW_ZONE
+        self.vein_zone = vein_zone or VEIN_ZONE
+        self.organic_max_y = organic_max_y or ORGANIC_MAX_Y
+        self.max_uv = max_uv
+        self.bounds = bounds
+        self.min_uv = min_uv
+        self.vein_max = vein_max
 
     def bone(self, name, parent, pivot, rotation=None):
         b = {"name": name, "pivot": [round(v, 3) for v in pivot], "cubes": []}
@@ -97,38 +106,38 @@ class Geo:
         bone["cubes"].append(cube)
         return cube
 
-    @staticmethod
-    def _uv_size(zone, fw, fh):
+    def _uv_size(self, zone, fw, fh):
         if zone == "glow":
-            return [8, 8]
+            g = max(2, min(8, self.glow_zone[2] // 4))
+            return [g, g]
         density = 2.0
-        uw = max(4.0, min(160.0, fw * density))
-        uh = max(4.0, min(160.0, fh * density))
+        uw = max(self.min_uv, min(self.max_uv, fw * density))
+        uh = max(self.min_uv, min(self.max_uv, fh * density))
         if zone == "vein":
-            uw, uh = min(uw, 120.0), min(uh, 56.0)
+            uw, uh = min(uw, self.vein_max[0]), min(uh, self.vein_max[1])
         return [round(uw, 2), round(uh, 2)]
 
     def _uv(self, zone, fw, fh):
         uw, uh = self._uv_size(zone, fw, fh)
         if zone == "glow":
-            x, y, gw, gh = GLOW_ZONE
-            return [x + RNG.randint(2, gw - 12), y + RNG.randint(2, gh - 12)]
+            x, y, gw, gh = self.glow_zone
+            return [x + RNG.randint(2, gw - 12), y + RNG.randint(2, gh - 12)] if gw >= 16 else [x + 1, y + 1]
         if zone == "vein":
-            x, y, vw, vh = VEIN_ZONE
+            x, y, vw, vh = self.vein_zone
             return [round(x + RNG.uniform(0, vw - uw), 2), round(y + RNG.uniform(0, vh - uh), 2)]
-        return [round(RNG.uniform(0, TEX - uw), 2), round(RNG.uniform(0, ORGANIC_MAX_Y - uh), 2)]
+        return [round(RNG.uniform(0, self.tex - uw), 2), round(RNG.uniform(0, self.organic_max_y - uh), 2)]
 
     def to_json(self):
         return {
             "format_version": "1.12.0",
             "minecraft:geometry": [{
                 "description": {
-                    "identifier": "geometry.storm_ray",
-                    "texture_width": TEX,
-                    "texture_height": TEX,
-                    "visible_bounds_width": 80,
-                    "visible_bounds_height": 30,
-                    "visible_bounds_offset": [0, 8, 0],
+                    "identifier": self.identifier,
+                    "texture_width": self.tex,
+                    "texture_height": self.tex,
+                    "visible_bounds_width": self.bounds[0],
+                    "visible_bounds_height": self.bounds[1],
+                    "visible_bounds_offset": [0, self.bounds[2], 0],
                 },
                 "bones": self.bones,
             }],
@@ -574,6 +583,190 @@ def portal_and_soot_textures():
     write_json(os.path.join(ASSETS, "particles", "soot.json"), {"textures": [f"stormray:soot_{i}" for i in range(4)]})
 
 
+# --------------------------------------------------------------------------- Phantom X (soot wraith)
+
+PX_TEX = 128
+PX_GLOW = (0, 112, 16, 16)
+PX_VEIN = (16, 112, 48, 16)
+PX_ORGANIC_MAX_Y = 108
+
+
+def build_phantom_geometry():
+    g = Geo("geometry.phantom_x", PX_TEX, PX_GLOW, PX_VEIN, PX_ORGANIC_MAX_Y, max_uv=48.0, bounds=(3, 4, 1.3),
+            min_uv=2.0, vein_max=(PX_VEIN[2] - 1.0, PX_VEIN[3] - 1.0))
+    g.bone("root", None, [0, 0, 0])
+    body = g.bone("body", "root", [0, 24, 0])
+    g.cube(body, [-4, 24, -2], [8, 9, 4])
+    g.cube(body, [-3, 18, -1.5], [6, 6, 3])
+    g.cube(body, [-5.5, 30, -2.8], [11, 3, 5.6])             # ragged mantle
+    for x in (-4.6, -2.2, 1.4, 3.6):
+        g.cube(body, [x, 28.5, -3.0], [1.2, 2.0, 0.4])
+    for y in (25.5, 27.5, 29.5):                                # faint ember ribs
+        g.cube(body, [-3, y, -2.15], [6, 0.4, 0.2], zone="vein")
+
+    head = g.bone("head", "body", [0, 33, 0])
+    g.cube(head, [-4, 33, -4], [8, 9, 8])
+    g.cube(head, [-1.5, 41, -2], [3, 2, 4])
+    g.cube(head, [-4.4, 32, -4.4], [8.8, 3, 1])                 # drooping hood rim
+    g.cube(head, [-2.5, 34, -4.25], [5, 6, 0.3])               # hollow face
+    for o, sz in (([-0.7, 38.3], [0.9, 2.4]), ([-0.2, 36.4], [0.9, 2.2]), ([-0.8, 34.5], [0.9, 2.2]),
+                  ([0.6, 38.9], [1.1, 0.6]), ([-1.7, 36.9], [1.1, 0.6]), ([0.5, 35.0], [0.8, 0.6])):
+        g.cube(head, [o[0], o[1], -4.45], [sz[0], sz[1], 0.2], zone="glow")  # jagged glowing crack
+
+    for side, name in ((-1, "arm_r"), (1, "arm_l")):
+        sx = 5 * side
+        upper = g.bone(name, "body", [sx, 31, 0])
+        o, s = [5, 21, -1], [2, 10, 2]
+        g.cube(upper, o if side > 0 else mirror(o, s), s)
+        lower = g.bone(name + "_lower", name, [6 * side, 21, 0])
+        o, s = [5.25, 10, -0.75], [1.5, 11, 1.5]
+        g.cube(lower, o if side > 0 else mirror(o, s), s)
+        for k, cx in enumerate((5.1, 5.85, 6.6)):
+            o, s = [cx, 4, -0.6 + k * 0.4], [0.5, 6, 0.5]
+            g.cube(lower, o if side > 0 else mirror(o, s), s)
+            o, s = [cx, 3.2, -0.6 + k * 0.4], [0.5, 0.8, 0.5]
+            g.cube(lower, o if side > 0 else mirror(o, s), s, zone="glow")
+
+    # tattered cloak: four panels, each with a swaying lower fringe
+    panels = {
+        "cloak_front": ([0, 20, -2], [-4.5, 9, -2.6], [9, 11, 1], "z", -2.6),
+        "cloak_back": ([0, 22, 2], [-5, 7, 1.6], [10, 15, 1], "z", 1.6),
+        "cloak_left": ([4.2, 21, 0], [4, 8, -2.2], [1, 13, 4.4], "x", 4.0),
+        "cloak_right": ([-4.2, 21, 0], [-5, 8, -2.2], [1, 13, 4.4], "x", -5.0),
+    }
+    for name, (pivot, origin, size, axis, plane) in panels.items():
+        panel = g.bone(name, "body", pivot)
+        g.cube(panel, origin, size)
+        low = g.bone(name + "_low", name, [pivot[0], origin[1], pivot[2]])
+        span = size[0] if axis == "z" else size[2]
+        start = origin[0] if axis == "z" else origin[2]
+        cursor = start
+        while cursor < start + span - 0.5:
+            w = RNG.uniform(1.0, 2.2)
+            length = RNG.uniform(3.0, 7.5)
+            if axis == "z":
+                g.cube(low, [cursor, origin[1] - length, plane + 0.1], [min(w, start + span - cursor), length, 0.8])
+            else:
+                g.cube(low, [plane + 0.1, origin[1] - length, cursor], [0.8, length, min(w, start + span - cursor)])
+            cursor += w + RNG.uniform(0.1, 0.5)
+    return g
+
+
+def build_phantom_animations():
+    cloak = ["cloak_front", "cloak_back", "cloak_left", "cloak_right"]
+    lows = [c + "_low" for c in cloak]
+    anims = {}
+
+    bones = {"root": {"position": vec(0, "1.5 + math.sin(query.anim_time * 120) * 1", 0)},
+             "body": {"rotation": vec("math.sin(query.anim_time * 120 + 40) * 2", 0, "math.sin(query.anim_time * 120) * 1.5")},
+             "head": {"rotation": vec("math.sin(query.anim_time * 120 - 30) * 3", "math.sin(query.anim_time * 120) * 6", 0)},
+             "arm_r": {"rotation": vec("math.sin(query.anim_time * 120) * 4", 0, "4 + math.sin(query.anim_time * 240) * 2")},
+             "arm_l": {"rotation": vec("math.sin(query.anim_time * 120 + 60) * 4", 0, "-4 - math.sin(query.anim_time * 240) * 2")},
+             "arm_r_lower": {"rotation": vec("-6 + math.sin(query.anim_time * 120) * 4", 0, 0)},
+             "arm_l_lower": {"rotation": vec("-6 + math.sin(query.anim_time * 120 + 60) * 4", 0, 0)}}
+    for k, c in enumerate(cloak):
+        sign = 1 if c in ("cloak_front", "cloak_left") else -1
+        axis_x = c in ("cloak_front", "cloak_back")
+        expr = f"{sign} * math.sin(query.anim_time * 240 - {k * 50}) * 4"
+        bones[c] = {"rotation": vec(expr, 0, 0) if axis_x else vec(0, 0, expr)}
+        expr2 = f"{sign} * math.sin(query.anim_time * 240 - {k * 50 + 70}) * 9"
+        bones[lows[k]] = {"rotation": vec(expr2, 0, 0) if axis_x else vec(0, 0, expr2)}
+    anims["animation.phantom_x.idle"] = {"loop": True, "animation_length": 3.0, "bones": bones}
+
+    bones = {"root": {"position": vec(0, "1.5 + math.sin(query.anim_time * 360) * 0.6", 0)},
+             "body": {"rotation": vec(16, 0, "math.sin(query.anim_time * 360) * 3")},
+             "head": {"rotation": vec(-12, 0, 0)},
+             "arm_r": {"rotation": vec("28 + math.sin(query.anim_time * 360) * 6", 0, 6)},
+             "arm_l": {"rotation": vec("28 + math.sin(query.anim_time * 360 + 90) * 6", 0, -6)},
+             "arm_r_lower": {"rotation": vec(12, 0, 0)},
+             "arm_l_lower": {"rotation": vec(12, 0, 0)},
+             "cloak_front": {"rotation": vec(-24, 0, 0)},
+             "cloak_front_low": {"rotation": vec("-10 + math.sin(query.anim_time * 720) * 6", 0, 0)},
+             "cloak_back": {"rotation": vec(28, 0, 0)},
+             "cloak_back_low": {"rotation": vec("18 + math.sin(query.anim_time * 720 + 40) * 8", 0, 0)},
+             "cloak_left": {"rotation": vec(0, 0, "8 + math.sin(query.anim_time * 720) * 4")},
+             "cloak_right": {"rotation": vec(0, 0, "-8 - math.sin(query.anim_time * 720) * 4")}}
+    anims["animation.phantom_x.move"] = {"loop": True, "animation_length": 1.0, "bones": bones}
+
+    # four alternating slashes, hits land at 0.15 / 0.40 / 0.65 / 0.90 s
+    def slash(start):
+        return {f"{start:.2f}": vec(-130, 0, 0), f"{start + 0.15:.2f}": vec(35, 0, 0), f"{start + 0.25:.2f}": vec(10, 0, 0)}
+    right = {"0.0": vec(0, 0, 0)}
+    left = {"0.0": vec(0, 0, 0)}
+    for i, start in enumerate((0.0, 0.25, 0.5, 0.75)):
+        (right if i % 2 == 0 else left).update(slash(start))
+    right["1.05"] = vec(0, 0, 0)
+    left["1.05"] = vec(0, 0, 0)
+    bones = {"arm_r": {"rotation": right}, "arm_l": {"rotation": left},
+             "arm_r_lower": {"rotation": {"0.0": vec(0, 0, 0), "0.1": vec(-30, 0, 0), "0.6": vec(-30, 0, 0), "1.05": vec(0, 0, 0)}},
+             "arm_l_lower": {"rotation": {"0.0": vec(0, 0, 0), "0.35": vec(-30, 0, 0), "0.85": vec(-30, 0, 0), "1.05": vec(0, 0, 0)}},
+             "body": {"rotation": {"0.0": vec(0, 0, 0), "0.15": vec(12, -22, 0), "0.40": vec(12, 22, 0),
+                                   "0.65": vec(14, -24, 0), "0.90": vec(14, 24, 0), "1.05": vec(0, 0, 0)}},
+             "head": {"rotation": {"0.0": vec(0, 0, 0), "0.1": vec(-20, 0, 0), "0.95": vec(-15, 0, 0), "1.05": vec(0, 0, 0)}},
+             "root": {"position": {"0.0": vec(0, 1.5, 0), "0.15": vec(0, 1.5, -2), "0.9": vec(0, 1.5, -2), "1.05": vec(0, 1.5, 0)}}}
+    anims["animation.phantom_x.combo"] = {"loop": False, "animation_length": 1.05, "bones": bones}
+
+    bones = {"arm_r": {"rotation": {"0.0": vec(0, 0, 0), "0.12": vec(-20, 0, 45), "0.5": vec(0, 0, 0)}},
+             "arm_l": {"rotation": {"0.0": vec(0, 0, 0), "0.12": vec(-20, 0, -45), "0.5": vec(0, 0, 0)}},
+             "head": {"rotation": {"0.0": vec(0, 0, 0), "0.12": vec(-25, 0, 0), "0.5": vec(0, 0, 0)}},
+             "root": {"position": {"0.0": vec(0, 1.5, 0), "0.12": vec(0, 3, 0), "0.5": vec(0, 1.5, 0)}}}
+    for c in cloak:
+        out = {"cloak_front": vec(-30, 0, 0), "cloak_back": vec(30, 0, 0), "cloak_left": vec(0, 0, 30), "cloak_right": vec(0, 0, -30)}[c]
+        bones[c] = {"rotation": {"0.0": vec(0, 0, 0), "0.12": out, "0.5": vec(0, 0, 0)}}
+    anims["animation.phantom_x.reveal"] = {"loop": False, "animation_length": 0.5, "bones": bones}
+
+    bones = {"root": {"position": {"0.0": vec(0, 1.5, 0), "0.3": vec(0, 3, 0), "1.5": vec(0, -7, 0)}},
+             "body": {"rotation": {"0.0": vec(0, 0, 0), "0.3": vec(-20, 0, 0), "1.5": vec(45, 0, 0)}},
+             "head": {"rotation": {"0.0": vec(0, 0, 0), "0.3": vec(-35, 0, 0), "1.5": vec(30, 0, 0)}},
+             "arm_r": {"rotation": {"0.0": vec(0, 0, 0), "0.3": vec(-60, 0, 30), "1.5": vec(10, 0, 5)}},
+             "arm_l": {"rotation": {"0.0": vec(0, 0, 0), "0.3": vec(-60, 0, -30), "1.5": vec(10, 0, -5)}}}
+    for c in cloak:
+        bones[c] = {"rotation": {"0.0": vec(0, 0, 0), "1.5": {"cloak_front": vec(-50, 0, 0), "cloak_back": vec(50, 0, 0),
+                                                              "cloak_left": vec(0, 0, 50), "cloak_right": vec(0, 0, -50)}[c]}}
+    anims["animation.phantom_x.death"] = {"loop": "hold_on_last_frame", "animation_length": 1.5, "bones": bones}
+    return {"format_version": "1.8.0", "animations": anims, "geckolib_format_version": 2}
+
+
+def phantom_textures():
+    rng = np.random.default_rng(777)
+    n = PX_TEX
+    base = fbm(n, 4, 5, rng)
+    streak = tileable_noise(n, 32, rng)
+    streak = np.repeat(streak[:, :1], n, axis=1) * 0 + tileable_noise(n, 48, rng).mean(axis=0, keepdims=True)
+    fibers = np.clip(streak * 0.6 + fbm(n, 16, 3, rng) * 0.4, 0, 1)
+    holes = fbm(n, 8, 3, rng)
+    shade = 0.25 + 0.55 * base * (0.6 + 0.4 * fibers)
+    shade = shade * (1 - 0.5 * np.clip((holes - 0.68) / 0.1, 0, 1))
+    r = 16 + 40 * shade
+    g = 14 + 34 * shade
+    b = 18 + 38 * shade
+    embers = rng.random((n, n)) > 0.993
+    r = np.where(embers, 150, r)
+    g = np.where(embers, 30, g)
+    b = np.where(embers, 25, b)
+    img = np.stack([r, g, b, np.full_like(r, 255)], axis=-1)
+    glow = np.zeros((n, n, 4))
+    glow[..., 0] = np.where(embers, 200, 0)
+    glow[..., 1] = np.where(embers, 30, 0)
+    glow[..., 3] = np.where(embers, 160, 0)
+
+    x, y, w, h = PX_GLOW
+    img[y:y + h, x:x + w] = [255, 70, 40, 255]
+    glow[y:y + h, x:x + w] = [255, 90, 50, 255]
+    x, y, w, h = PX_VEIN
+    vz = 1.0 - np.abs(fbm(64, 4, 3, rng)[:h, :w] - 0.5) * 2.0
+    vmask = np.clip((vz - 0.75) / 0.25, 0, 1)
+    img[y:y + h, x:x + w, 0] = 22 + 150 * vmask
+    img[y:y + h, x:x + w, 1] = 14 + 10 * vmask
+    img[y:y + h, x:x + w, 2] = 18 + 10 * vmask
+    glow[y:y + h, x:x + w, 0] = 200 * vmask
+    glow[y:y + h, x:x + w, 1] = 25 * vmask
+    glow[y:y + h, x:x + w, 3] = 255 * vmask
+    out = os.path.join(ASSETS, "textures", "entity")
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_x.png"))
+    Image.fromarray(np.clip(glow, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_x_glowmask.png"))
+
+
 def main():
     geo = build_geometry()
     write_json(os.path.join(ASSETS, "geo", "entity", "storm_ray.geo.json"), geo.to_json())
@@ -582,6 +775,11 @@ def main():
     particle_sprites()
     environment_textures()
     portal_and_soot_textures()
+    phantom = build_phantom_geometry()
+    write_json(os.path.join(ASSETS, "geo", "entity", "phantom_x.geo.json"), phantom.to_json())
+    write_json(os.path.join(ASSETS, "animations", "entity", "phantom_x.animation.json"), build_phantom_animations())
+    phantom_textures()
+    print(f"phantom_x: {len(phantom.bones)} bones, {sum(len(b['cubes']) for b in phantom.bones)} cubes")
     bones = geo.bones
     print(f"geometry: {len(bones)} bones, {sum(len(b['cubes']) for b in bones)} cubes")
 

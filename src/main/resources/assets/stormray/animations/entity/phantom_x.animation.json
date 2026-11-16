@@ -1,0 +1,753 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.phantom_x.idle": {
+   "loop": true,
+   "animation_length": 3.0,
+   "bones": {
+    "root": {
+     "position": [
+      0,
+      "1.5 + math.sin(query.anim_time * 120) * 1",
+      0
+     ]
+    },
+    "body": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 40) * 2",
+      0,
+      "math.sin(query.anim_time * 120) * 1.5"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 - 30) * 3",
+      "math.sin(query.anim_time * 120) * 6",
+      0
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "math.sin(query.anim_time * 120) * 4",
+      0,
+      "4 + math.sin(query.anim_time * 240) * 2"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 60) * 4",
+      0,
+      "-4 - math.sin(query.anim_time * 240) * 2"
+     ]
+    },
+    "arm_r_lower": {
+     "rotation": [
+      "-6 + math.sin(query.anim_time * 120) * 4",
+      0,
+      0
+     ]
+    },
+    "arm_l_lower": {
+     "rotation": [
+      "-6 + math.sin(query.anim_time * 120 + 60) * 4",
+      0,
+      0
+     ]
+    },
+    "cloak_front": {
+     "rotation": [
+      "1 * math.sin(query.anim_time * 240 - 0) * 4",
+      0,
+      0
+     ]
+    },
+    "cloak_front_low": {
+     "rotation": [
+      "1 * math.sin(query.anim_time * 240 - 70) * 9",
+      0,
+      0
+     ]
+    },
+    "cloak_back": {
+     "rotation": [
+      "-1 * math.sin(query.anim_time * 240 - 50) * 4",
+      0,
+      0
+     ]
+    },
+    "cloak_back_low": {
+     "rotation": [
+      "-1 * math.sin(query.anim_time * 240 - 120) * 9",
+      0,
+      0
+     ]
+    },
+    "cloak_left": {
+     "rotation": [
+      0,
+      0,
+      "1 * math.sin(query.anim_time * 240 - 100) * 4"
+     ]
+    },
+    "cloak_left_low": {
+     "rotation": [
+      0,
+      0,
+      "1 * math.sin(query.anim_time * 240 - 170) * 9"
+     ]
+    },
+    "cloak_right": {
+     "rotation": [
+      0,
+      0,
+      "-1 * math.sin(query.anim_time * 240 - 150) * 4"
+     ]
+    },
+    "cloak_right_low": {
+     "rotation": [
+      0,
+      0,
+      "-1 * math.sin(query.anim_time * 240 - 220) * 9"
+     ]
+    }
+   }
+  },
+  "animation.phantom_x.move": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "root": {
+     "position": [
+      0,
+      "1.5 + math.sin(query.anim_time * 360) * 0.6",
+      0
+     ]
+    },
+    "body": {
+     "rotation": [
+      16,
+      0,
+      "math.sin(query.anim_time * 360) * 3"
+     ]
+    },
+    "head": {
+     "rotation": [
+      -12,
+      0,
+      0
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "28 + math.sin(query.anim_time * 360) * 6",
+      0,
+      6
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "28 + math.sin(query.anim_time * 360 + 90) * 6",
+      0,
+      -6
+     ]
+    },
+    "arm_r_lower": {
+     "rotation": [
+      12,
+      0,
+      0
+     ]
+    },
+    "arm_l_lower": {
+     "rotation": [
+      12,
+      0,
+      0
+     ]
+    },
+    "cloak_front": {
+     "rotation": [
+      -24,
+      0,
+      0
+     ]
+    },
+    "cloak_front_low": {
+     "rotation": [
+      "-10 + math.sin(query.anim_time * 720) * 6",
+      0,
+      0
+     ]
+    },
+    "cloak_back": {
+     "rotation": [
+      28,
+      0,
+      0
+     ]
+    },
+    "cloak_back_low": {
+     "rotation": [
+      "18 + math.sin(query.anim_time * 720 + 40) * 8",
+      0,
+      0
+     ]
+    },
+    "cloak_left": {
+     "rotation": [
+      0,
+      0,
+      "8 + math.sin(query.anim_time * 720) * 4"
+     ]
+    },
+    "cloak_right": {
+     "rotation": [
+      0,
+      0,
+      "-8 - math.sin(query.anim_time * 720) * 4"
+     ]
+    }
+   }
+  },
+  "animation.phantom_x.combo": {
+   "loop": false,
+   "animation_length": 1.05,
+   "bones": {
+    "arm_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.00": [
+       -130,
+       0,
+       0
+      ],
+      "0.15": [
+       35,
+       0,
+       0
+      ],
+      "0.25": [
+       10,
+       0,
+       0
+      ],
+      "0.50": [
+       -130,
+       0,
+       0
+      ],
+      "0.65": [
+       35,
+       0,
+       0
+      ],
+      "0.75": [
+       10,
+       0,
+       0
+      ],
+      "1.05": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_l": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       -130,
+       0,
+       0
+      ],
+      "0.40": [
+       35,
+       0,
+       0
+      ],
+      "0.50": [
+       10,
+       0,
+       0
+      ],
+      "0.75": [
+       -130,
+       0,
+       0
+      ],
+      "0.90": [
+       35,
+       0,
+       0
+      ],
+      "1.00": [
+       10,
+       0,
+       0
+      ],
+      "1.05": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_r_lower": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.1": [
+       -30,
+       0,
+       0
+      ],
+      "0.6": [
+       -30,
+       0,
+       0
+      ],
+      "1.05": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_l_lower": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       -30,
+       0,
+       0
+      ],
+      "0.85": [
+       -30,
+       0,
+       0
+      ],
+      "1.05": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "body": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       12,
+       -22,
+       0
+      ],
+      "0.40": [
+       12,
+       22,
+       0
+      ],
+      "0.65": [
+       14,
+       -24,
+       0
+      ],
+      "0.90": [
+       14,
+       24,
+       0
+      ],
+      "1.05": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.1": [
+       -20,
+       0,
+       0
+      ],
+      "0.95": [
+       -15,
+       0,
+       0
+      ],
+      "1.05": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "root": {
+     "position": {
+      "0.0": [
+       0,
+       1.5,
+       0
+      ],
+      "0.15": [
+       0,
+       1.5,
+       -2
+      ],
+      "0.9": [
+       0,
+       1.5,
+       -2
+      ],
+      "1.05": [
+       0,
+       1.5,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.phantom_x.reveal": {
+   "loop": false,
+   "animation_length": 0.5,
+   "bones": {
+    "arm_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -20,
+       0,
+       45
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_l": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -20,
+       0,
+       -45
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -25,
+       0,
+       0
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "root": {
+     "position": {
+      "0.0": [
+       0,
+       1.5,
+       0
+      ],
+      "0.12": [
+       0,
+       3,
+       0
+      ],
+      "0.5": [
+       0,
+       1.5,
+       0
+      ]
+     }
+    },
+    "cloak_front": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -30,
+       0,
+       0
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "cloak_back": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       30,
+       0,
+       0
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "cloak_left": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       0,
+       0,
+       30
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "cloak_right": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       0,
+       0,
+       -30
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.phantom_x.death": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 1.5,
+   "bones": {
+    "root": {
+     "position": {
+      "0.0": [
+       0,
+       1.5,
+       0
+      ],
+      "0.3": [
+       0,
+       3,
+       0
+      ],
+      "1.5": [
+       0,
+       -7,
+       0
+      ]
+     }
+    },
+    "body": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -20,
+       0,
+       0
+      ],
+      "1.5": [
+       45,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -35,
+       0,
+       0
+      ],
+      "1.5": [
+       30,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -60,
+       0,
+       30
+      ],
+      "1.5": [
+       10,
+       0,
+       5
+      ]
+     }
+    },
+    "arm_l": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -60,
+       0,
+       -30
+      ],
+      "1.5": [
+       10,
+       0,
+       -5
+      ]
+     }
+    },
+    "cloak_front": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       -50,
+       0,
+       0
+      ]
+     }
+    },
+    "cloak_back": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       50,
+       0,
+       0
+      ]
+     }
+    },
+    "cloak_left": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       0,
+       0,
+       50
+      ]
+     }
+    },
+    "cloak_right": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       0,
+       0,
+       -50
+      ]
+     }
+    }
+   }
+  }
+ },
+ "geckolib_format_version": 2
+}

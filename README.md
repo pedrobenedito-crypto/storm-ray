@@ -46,7 +46,7 @@ No vanilla não existe cabeça de jogador no survival, então o mod adiciona uma
 
 Uma cabeça sem dono é a cabeça do Steve. Cabeças com a skin de outro jogador não funcionam, a não ser que `requireSteveHead = false` na config.
 
-Para testes no criativo também existe o **Ovo Gerador de Arraia da Tempestade**.
+Para testes no criativo também existem o **Ovo Gerador de Arraia da Tempestade** e o **Ovo Gerador de Phantom X**.
 
 ---
 
@@ -92,6 +92,16 @@ Quando a cabeça cai no chão, ela é consumida, cai um raio e o portal se abre.
 - **Vazio e hostil:** não há animais, aldeões, peixes nem morcegos, só monstros. Mobs trazidos de propósito (ovo gerador, comando, balde, com nome, na coleira ou domados) são mantidos.
 - **Voltar:** pise no portal de volta. Se quebrar um bloco de redstone de um portal aberto, o portal fecha e esse bloco não dropa nada, para os portais não virarem fonte de redstone grátis.
 
+### Phantom X
+O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só nessa dimensão**, com a mesma frequência de zumbis e esqueletos, em grupos de 1 ou 2. No mundo normal, só aparece por ovo gerador ou comando.
+
+- **Invisível:** fica quase transparente, como um vulto tremido, deixando um rastro leve de fuligem e sussurrando. A rachadura vermelha do rosto também some.
+- **Combo:** chega perto invisível, aparece de repente e dá **4 golpes rápidos** de 1,5 coração cada. Todos acertam, porque ignoram o tempo de invulnerabilidade entre golpes. Depois some de novo, recua e volta a atacar.
+- **Ferido:** quando leva dano, perde a invisibilidade por um instante.
+- **Status:** 40 de vida (como um Enderman), mas não é um chefe.
+
+---
+
 Limitações conhecidas: a cor da água continua a normal (mudar isso exigiria mixins), e na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar.
 
 ---
@@ -128,6 +138,8 @@ Arquivos gerados na primeira execução:
 | dimension | `hostileOnly` | true | Só monstros no reflexo |
 | dimension | `syncChunksPerTick` / `syncMillisPerTick` | 4 / 8 | Limite de trabalho da cópia por tick (desempenho) |
 | dimension | `lightningAverageIntervalTicks` | 90 | Frequência dos raios vermelhos no reflexo |
+| phantom_x | `health` / `hitDamage` / `comboHits` / `comboCooldownTicks` | 40 / 3 / 4 / 50 | Força do Phantom X |
+| phantom_x | `spawnWeight` | 100 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
 | client | `skyTintStrength`, `screenTintStrength`, `thickFog`, `lightningFlashes`, `ambientParticles`, `ambienceVolume` | | Intensidade visual e sonora. `lightningFlashes = false` desliga os clarões de tela (fotossensibilidade) |
 
 20 ticks = 1 segundo.
@@ -155,7 +167,7 @@ Comandos úteis:
 Todos os assets são originais e gerados por código:
 
 - `tools/generate_assets.py`: modelo GeckoLib (46 bones), 7 animações, textura + glowmask, partículas, nuvens e overlays de pedra.
-- `tools/generate_sounds.py`: 20 efeitos sonoros sintetizados (sem samples de terceiros).
+- `tools/generate_sounds.py`: 28 efeitos sonoros sintetizados (sem samples de terceiros).
 
 Para regerar: `pip install numpy pillow scipy`, ter o `ffmpeg` instalado e rodar `python3 tools/generate_assets.py` e `python3 tools/generate_sounds.py`. O modelo (`src/main/resources/assets/stormray/geo/entity/storm_ray.geo.json`) abre no **Blockbench** (plugin GeckoLib). Para trocar por um modelo feito à mão, mantenha os mesmos nomes de bones e de animações (`animation.storm_ray.idle`, `summon`, `swoop`, `lash`, `charge`, `release`, `death`).
 
@@ -207,7 +219,7 @@ src/main/java/com/stormray/
 ├── config/                       # StormRayConfig (comum), StormRayClientConfig, DifficultyPreset
 ├── registry/                     # entidades, itens (ovo), sons, partículas, damage type
 ├── ritual/                       # forma do T + detecção/consumo do ritual
-├── entity/                       # StormRayEntity (IA, fases, ataques, GeckoLib) + efeitos do cliente
+├── entity/                       # StormRayEntity e PhantomXEntity (IA, ataques, GeckoLib), spawn do Phantom X
 ├── petrify/                      # petrificação (servidor), espelho no cliente, bloqueio de ações
 ├── storm/                        # evento do céu vermelho no servidor (sincronização, raios)
 ├── dimension/                    # Reflexo de Cinzas: apodrecimento, cópia de chunks, regras de mobs

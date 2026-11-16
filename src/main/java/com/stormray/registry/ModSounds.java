@@ -25,6 +25,13 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> PORTAL_TRAVEL = register("block.ashen_portal.travel");
     public static final RegistryObject<SoundEvent> PORTAL_AMBIENT = register("block.ashen_portal.ambient");
 
+    public static final RegistryObject<SoundEvent> PHANTOM_AMBIENT = register("entity.phantom_x.ambient");
+    public static final RegistryObject<SoundEvent> PHANTOM_HURT = register("entity.phantom_x.hurt");
+    public static final RegistryObject<SoundEvent> PHANTOM_DEATH = register("entity.phantom_x.death");
+    public static final RegistryObject<SoundEvent> PHANTOM_SLASH = register("entity.phantom_x.slash");
+    public static final RegistryObject<SoundEvent> PHANTOM_CLOAK = register("entity.phantom_x.cloak");
+    public static final RegistryObject<SoundEvent> PHANTOM_REVEAL = register("entity.phantom_x.reveal");
+
     private static RegistryObject<SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(StormRayMod.id(name)));
     }
