@@ -110,6 +110,8 @@ class AssetIntegrityTest {
         assertTrue(Pattern.compile("\"count\":\\s*1\\b").matcher(set).find(), "exactly one colosseum per world");
         String loot = read(data.resolve("loot_tables/chests/sky_island.json"));
         assertTrue(loot.contains("\"stormray:colosseum_locator\""), "sky island chests must hold the locator");
+        assertTrue(loot.contains("\"stormray:stone_breaker\"") && Pattern.compile("\"chance\":\\s*0\\.2\\b").matcher(loot).find(),
+                "sky island chests must offer the Stone Breaker potion with a 20% chance");
         String tag = read(data.resolve("tags/worldgen/structure/ruined_colosseum.json"));
         assertTrue(tag.contains("\"stormray:ruined_colosseum\""), "the locator finds the colosseum through this tag");
     }
@@ -124,7 +126,8 @@ class AssetIntegrityTest {
                 "textures/entity/phantom_x.png", "textures/entity/phantom_x_glowmask.png",
                 "models/item/phantom_x_spawn_egg.json", "textures/entity/phantom_sea.png",
                 "textures/entity/phantom_sea_glowmask.png", "models/item/phantom_sea_spawn_egg.json",
-                "models/item/colosseum_locator.json", "textures/item/colosseum_locator.png"}) {
+                "models/item/colosseum_locator.json", "textures/item/colosseum_locator.png",
+                "textures/mob_effect/stone_breaker.png"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

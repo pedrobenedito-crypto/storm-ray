@@ -950,6 +950,34 @@ def item_textures():
     out = os.path.join(ASSETS, "textures", "item")
     os.makedirs(out, exist_ok=True)
     img.save(os.path.join(out, "colosseum_locator.png"))
+    effect_icons()
+
+
+def effect_icons():
+    """Stone Breaker status icon (18x18): a block of stone split by a bright crack."""
+    rng = random.Random(777)
+    size = 18
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = img.load()
+    crack = {3: 9, 4: 9, 5: 8, 6: 8, 7: 9, 8: 10, 9: 9, 10: 8, 11: 8, 12: 9, 13: 10, 14: 9}
+    for y in range(3, 15):
+        for x in range(3, 15):
+            edge = x in (3, 14) or y in (3, 14)
+            base = 70 if edge else 128 + rng.randint(-12, 12) + (6 - y) * 3
+            side = x - crack[y]
+            if side == 0:
+                col = (255, 244, 214)          # the crack itself
+            elif abs(side) == 1 and not edge:
+                col = (base - 40, base - 42, base - 38)
+            else:
+                shift = -1 if side < 0 else 1  # the two halves pull apart
+                col = (base + shift * 6, base + shift * 6, base + shift * 6 + 4)
+            px[x, y] = tuple(max(0, min(255, c)) for c in col) + (255,)
+    for (x, y) in ((8, 1), (10, 2), (9, 16), (7, 15), (11, 15)):   # chips flying off
+        px[x, y] = (150, 150, 156, 255)
+    out = os.path.join(ASSETS, "textures", "mob_effect")
+    os.makedirs(out, exist_ok=True)
+    img.save(os.path.join(out, "stone_breaker.png"))
 
 
 def main():

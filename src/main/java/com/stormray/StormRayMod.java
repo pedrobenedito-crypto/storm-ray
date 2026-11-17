@@ -5,6 +5,7 @@ import com.stormray.config.StormRayClientConfig;
 import com.stormray.config.StormRayConfig;
 import com.stormray.network.ModNetwork;
 import com.stormray.registry.ModBlocks;
+import com.stormray.registry.ModEffects;
 import com.stormray.registry.ModEntities;
 import com.stormray.registry.ModFeatures;
 import com.stormray.registry.ModItems;
@@ -38,6 +39,8 @@ public final class StormRayMod {
         ModStructures.PIECE_TYPES.register(modBus);
         ModEntities.ENTITY_TYPES.register(modBus);
         ModItems.ITEMS.register(modBus);
+        ModEffects.MOB_EFFECTS.register(modBus);
+        ModEffects.POTIONS.register(modBus);
         ModSounds.SOUND_EVENTS.register(modBus);
         ModParticles.PARTICLE_TYPES.register(modBus);
 

@@ -19,24 +19,31 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
  * The colosseum fight. When a survival player walks onto the arena floor, the Storm Ray
- * tears out of the sigil in the middle and Phantom X guards step out of the ruins. After the
+ * tears out of the sigil in the middle and a first wave of Phantom X steps out of the ruins.
+ * While the boss lives and players stay near, further and larger waves keep coming. After the
  * boss dies the arena sleeps for a configurable time before it can wake again.
+ *
+ * <p>The arena remembers its guardian by id and only forgets it when the guardian dies or is
+ * destroyed. A guardian that is merely unloaded (everyone walked away) is still the guardian,
+ * so coming back never summons a second one.</p>
  */
 @Mod.EventBusSubscriber(modid = StormRayMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class ColosseumEvents {
-    /** Seconds a missing (not dead) guardian is waited for before the arena may wake again. */
-    private static final long LOST_AFTER_TICKS = 1200L;
+    /** Players this close to the centre (horizontally) keep the waves coming. */
+    private static final double FIGHT_RADIUS = 52.0D;
 
     private ColosseumEvents() {
     }
@@ -57,47 +64,58 @@ public final class ColosseumEvents {
             return;
         }
         ColosseumData data = ColosseumData.get(level);
+        BlockPos centre = data.centre();
+        if (centre == null) {
+            centre = discover(level, data);
+            if (centre == null) {
+                return;
+            }
+        }
+        boolean onArena = false;
+        boolean nearby = false;
         for (ServerPlayer player : level.players()) {
             if (!player.isAlive() || player.isSpectator() || player.isCreative()) {
                 continue;
             }
-            BlockPos centre = arenaUnder(level, data, player);
-            if (centre != null) {
-                tryAwaken(level, data, centre);
-                return;
+            double dx = player.getX() - (centre.getX() + 0.5D);
+            double dz = player.getZ() - (centre.getZ() + 0.5D);
+            double distanceSq = dx * dx + dz * dz;
+            if (distanceSq <= FIGHT_RADIUS * FIGHT_RADIUS) {
+                nearby = true;
             }
+            if (distanceSq <= ColosseumShape.ARENA_RADIUS * ColosseumShape.ARENA_RADIUS
+                    && player.getY() >= centre.getY() - 3.0D && player.getY() <= centre.getY() + ColosseumShape.HEIGHT) {
+                onArena = true;
+            }
+        }
+        if (data.bossId() != null) {
+            // A guardian already exists (loaded or not): never summon another, only send its waves.
+            if (nearby) {
+                tickWaves(level, data, centre);
+            }
+            return;
+        }
+        if (onArena) {
+            tryAwaken(level, data, centre);
         }
     }
 
-    /** The arena centre if the player stands on the arena floor, otherwise null. */
-    private static BlockPos arenaUnder(ServerLevel level, ColosseumData data, ServerPlayer player) {
-        BlockPos centre = data.centre();
-        if (centre == null) {
+    /** Finds the colosseum the first time a player walks into it and remembers its centre. */
+    private static BlockPos discover(ServerLevel level, ColosseumData data) {
+        for (ServerPlayer player : level.players()) {
             StructureStart start = level.structureManager().getStructureWithPieceAt(player.blockPosition(), ModStructures.COLOSSEUM_KEY);
-            if (!start.isValid()) {
-                return null;
+            if (start.isValid()) {
+                BlockPos centre = ColosseumPiece.centreOf(start.getBoundingBox());
+                data.setCentre(centre);
+                return centre;
             }
-            centre = ColosseumPiece.centreOf(start.getBoundingBox());
-            data.setCentre(centre);
         }
-        double dx = player.getX() - (centre.getX() + 0.5D);
-        double dz = player.getZ() - (centre.getZ() + 0.5D);
-        double reach = ColosseumShape.ARENA_RADIUS;
-        boolean inside = dx * dx + dz * dz <= reach * reach
-                && player.getY() >= centre.getY() - 3.0D && player.getY() <= centre.getY() + ColosseumShape.HEIGHT;
-        return inside ? centre : null;
+        return null;
     }
 
     private static void tryAwaken(ServerLevel level, ColosseumData data, BlockPos centre) {
         long now = level.getGameTime();
         Vec3 ground = Vec3.atBottomCenterOf(centre);
-        if (data.bossId() != null) {
-            if (level.getEntity(data.bossId()) != null || StormRayEntity.anyAliveNear(level, ground, 256.0D)
-                    || now - data.awakenedAt() < LOST_AFTER_TICKS) {
-                return; // the guardian is still out there
-            }
-            data.bossLost();
-        }
         if (data.defeatedAt() >= 0L) {
             int rest = StormRayConfig.COLOSSEUM_RESPAWN_TICKS.get();
             if (rest <= 0 || now - data.defeatedAt() < rest) {
@@ -117,47 +135,85 @@ public final class ColosseumEvents {
         level.addFreshEntity(ray);
         data.bossAwakened(ray.getUUID(), now);
 
-        spawnGuards(level, centre);
+        spawnPhantoms(level, centre, StormRayConfig.COLOSSEUM_GUARDS.get());
 
         level.playSound(null, ground.x, ground.y, ground.z, ModSounds.RITUAL_IGNITE.get(), SoundSource.HOSTILE, 6.0F, 0.8F);
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, ground.x, ground.y + 1.0D, ground.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         level.sendParticles(ModParticles.RITUAL_RUNE.get(), ground.x, ground.y + 1.0D, ground.z, 200, 2.5D, 2.0D, 2.5D, 0.35D);
         level.sendParticles(ParticleTypes.LARGE_SMOKE, ground.x, ground.y + 0.5D, ground.z, 80, 3.0D, 0.5D, 3.0D, 0.05D);
         StormEnvironment.spawnVisualLightning(level, ground);
-        Component message = Component.translatable("message.stormray.colosseum.awaken")
-                .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
+        announce(level, ground, Component.translatable("message.stormray.colosseum.awaken")
+                .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+        StormRayMod.LOGGER.info("The colosseum at {} in {} wakes", centre, level.dimension().location());
+    }
+
+    /** Sends the next wave of Phantom X when it is due. Each wave is one phantom larger than the last. */
+    private static void tickWaves(ServerLevel level, ColosseumData data, BlockPos centre) {
+        int interval = StormRayConfig.COLOSSEUM_WAVE_INTERVAL.get();
+        long now = level.getGameTime();
+        if (interval <= 0 || now - data.lastWaveAt() < interval) {
+            return;
+        }
+        Entity boss = level.getEntity(data.bossId());
+        if (!(boss instanceof StormRayEntity ray) || !ray.isAlive() || ray.getPhase() == StormRayEntity.Phase.SUMMONING) {
+            return; // waves only come while the guardian is actually fighting
+        }
+        double cx = centre.getX() + 0.5D;
+        double cz = centre.getZ() + 0.5D;
+        int alive = level.getEntities(ModEntities.PHANTOM_X.get(), phantom -> {
+            double dx = phantom.getX() - cx;
+            double dz = phantom.getZ() - cz;
+            return phantom.isAlive() && dx * dx + dz * dz <= FIGHT_RADIUS * FIGHT_RADIUS;
+        }).size();
+        int room = StormRayConfig.COLOSSEUM_MAX_PHANTOMS.get() - alive;
+        int size = Math.min(StormRayConfig.COLOSSEUM_GUARDS.get() + data.wave(), room);
+        if (size <= 0) {
+            return; // the arena is full; the wave comes as soon as some phantoms fall
+        }
+        if (spawnPhantoms(level, centre, size) == 0) {
+            return;
+        }
+        data.waveSent(now);
+        Vec3 ground = Vec3.atBottomCenterOf(centre);
+        level.playSound(null, ground.x, ground.y + 2.0D, ground.z, ModSounds.PHANTOM_REVEAL.get(), SoundSource.HOSTILE, 4.0F, 0.6F);
+        announce(level, ground, Component.translatable("message.stormray.colosseum.wave", data.wave())
+                .withStyle(ChatFormatting.RED));
+    }
+
+    private static void announce(ServerLevel level, Vec3 ground, Component message) {
         for (ServerPlayer player : level.players()) {
             if (player.distanceToSqr(ground) < 96.0D * 96.0D) {
                 player.displayClientMessage(message, true);
             }
         }
-        StormRayMod.LOGGER.info("The colosseum at {} in {} wakes", centre, level.dimension().location());
     }
 
-    /** Phantom X guards appear around the edge of the arena. */
-    private static void spawnGuards(ServerLevel level, BlockPos centre) {
-        int count = StormRayConfig.COLOSSEUM_GUARDS.get();
+    /** Phantom X appear around the arena floor. Returns how many found a free spot. */
+    private static int spawnPhantoms(ServerLevel level, BlockPos centre, int count) {
         RandomSource random = level.random;
+        int spawned = 0;
         for (int n = 0; n < count; n++) {
             for (int attempt = 0; attempt < 6; attempt++) {
                 double angle = random.nextDouble() * Math.PI * 2.0D;
                 double distance = 9.0D + random.nextDouble() * 10.0D;
                 double x = centre.getX() + 0.5D + Math.cos(angle) * distance;
                 double z = centre.getZ() + 0.5D + Math.sin(angle) * distance;
-                PhantomXEntity guard = ModEntities.PHANTOM_X.get().create(level);
-                if (guard == null) {
-                    return;
+                PhantomXEntity phantom = ModEntities.PHANTOM_X.get().create(level);
+                if (phantom == null) {
+                    return spawned;
                 }
-                guard.moveTo(x, centre.getY(), z, random.nextFloat() * 360.0F, 0.0F);
-                if (!level.noCollision(guard)) {
+                phantom.moveTo(x, centre.getY(), z, random.nextFloat() * 360.0F, 0.0F);
+                if (!level.noCollision(phantom)) {
                     continue; // inside rubble or a pillar: try another spot
                 }
-                guard.finalizeSpawn(level, level.getCurrentDifficultyAt(guard.blockPosition()), MobSpawnType.EVENT, null, null);
-                level.addFreshEntity(guard);
+                phantom.finalizeSpawn(level, level.getCurrentDifficultyAt(phantom.blockPosition()), MobSpawnType.EVENT, null, null);
+                level.addFreshEntity(phantom);
                 level.sendParticles(ModParticles.SOOT.get(), x, centre.getY() + 1.2D, z, 30, 0.4D, 0.8D, 0.4D, 0.03D);
+                spawned++;
                 break;
             }
         }
+        return spawned;
     }
 
     @SubscribeEvent
@@ -168,6 +224,29 @@ public final class ColosseumEvents {
         ColosseumData data = ColosseumData.get(level);
         if (ray.getUUID().equals(data.bossId())) {
             data.bossDefeated(level.getGameTime());
+        }
+    }
+
+    /**
+     * The guardian left the world. Unloading with its chunk is not a loss; being destroyed
+     * without dying (peaceful mode, a command) is, and frees the arena to wake again.
+     */
+    @SubscribeEvent
+    public static void onEntityLeave(EntityLeaveLevelEvent event) {
+        if (!(event.getEntity() instanceof StormRayEntity ray) || !(event.getLevel() instanceof ServerLevel level) || !hasColosseum(level)) {
+            return;
+        }
+        Entity.RemovalReason reason = ray.getRemovalReason();
+        if (reason == null || !reason.shouldDestroy()) {
+            return;
+        }
+        ColosseumData data = ColosseumData.get(level);
+        if (ray.getUUID().equals(data.bossId())) {
+            if (ray.isDeadOrDying()) {
+                data.bossDefeated(level.getGameTime());
+            } else {
+                data.bossLost();
+            }
         }
     }
 }

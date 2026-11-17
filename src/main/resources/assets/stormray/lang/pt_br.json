@@ -52,5 +52,11 @@
   "direction.stormray.s": "sul",
   "direction.stormray.sw": "sudoeste",
   "direction.stormray.w": "oeste",
-  "direction.stormray.nw": "noroeste"
+  "direction.stormray.nw": "noroeste",
+  "effect.stormray.stone_breaker": "Stone Breaker",
+  "item.minecraft.potion.effect.stone_breaker": "Potion of Stone Breaker",
+  "item.minecraft.splash_potion.effect.stone_breaker": "Splash Potion of Stone Breaker",
+  "item.minecraft.lingering_potion.effect.stone_breaker": "Lingering Potion of Stone Breaker",
+  "item.minecraft.tipped_arrow.effect.stone_breaker": "Arrow of Stone Breaker",
+  "message.stormray.colosseum.wave": "Onda %1$s de Phantom X!"
 }

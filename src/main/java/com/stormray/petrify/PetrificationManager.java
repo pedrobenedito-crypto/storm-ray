@@ -5,6 +5,7 @@ import com.stormray.entity.StormRayEntity;
 import com.stormray.network.ModNetwork;
 import com.stormray.network.PetrifyPacket;
 import com.stormray.registry.ModDamageTypes;
+import com.stormray.registry.ModEffects;
 import com.stormray.registry.ModParticles;
 import com.stormray.registry.ModSounds;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -13,6 +14,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -89,10 +91,15 @@ public final class PetrificationManager {
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, e -> canPetrify(e, source))) {
             double dx = entity.getX() - center.x;
             double dz = entity.getZ() - center.z;
-            if (dx * dx + dz * dz <= radius * radius) {
-                petrify(entity, source, duration);
-                count++;
+            if (dx * dx + dz * dz > radius * radius) {
+                continue;
             }
+            if (isStoneBreaker(entity)) {
+                resist(level, entity); // the pulse shatters harmlessly against Stone Breaker
+                continue;
+            }
+            petrify(entity, source, duration);
+            count++;
         }
         return count;
     }
@@ -113,7 +120,34 @@ public final class PetrificationManager {
         return StormRayConfig.AFFECT_MOBS.get();
     }
 
+    /** True while the Stone Breaker effect protects this entity from petrification. */
+    public static boolean isStoneBreaker(LivingEntity entity) {
+        return entity.hasEffect(ModEffects.STONE_BREAKER.get());
+    }
+
+    /** Feedback for a protected entity caught in the pulse: the stone cracks and falls away. */
+    private static void resist(ServerLevel level, LivingEntity entity) {
+        double h = entity.getBbHeight();
+        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLESTONE.defaultBlockState()),
+                entity.getX(), entity.getY() + h * 0.5D, entity.getZ(), 30, entity.getBbWidth() * 0.5D, h * 0.4D,
+                entity.getBbWidth() * 0.5D, 0.12D);
+        level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.STONE_BREAK, SoundSource.PLAYERS, 1.6F, 0.6F);
+    }
+
+    /** Ends a petrification early without harm (the victim drank Stone Breaker in time). */
+    private static void release(ServerLevel level, LivingEntity entity, State state) {
+        removeModifiers(entity);
+        if (entity instanceof Mob mob) {
+            restore(mob, state);
+        }
+        resist(level, entity);
+        ModNetwork.sendTracking(entity, new PetrifyPacket(entity.getId(), 0, 0, false));
+    }
+
     public static void petrify(LivingEntity entity, StormRayEntity source, int duration) {
+        if (isStoneBreaker(entity)) {
+            return;
+        }
         boolean prevNoAi = false;
         if (entity instanceof Mob mob) {
             prevNoAi = mob.isNoAi();
@@ -157,6 +191,11 @@ public final class PetrificationManager {
                     restore(mob, state);
                 }
                 it.remove();
+                continue;
+            }
+            if (isStoneBreaker(entity)) {
+                it.remove();
+                release(level, entity, state);
                 continue;
             }
             state.elapsed++;

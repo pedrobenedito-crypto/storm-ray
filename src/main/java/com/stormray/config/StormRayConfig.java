@@ -69,6 +69,8 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.BooleanValue COLOSSEUM_BOSS;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_RESPAWN_TICKS;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_GUARDS;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_WAVE_INTERVAL;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_MAX_PHANTOMS;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -190,8 +192,14 @@ public final class StormRayConfig {
         COLOSSEUM_RESPAWN_TICKS = b.comment("Ticks the arena rests after its Storm Ray dies before it can wake again",
                         "(72000 = 3 Minecraft days). 0 = the fight happens only once per world.")
                 .defineInRange("respawnTicks", 72000, 0, Integer.MAX_VALUE);
-        COLOSSEUM_GUARDS = b.comment("Phantom X guards that appear in the arena together with the Storm Ray.")
+        COLOSSEUM_GUARDS = b.comment("Size of the first Phantom X wave, which appears together with the Storm Ray.",
+                        "Each later wave is one phantom larger.")
                 .defineInRange("guardCount", 4, 0, 16);
+        COLOSSEUM_WAVE_INTERVAL = b.comment("Ticks between Phantom X waves while the colosseum's Storm Ray is alive and players are near",
+                        "(600 = 30 seconds). 0 disables the extra waves.")
+                .defineInRange("waveIntervalTicks", 600, 0, 72000);
+        COLOSSEUM_MAX_PHANTOMS = b.comment("Waves never raise the number of living Phantom X around the arena above this.")
+                .defineInRange("maxPhantoms", 12, 1, 64);
         b.pop();
 
         SPEC = b.build();

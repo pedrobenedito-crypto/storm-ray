@@ -18,6 +18,8 @@ public class ColosseumData extends SavedData {
     private UUID bossId;
     private long awakenedAt;
     private long defeatedAt = -1L;
+    private int wave;
+    private long lastWaveAt;
 
     public static ColosseumData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(ColosseumData::load, ColosseumData::new, NAME);
@@ -33,6 +35,8 @@ public class ColosseumData extends SavedData {
         }
         data.awakenedAt = tag.getLong("AwakenedAt");
         data.defeatedAt = tag.contains("DefeatedAt") ? tag.getLong("DefeatedAt") : -1L;
+        data.wave = tag.getInt("Wave");
+        data.lastWaveAt = tag.getLong("LastWaveAt");
         return data;
     }
 
@@ -48,6 +52,8 @@ public class ColosseumData extends SavedData {
         }
         tag.putLong("AwakenedAt", this.awakenedAt);
         tag.putLong("DefeatedAt", this.defeatedAt);
+        tag.putInt("Wave", this.wave);
+        tag.putLong("LastWaveAt", this.lastWaveAt);
         return tag;
     }
 
@@ -67,10 +73,6 @@ public class ColosseumData extends SavedData {
         return this.bossId;
     }
 
-    public long awakenedAt() {
-        return this.awakenedAt;
-    }
-
     /** Game time of the last defeat, or -1 if the guardian has never been beaten. */
     public long defeatedAt() {
         return this.defeatedAt;
@@ -79,12 +81,29 @@ public class ColosseumData extends SavedData {
     public void bossAwakened(UUID id, long gameTime) {
         this.bossId = id;
         this.awakenedAt = gameTime;
+        this.wave = 1; // the guards that rise with the boss are the first wave
+        this.lastWaveAt = gameTime;
         setDirty();
     }
 
     public void bossDefeated(long gameTime) {
         this.bossId = null;
         this.defeatedAt = gameTime;
+        setDirty();
+    }
+
+    /** Number of Phantom X waves sent in the current fight (the first comes with the boss). */
+    public int wave() {
+        return this.wave;
+    }
+
+    public long lastWaveAt() {
+        return this.lastWaveAt;
+    }
+
+    public void waveSent(long gameTime) {
+        this.wave++;
+        this.lastWaveAt = gameTime;
         setDirty();
     }
 
