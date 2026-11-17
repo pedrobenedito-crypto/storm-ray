@@ -146,6 +146,12 @@ public class PhantomXEntity extends Monster implements GeoEntity {
         }
     }
 
+    /** Tears the cloak away for a while, e.g. when a colosseum wave steps out of the ruins. */
+    public void revealFor(int ticks) {
+        this.revealTicks = Math.max(this.revealTicks, ticks);
+        setCloaked(false);
+    }
+
     /** 0 = fully cloaked look, 1 = solid. Smoothed on the client for rendering. */
     public float getCloakVisibility(float partialTick) {
         return Mth.lerp(partialTick, this.prevCloak, this.cloak);

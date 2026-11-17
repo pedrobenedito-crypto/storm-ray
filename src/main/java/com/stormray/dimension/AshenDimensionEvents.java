@@ -58,6 +58,43 @@ public final class AshenDimensionEvents {
         MirrorSync.clear();
     }
 
+    // ------------------------------------------------------------------ live sync: overworld -> mirror
+
+    private static boolean isOverworld(net.minecraft.world.level.LevelAccessor level) {
+        return level instanceof ServerLevel serverLevel && serverLevel.dimension() == net.minecraft.world.level.Level.OVERWORLD;
+    }
+
+    /** Fired for practically every block change (placing, breaking, pistons, fluids, growth, commands). */
+    @SubscribeEvent
+    public static void onNeighborNotify(BlockEvent.NeighborNotifyEvent event) {
+        if (isOverworld(event.getLevel())) {
+            MirrorSync.markDirty(event.getPos());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onOverworldPlace(BlockEvent.EntityPlaceEvent event) {
+        if (isOverworld(event.getLevel())) {
+            MirrorSync.markDirty(event.getPos());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onOverworldBreak(BlockEvent.BreakEvent event) {
+        if (isOverworld(event.getLevel())) {
+            MirrorSync.markDirty(event.getPos());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onExplosion(net.minecraftforge.event.level.ExplosionEvent.Detonate event) {
+        if (isOverworld(event.getLevel())) {
+            for (BlockPos pos : event.getAffectedBlocks()) {
+                MirrorSync.markDirty(pos);
+            }
+        }
+    }
+
     // Make sure a chunk shows its copied builds before a player changes it, so nothing gets overwritten.
     @SubscribeEvent
     public static void onBreak(BlockEvent.BreakEvent event) {

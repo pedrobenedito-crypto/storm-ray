@@ -17,11 +17,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
@@ -132,6 +134,7 @@ public final class ColosseumEvents {
         }
         ray.moveTo(ground.x, ground.y, ground.z, level.random.nextFloat() * 360.0F, 0.0F);
         ray.finalizeSpawn(level, level.getCurrentDifficultyAt(centre), MobSpawnType.EVENT, null, null);
+        ray.setPetrifyEnabled(StormRayConfig.COLOSSEUM_PETRIFY_WAVE.get() <= 1);
         level.addFreshEntity(ray);
         data.bossAwakened(ray.getUUID(), now);
 
@@ -147,16 +150,28 @@ public final class ColosseumEvents {
         StormRayMod.LOGGER.info("The colosseum at {} in {} wakes", centre, level.dimension().location());
     }
 
-    /** Sends the next wave of Phantom X when it is due. Each wave is one phantom larger than the last. */
+    /**
+     * Runs once a second while the guardian exists and players are near: unlocks its
+     * petrification at the configured wave and sends the next wave of Phantom X when it is due.
+     * Each wave is one phantom larger than the last.
+     */
     private static void tickWaves(ServerLevel level, ColosseumData data, BlockPos centre) {
+        Entity boss = level.getEntity(data.bossId());
+        if (!(boss instanceof StormRayEntity ray) || !ray.isAlive()) {
+            return; // waves only come while the guardian is actually here
+        }
+        Vec3 ground = Vec3.atBottomCenterOf(centre);
+        boolean petrify = data.wave() >= StormRayConfig.COLOSSEUM_PETRIFY_WAVE.get();
+        if (petrify && !ray.isPetrifyEnabled()) {
+            announce(level, ground, Component.translatable("message.stormray.colosseum.petrify")
+                    .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+        }
+        ray.setPetrifyEnabled(petrify);
+
         int interval = StormRayConfig.COLOSSEUM_WAVE_INTERVAL.get();
         long now = level.getGameTime();
-        if (interval <= 0 || now - data.lastWaveAt() < interval) {
+        if (interval <= 0 || now - data.lastWaveAt() < interval || ray.getPhase() == StormRayEntity.Phase.SUMMONING) {
             return;
-        }
-        Entity boss = level.getEntity(data.bossId());
-        if (!(boss instanceof StormRayEntity ray) || !ray.isAlive() || ray.getPhase() == StormRayEntity.Phase.SUMMONING) {
-            return; // waves only come while the guardian is actually fighting
         }
         double cx = centre.getX() + 0.5D;
         double cz = centre.getZ() + 0.5D;
@@ -170,11 +185,12 @@ public final class ColosseumEvents {
         if (size <= 0) {
             return; // the arena is full; the wave comes as soon as some phantoms fall
         }
-        if (spawnPhantoms(level, centre, size) == 0) {
+        int spawned = spawnPhantoms(level, centre, size);
+        if (spawned == 0) {
             return;
         }
         data.waveSent(now);
-        Vec3 ground = Vec3.atBottomCenterOf(centre);
+        StormRayMod.LOGGER.info("Colosseum wave {}: {} Phantom X", data.wave(), spawned);
         level.playSound(null, ground.x, ground.y + 2.0D, ground.z, ModSounds.PHANTOM_REVEAL.get(), SoundSource.HOSTILE, 4.0F, 0.6F);
         announce(level, ground, Component.translatable("message.stormray.colosseum.wave", data.wave())
                 .withStyle(ChatFormatting.RED));
@@ -188,30 +204,36 @@ public final class ColosseumEvents {
         }
     }
 
-    /** Phantom X appear around the arena floor. Returns how many found a free spot. */
+    /**
+     * Phantom X step out onto the arena floor, standing on whatever is there (sand, rubble, a
+     * broken pillar). They arrive uncloaked for a few seconds so the wave can be seen coming.
+     * Returns how many appeared.
+     */
     private static int spawnPhantoms(ServerLevel level, BlockPos centre, int count) {
         RandomSource random = level.random;
         int spawned = 0;
         for (int n = 0; n < count; n++) {
-            for (int attempt = 0; attempt < 6; attempt++) {
-                double angle = random.nextDouble() * Math.PI * 2.0D;
-                double distance = 9.0D + random.nextDouble() * 10.0D;
-                double x = centre.getX() + 0.5D + Math.cos(angle) * distance;
-                double z = centre.getZ() + 0.5D + Math.sin(angle) * distance;
-                PhantomXEntity phantom = ModEntities.PHANTOM_X.get().create(level);
-                if (phantom == null) {
-                    return spawned;
-                }
-                phantom.moveTo(x, centre.getY(), z, random.nextFloat() * 360.0F, 0.0F);
-                if (!level.noCollision(phantom)) {
-                    continue; // inside rubble or a pillar: try another spot
-                }
-                phantom.finalizeSpawn(level, level.getCurrentDifficultyAt(phantom.blockPosition()), MobSpawnType.EVENT, null, null);
-                level.addFreshEntity(phantom);
-                level.sendParticles(ModParticles.SOOT.get(), x, centre.getY() + 1.2D, z, 30, 0.4D, 0.8D, 0.4D, 0.03D);
-                spawned++;
-                break;
+            double angle = random.nextDouble() * Math.PI * 2.0D;
+            double distance = 8.0D + random.nextDouble() * 11.0D;
+            double x = centre.getX() + 0.5D + Math.cos(angle) * distance;
+            double z = centre.getZ() + 0.5D + Math.sin(angle) * distance;
+            int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mth.floor(x), Mth.floor(z));
+            // never below the arena floor, never up on the stands
+            double y = Mth.clamp(surface, centre.getY(), centre.getY() + 10);
+            PhantomXEntity phantom = ModEntities.PHANTOM_X.get().create(level);
+            if (phantom == null) {
+                return spawned;
             }
+            phantom.moveTo(x, y, z, random.nextFloat() * 360.0F, 0.0F);
+            phantom.finalizeSpawn(level, level.getCurrentDifficultyAt(phantom.blockPosition()), MobSpawnType.EVENT, null, null);
+            phantom.setPersistenceRequired();
+            if (!level.addFreshEntity(phantom)) {
+                continue;
+            }
+            phantom.revealFor(60);
+            level.sendParticles(ModParticles.SOOT.get(), x, y + 1.2D, z, 40, 0.4D, 0.8D, 0.4D, 0.03D);
+            level.sendParticles(ModParticles.STORM_EMBER.get(), x, y + 1.2D, z, 12, 0.3D, 0.8D, 0.3D, 0.02D);
+            spawned++;
         }
         return spawned;
     }

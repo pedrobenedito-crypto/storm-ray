@@ -46,6 +46,8 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.BooleanValue PORTAL_ENABLED;
     public static final ForgeConfigSpec.BooleanValue COPY_BUILDS;
     public static final ForgeConfigSpec.BooleanValue HOSTILE_ONLY;
+    public static final ForgeConfigSpec.BooleanValue LIVE_SYNC;
+    public static final ForgeConfigSpec.IntValue SYNC_COLUMNS_PER_TICK;
     public static final ForgeConfigSpec.IntValue SYNC_CHUNKS_PER_TICK;
     public static final ForgeConfigSpec.IntValue SYNC_MILLIS_PER_TICK;
     public static final ForgeConfigSpec.IntValue MIRROR_LIGHTNING_INTERVAL;
@@ -71,6 +73,12 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.IntValue COLOSSEUM_GUARDS;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_WAVE_INTERVAL;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_MAX_PHANTOMS;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_PETRIFY_WAVE;
+
+    // Eye lasers
+    public static final ForgeConfigSpec.DoubleValue LASER_CHANCE;
+    public static final ForgeConfigSpec.DoubleValue LASER_DAMAGE;
+    public static final ForgeConfigSpec.BooleanValue LASER_FIRE;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -95,6 +103,15 @@ public final class StormRayConfig {
                 .defineInRange("leashRadius", 96.0D, 16.0D, 4096.0D);
         DIFFICULTY = b.comment("Preset multiplier for health, damage and cooldowns: CASUAL, NORMAL, HARD, NIGHTMARE.")
                 .defineEnum("difficulty", DifficultyPreset.NORMAL);
+        b.pop();
+
+        b.comment("Eye lasers: twin beams that sweep after the target and set the ground on fire").push("laser");
+        LASER_CHANCE = b.comment("Chance that an attack is the eye lasers instead of the tentacle swoop (0.2 = 20%). 0 disables.")
+                .defineInRange("chance", 0.2D, 0.0D, 1.0D);
+        LASER_DAMAGE = b.comment("Damage per hit while standing where the beams land (about two hits per second), before the difficulty multiplier.")
+                .defineInRange("damage", 4.0D, 0.0D, 1000.0D);
+        LASER_FIRE = b.comment("The beams set the ground on fire (also needs the mobGriefing game rule).")
+                .define("setFire", true);
         b.pop();
 
         b.comment("Redstone ritual").push("summoning");
@@ -150,6 +167,11 @@ public final class StormRayConfig {
                 .define("copyBuilds", true);
         HOSTILE_ONLY = b.comment("Only hostile monsters may exist in the mirror (no animals, villagers, fish or bats).")
                 .define("hostileOnly", true);
+        LIVE_SYNC = b.comment("Keep copying: every later block change in the overworld is also applied to the mirror",
+                        "(needs copyBuilds). The overworld wins: a synced column replaces mirror-side changes in that column.")
+                .define("liveSync", true);
+        SYNC_COLUMNS_PER_TICK = b.comment("Maximum changed block columns copied to the mirror per server tick.")
+                .defineInRange("syncColumnsPerTick", 64, 1, 4096);
         SYNC_CHUNKS_PER_TICK = b.comment("Maximum mirror chunks synchronised with the overworld per server tick.")
                 .defineInRange("syncChunksPerTick", 4, 1, 64);
         SYNC_MILLIS_PER_TICK = b.comment("Time budget in milliseconds for chunk synchronisation per server tick.")
@@ -200,6 +222,9 @@ public final class StormRayConfig {
                 .defineInRange("waveIntervalTicks", 600, 0, 72000);
         COLOSSEUM_MAX_PHANTOMS = b.comment("Waves never raise the number of living Phantom X around the arena above this.")
                 .defineInRange("maxPhantoms", 12, 1, 64);
+        COLOSSEUM_PETRIFY_WAVE = b.comment("The colosseum's Storm Ray only starts using its petrification pulse from this wave on",
+                        "(1 = from the start). Storm Rays summoned by the ritual are not affected.")
+                .defineInRange("petrifyFromWave", 4, 1, 1000);
         b.pop();
 
         SPEC = b.build();

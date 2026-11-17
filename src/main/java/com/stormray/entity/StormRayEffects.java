@@ -16,6 +16,8 @@ import org.joml.Vector3f;
  */
 public final class StormRayEffects {
     private static final DustParticleOptions RED_DUST = new DustParticleOptions(new Vector3f(0.85F, 0.04F, 0.08F), 3.0F);
+    private static final DustParticleOptions LASER_DUST = new DustParticleOptions(new Vector3f(1.0F, 0.12F, 0.04F), 1.4F);
+    private static final DustParticleOptions LASER_GLARE = new DustParticleOptions(new Vector3f(1.0F, 0.45F, 0.2F), 0.8F);
     private static final DustParticleOptions DARK_DUST = new DustParticleOptions(new Vector3f(0.18F, 0.02F, 0.06F), 4.0F);
 
     private StormRayEffects() {
@@ -35,6 +37,10 @@ public final class StormRayEffects {
             case SUMMONING -> summonParticles(ray, level, random, center);
             case CHARGING -> chargeParticles(ray, level, random, center);
             case PULSE -> pulseParticles(ray, level, random, center);
+            case LASER -> {
+                ambientParticles(ray, level, random, center);
+                laserParticles(ray, level, random);
+            }
             default -> ambientParticles(ray, level, random, center);
         }
     }
@@ -120,6 +126,39 @@ public final class StormRayEffects {
                     center.z + Math.sin(angle) * 2.0D, vx * 0.8D, 0.05D, vz * 0.8D);
         }
         level.addAlwaysVisibleParticle(ParticleTypes.EXPLOSION_EMITTER, true, center.x, center.y, center.z, 0.0D, 0.0D, 0.0D);
+    }
+
+    /** Two beams from the eyes to the synced end point: a faint aiming line first, then solid fire. */
+    private static void laserParticles(StormRayEntity ray, Level level, RandomSource random) {
+        Vec3 end = ray.getLaserEnd();
+        boolean firing = ray.isLaserFiring();
+        for (int side = -1; side <= 1; side += 2) {
+            Vec3 eye = ray.getEyePosition(side);
+            Vec3 beam = end.subtract(eye);
+            double length = beam.length();
+            if (length < 0.5D || length > 96.0D) {
+                continue;
+            }
+            Vec3 step = beam.scale(1.0D / length);
+            double spacing = firing ? 0.6D : 2.2D;
+            for (double d = random.nextDouble() * spacing; d < length; d += spacing) {
+                level.addAlwaysVisibleParticle(firing ? LASER_DUST : LASER_GLARE, true,
+                        eye.x + step.x * d, eye.y + step.y * d, eye.z + step.z * d, 0.0D, 0.0D, 0.0D);
+            }
+            // the eye itself burns
+            level.addAlwaysVisibleParticle(firing ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME, true, eye.x, eye.y, eye.z,
+                    random.nextGaussian() * 0.03D, 0.02D, random.nextGaussian() * 0.03D);
+        }
+        if (firing) {
+            for (int i = 0; i < 6; i++) {
+                level.addAlwaysVisibleParticle(ParticleTypes.FLAME, true, end.x + random.nextGaussian() * 0.5D, end.y + 0.1D,
+                        end.z + random.nextGaussian() * 0.5D, random.nextGaussian() * 0.08D, 0.08D + random.nextDouble() * 0.12D,
+                        random.nextGaussian() * 0.08D);
+            }
+            level.addAlwaysVisibleParticle(ParticleTypes.LAVA, true, end.x, end.y + 0.2D, end.z, 0.0D, 0.0D, 0.0D);
+            level.addAlwaysVisibleParticle(ParticleTypes.LARGE_SMOKE, true, end.x + random.nextGaussian() * 0.6D, end.y + 0.4D,
+                    end.z + random.nextGaussian() * 0.6D, 0.0D, 0.06D, 0.0D);
+        }
     }
 
     private static void deathParticles(StormRayEntity ray, Level level, RandomSource random, Vec3 center) {

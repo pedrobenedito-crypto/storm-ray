@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.2.0.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.4.0.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -55,6 +55,7 @@ Para testes no criativo também existem o **Ovo Gerador de Arraia da Tempestade*
 - **Céu vermelho:** os jogadores dentro do raio do evento (160 blocos por padrão) veem um céu vermelho-sangue, nuvens escuras de tempestade, névoa vermelha densa, raios ao longe, clarões, cinzas vermelhas flutuando e o som da tempestade. O efeito é só visual e só para esses jogadores: o clima, o horário e os biomas do mundo **não** mudam. Tudo volta ao normal quando a criatura morre, é descarregada ou quando o jogador sai do raio.
 - **Barra de vida própria:** barra carmim pulsante com uma veia de luz percorrendo.
 - **Ataque de filamentos:** ela mergulha sobre o alvo e chicoteia tudo em volta com os filamentos de tempestade, com dano e repulsão.
+- **Lasers dos olhos:** em 20% dos ataques, em vez do mergulho, os olhos brilham por 1 segundo (aviso) e disparam dois feixes que varrem o chão atrás do alvo por uns 3,5 segundos. Onde os feixes tocam, o chão e os arredores pegam fogo, e quem estiver ali leva dano e fica em chamas. Dá para escapar correndo. O fogo respeita a regra `mobGriefing` e pode ser desligado na config.
 - **Petrificação (habilidade principal):** a cada ~30 s ela para, o céu escurece e fica mais vermelho, e energia vermelha converge para o corpo. Então ela solta um pulso. Todo ser vivo no raio (22 blocos na horizontal) fica cinza e vira pedra aos poucos, com partículas de pedra rachando e sons de rocha. Ele não consegue andar, pular, atacar, usar itens nem quebrar blocos. Ao fim do efeito, morre.
   - Um **Totem da Imortalidade** ainda salva o jogador.
   - Nenhum bloco é colocado e nenhum inventário é apagado: a morte é normal, com os itens caindo conforme as regras do mundo.
@@ -86,7 +87,10 @@ Quando a cabeça cai no chão, ela é consumida, cai um raio e o portal se abre.
 
 ### Como é lá dentro
 - **Mesmo mundo, mesmas coordenadas:** mesma seed, então relevo, biomas, cavernas, vilas e estruturas são idênticos. Ao entrar, você aparece no mesmo X/Z, ao lado de um portal de volta, que é construído automaticamente se ainda não existir.
-- **Suas construções também estão lá:** na primeira vez que um chunk do reflexo é carregado, o que foi construído ou alterado nesse chunk do mundo original é copiado. O conteúdo de baús e outros recipientes **não** é copiado, para não duplicar itens. Depois disso, cada mundo segue independente. Construções feitas no mundo original depois da primeira visita não aparecem lá.
+- **Suas construções também estão lá, e continuam sincronizadas:** na primeira vez que um chunk do reflexo é carregado, o que foi construído ou alterado nesse chunk do mundo original é copiado. Depois disso, **toda mudança de bloco no mundo normal** (colocar, quebrar, explosões, pistões, água, plantações crescendo, comandos) é repetida no Reflexo, já apodrecida. Se o chunk do Reflexo estiver carregado, a mudança aparece em instantes; se não estiver, fica anotada e é aplicada quando ele carregar.
+  - O conteúdo de baús e outros recipientes **não** é copiado, para não duplicar itens.
+  - O mundo normal manda: quando uma coluna de blocos é sincronizada, ela substitui o que você tiver mudado nessa mesma coluna dentro do Reflexo. Blocos de portal abertos no Reflexo nunca são apagados.
+  - A sincronização é só do mundo normal para o Reflexo, e só de blocos (não de mobs, molduras ou suportes de armadura).
 - **Mundo apodrecido:** a grama vira terra grossa, podzol e manchas de nylium carmesim; flores e plantas viram arbustos secos e raízes carmesim; quase metade das folhas cai; cipós vermelhos pendem das árvores; e a vegetação que sobra fica marrom-acinzentada.
 - **Atmosfera:** céu vermelho permanente com nuvens de tempestade, névoa vermelha, raios e clarões, fuligem e brasas no ar, luz avermelhada e o som da tempestade. É sempre noite.
 - **Vazio e hostil:** não há animais, aldeões, peixes nem morcegos, só monstros. Mobs trazidos de propósito (ovo gerador, comando, balde, com nome, na coleira ou domados) são mantidos.
@@ -117,7 +121,7 @@ Um anfiteatro redondo enorme (uns 87 blocos de diâmetro e até 24 de altura), d
 
 - **É único, como o portal do End:** só existe **1 por mundo**, a cerca de 950 a 1.850 blocos do ponto 0,0. Ele usa o mesmo tipo de posicionamento em anel das fortalezas, com contagem 1.
 - **Existe nos dois mundos, no mesmo lugar:** como o Reflexo de Cinzas é uma cópia 1:1, o mesmo coliseu fica nas mesmas coordenadas no mundo normal (com vinhas verdes e musgo) e no Reflexo (com vinhas vermelhas pendendo dos arcos).
-- **A batalha:** quando um jogador em sobrevivência pisa na areia da arena, a **Storm Ray** emerge do selo no centro junto com a primeira onda de **4 Phantom X**. Enquanto a arraia estiver viva e houver jogadores por perto, uma nova **onda de Phantom X** chega a cada 30 segundos, cada uma com um a mais que a anterior (5, 6, 7...), até o limite de 12 vivos ao mesmo tempo. Depois que a arraia morre, as ondas param e a arena descansa por 3 dias de jogo (configurável) antes de poder despertar de novo. Cada mundo (normal e Reflexo) tem a sua própria luta. Não acontece no modo pacífico nem com jogadores em criativo/espectador.
+- **A batalha:** quando um jogador em sobrevivência pisa na areia da arena, a **Storm Ray** emerge do selo no centro junto com a primeira onda de **4 Phantom X**. Enquanto a arraia estiver viva e houver jogadores por perto, uma nova **onda de Phantom X** chega a cada 30 segundos, cada uma com um a mais que a anterior (5, 6, 7...), até o limite de 12 vivos ao mesmo tempo. Eles chegam visíveis por alguns segundos antes de sumir de novo, e a arraia não os fere nem petrifica. A arraia do coliseu só começa a usar a **petrificação a partir da onda 4**; os lasers e os filamentos valem desde a primeira. Depois que a arraia morre, as ondas param e a arena descansa por 3 dias de jogo (configurável) antes de poder despertar de novo. Cada mundo (normal e Reflexo) tem a sua própria luta. Não acontece no modo pacífico nem com jogadores em criativo/espectador.
 - **Um guardião por vez:** a arena lembra da sua arraia. Sair e voltar não invoca outra: a mesma continua lá até ser morta.
 
 Comando para achar:
@@ -176,6 +180,8 @@ Arquivos gerados na primeira execução:
 | petrification | `affectPlayers` / `affectMobs` / `affectCreativePlayers` | true / true / false | Quem é afetado |
 | dimension | `enablePortal` | true | Liga/desliga o portal |
 | dimension | `copyBuilds` | true | Copia as construções do mundo original no primeiro carregamento de cada chunk |
+| dimension | `liveSync` | true | Repete no Reflexo toda mudança de bloco feita depois no mundo normal |
+| dimension | `syncColumnsPerTick` | 64 | Limite de colunas de blocos sincronizadas por tick |
 | dimension | `hostileOnly` | true | Só monstros no reflexo |
 | dimension | `syncChunksPerTick` / `syncMillisPerTick` | 4 / 8 | Limite de trabalho da cópia por tick (desempenho) |
 | dimension | `lightningAverageIntervalTicks` | 90 | Frequência dos raios vermelhos no reflexo |
@@ -188,6 +194,8 @@ Arquivos gerados na primeira execução:
 | colosseum | `guardCount` | 4 | Tamanho da primeira onda de Phantom X (cada onda seguinte tem um a mais) |
 | colosseum | `waveIntervalTicks` | 600 | Intervalo entre as ondas (0 desliga as ondas extras) |
 | colosseum | `maxPhantoms` | 12 | Máximo de Phantom X vivos ao redor da arena |
+| colosseum | `petrifyFromWave` | 4 | Onda a partir da qual a arraia do coliseu usa a petrificação (não afeta arraias do ritual) |
+| laser | `chance` / `damage` / `setFire` | 0,2 / 4 / true | Chance de o ataque ser o laser dos olhos, dano por acerto e se o chão pega fogo |
 | client | `skyTintStrength`, `screenTintStrength`, `thickFog`, `lightningFlashes`, `ambientParticles`, `ambienceVolume` | | Intensidade visual e sonora. `lightningFlashes = false` desliga os clarões de tela (fotossensibilidade) |
 
 20 ticks = 1 segundo.
@@ -205,7 +213,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.2.0.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.4.0.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -254,7 +262,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.2.0.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.4.0.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---

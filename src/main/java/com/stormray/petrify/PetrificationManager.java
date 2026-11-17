@@ -1,6 +1,8 @@
 package com.stormray.petrify;
 
 import com.stormray.config.StormRayConfig;
+import com.stormray.entity.PhantomSeaEntity;
+import com.stormray.entity.PhantomXEntity;
 import com.stormray.entity.StormRayEntity;
 import com.stormray.network.ModNetwork;
 import com.stormray.network.PetrifyPacket;
@@ -110,6 +112,9 @@ public final class PetrificationManager {
         }
         if (entity.getType().is(Tags.EntityTypes.BOSSES) || STATES.containsKey(entity.getUUID())) {
             return false;
+        }
+        if (entity instanceof PhantomXEntity || entity instanceof PhantomSeaEntity) {
+            return false; // the Storm Ray's own phantoms are not turned to stone
         }
         if (entity instanceof Player player) {
             if (!StormRayConfig.AFFECT_PLAYERS.get() || player.isSpectator()) {

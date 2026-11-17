@@ -58,5 +58,6 @@
   "item.minecraft.splash_potion.effect.stone_breaker": "Splash Potion of Stone Breaker",
   "item.minecraft.lingering_potion.effect.stone_breaker": "Lingering Potion of Stone Breaker",
   "item.minecraft.tipped_arrow.effect.stone_breaker": "Arrow of Stone Breaker",
-  "message.stormray.colosseum.wave": "Onda %1$s de Phantom X!"
+  "message.stormray.colosseum.wave": "Onda %1$s de Phantom X!",
+  "message.stormray.colosseum.petrify": "A arraia começa a petrificar!"
 }

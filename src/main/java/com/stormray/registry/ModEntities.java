@@ -28,6 +28,7 @@ public final class ModEntities {
     public static final RegistryObject<EntityType<PhantomXEntity>> PHANTOM_X = ENTITY_TYPES.register("phantom_x",
             () -> EntityType.Builder.<PhantomXEntity>of(PhantomXEntity::new, MobCategory.MONSTER)
                     .sized(0.7F, 2.6F)
+                    .fireImmune()
                     .clientTrackingRange(8)
                     .build(StormRayMod.id("phantom_x").toString()));
 

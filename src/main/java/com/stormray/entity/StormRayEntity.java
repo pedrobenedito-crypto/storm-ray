@@ -8,6 +8,7 @@ import com.stormray.registry.ModSounds;
 import com.stormray.storm.StormEnvironment;
 import com.stormray.util.StormMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
@@ -37,12 +39,16 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -71,10 +77,15 @@ public class StormRayEntity extends Monster implements GeoEntity {
     public static final int DEATH_TICKS = 100;
     private static final int PULSE_TICKS = 30;
     private static final int SWOOP_MAX_TICKS = 100;
+    /** Eye lasers: a short aiming glare, then the beams burn across the ground. */
+    public static final int LASER_WARMUP_TICKS = 20;
+    private static final int LASER_TICKS = 90;
+    private static final double LASER_SWEEP_SPEED = 0.3D;
+    private static final double LASER_RANGE = 64.0D;
     private static final String CONTROLLER = "main";
 
     public enum Phase {
-        SUMMONING, HOVER, SWOOP, CHARGING, PULSE;
+        SUMMONING, HOVER, SWOOP, CHARGING, PULSE, LASER;
 
         public static Phase byId(int id) {
             Phase[] values = values();
@@ -86,6 +97,13 @@ public class StormRayEntity extends Monster implements GeoEntity {
             SynchedEntityData.defineId(StormRayEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_PHASE_LENGTH =
             SynchedEntityData.defineId(StormRayEntity.class, EntityDataSerializers.INT);
+
+    private static final EntityDataAccessor<Float> DATA_LASER_X =
+            SynchedEntityData.defineId(StormRayEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_LASER_Y =
+            SynchedEntityData.defineId(StormRayEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_LASER_Z =
+            SynchedEntityData.defineId(StormRayEntity.class, EntityDataSerializers.FLOAT);
 
     private static final RawAnimation ANIM_IDLE = RawAnimation.begin().thenLoop("animation.storm_ray.idle");
     private static final RawAnimation ANIM_SUMMON = RawAnimation.begin()
@@ -114,6 +132,10 @@ public class StormRayEntity extends Monster implements GeoEntity {
     private float orbitAngle;
     private float damageTakenScale = 1.0F;
     private int dyingTicks;
+    /** False while a colosseum guardian is still holding back its petrification pulse. */
+    private boolean petrifyEnabled = true;
+    /** Where the eye lasers are being dragged to on the ground (server side). */
+    private Vec3 laserAim = Vec3.ZERO;
 
     public StormRayEntity(EntityType<? extends StormRayEntity> type, Level level) {
         super(type, level);
@@ -143,6 +165,9 @@ public class StormRayEntity extends Monster implements GeoEntity {
         super.defineSynchedData();
         this.entityData.define(DATA_PHASE, Phase.HOVER.ordinal());
         this.entityData.define(DATA_PHASE_LENGTH, 0);
+        this.entityData.define(DATA_LASER_X, 0.0F);
+        this.entityData.define(DATA_LASER_Y, 0.0F);
+        this.entityData.define(DATA_LASER_Z, 0.0F);
     }
 
     @Override
@@ -233,6 +258,7 @@ public class StormRayEntity extends Monster implements GeoEntity {
             case SWOOP -> tickSwoop(target);
             case CHARGING -> tickCharging();
             case PULSE -> tickPulse();
+            case LASER -> tickLaser(target);
         }
         this.bossEvent.setProgress(Mth.clamp(this.getHealth() / this.getMaxHealth(), 0.0F, 1.0F));
     }
@@ -324,11 +350,16 @@ public class StormRayEntity extends Monster implements GeoEntity {
         }
         double horizontalSq = horizontalDistanceSqr(target);
         double petrifyRange = StormRayConfig.PETRIFY_RADIUS.get() * 1.6D;
-        if (this.petrifyCooldown <= 0 && horizontalSq < petrifyRange * petrifyRange) {
+        if (this.petrifyEnabled && this.petrifyCooldown <= 0 && horizontalSq < petrifyRange * petrifyRange) {
             startCharging();
         } else if (this.tentacleCooldown <= 0 && horizontalSq < 48.0D * 48.0D) {
-            setPhase(Phase.SWOOP, SWOOP_MAX_TICKS);
-            playBossSound(ModSounds.TENTACLE.get(), 5.0F, 0.7F);
+            // Most attacks are the tentacle swoop; now and then it burns the ground with its eyes instead.
+            if (this.random.nextDouble() < StormRayConfig.LASER_CHANCE.get()) {
+                startLaser(target);
+            } else {
+                setPhase(Phase.SWOOP, SWOOP_MAX_TICKS);
+                playBossSound(ModSounds.TENTACLE.get(), 5.0F, 0.7F);
+            }
         }
     }
 
@@ -381,6 +412,132 @@ public class StormRayEntity extends Monster implements GeoEntity {
         }
     }
 
+    // ------------------------------------------------------------------ eye lasers
+
+    private void startLaser(LivingEntity target) {
+        // Start short of the target, on the boss's side, so the beams visibly sweep towards it.
+        Vec3 toBoss = position().subtract(target.position()).multiply(1.0D, 0.0D, 1.0D);
+        Vec3 offset = toBoss.lengthSqr() > 1.0E-4D ? toBoss.normalize().scale(7.0D) : Vec3.ZERO;
+        this.laserAim = target.position().add(offset);
+        syncLaserEnd(traceLaser());
+        setPhase(Phase.LASER, LASER_TICKS);
+        playBossSound(ModSounds.CHARGE.get(), 8.0F, 1.7F);
+    }
+
+    private void tickLaser(@Nullable LivingEntity target) {
+        this.petrifyCooldown--;
+        this.setDeltaMovement(this.getDeltaMovement().scale(0.88D));
+        if (target != null) {
+            Vec3 delta = target.position().subtract(this.laserAim);
+            double distance = delta.length();
+            if (distance > LASER_SWEEP_SPEED) {
+                delta = delta.scale(LASER_SWEEP_SPEED / distance);
+            }
+            this.laserAim = this.laserAim.add(delta);
+        }
+        faceDirection(this.laserAim.subtract(position()));
+        Vec3 end = traceLaser();
+        syncLaserEnd(end);
+
+        if (this.phaseTicks >= LASER_WARMUP_TICKS && this.level() instanceof ServerLevel serverLevel) {
+            if (this.phaseTicks == LASER_WARMUP_TICKS) {
+                playBossSound(SoundEvents.BLAZE_SHOOT, 8.0F, 0.5F);
+                StormEnvironment.flash(this, 0.4F);
+            }
+            if (this.phaseTicks % 2 == 0) {
+                burnAt(serverLevel, end);
+            }
+            if (this.phaseTicks % 8 == 0) {
+                serverLevel.playSound(null, end.x, end.y, end.z, SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 3.0F,
+                        0.6F + this.random.nextFloat() * 0.3F);
+            }
+        }
+        if (this.phaseTicks >= getPhaseLength() || target == null) {
+            this.tentacleCooldown = preset().scaleCooldown(StormRayConfig.TENTACLE_COOLDOWN.get());
+            setPhase(Phase.HOVER, 0);
+        }
+    }
+
+    /** Where the beams end: the first block between the eyes and the aim point. */
+    private Vec3 traceLaser() {
+        Vec3 from = getEyeCenter();
+        Vec3 direction = this.laserAim.add(0.0D, 0.1D, 0.0D).subtract(from);
+        if (direction.lengthSqr() < 1.0E-4D) {
+            return this.laserAim;
+        }
+        Vec3 to = from.add(direction.normalize().scale(LASER_RANGE));
+        BlockHitResult hit = this.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, this));
+        return hit.getLocation();
+    }
+
+    private void syncLaserEnd(Vec3 end) {
+        this.entityData.set(DATA_LASER_X, (float) end.x);
+        this.entityData.set(DATA_LASER_Y, (float) end.y);
+        this.entityData.set(DATA_LASER_Z, (float) end.z);
+    }
+
+    /** Scorches whoever stands where the beams land and sets the ground there alight. */
+    private void burnAt(ServerLevel level, Vec3 end) {
+        float damage = (float) (StormRayConfig.LASER_DAMAGE.get() * preset().damageMultiplier());
+        AABB area = new AABB(end, end).inflate(1.8D, 2.2D, 1.8D);
+        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, area, this::canLash)) {
+            victim.setSecondsOnFire(5);
+            victim.hurt(this.damageSources().mobAttack(this), damage);
+        }
+        if (!StormRayConfig.LASER_FIRE.get() || !ForgeEventFactory.getMobGriefingEvent(level, this)) {
+            return;
+        }
+        BlockPos centre = BlockPos.containing(end.x, end.y + 0.3D, end.z);
+        for (int n = 0; n < 3; n++) {
+            // the first flame lands exactly under the beam, the others scatter around it
+            int spread = n == 0 ? 0 : 2;
+            BlockPos pos = centre.offset(spread == 0 ? 0 : this.random.nextInt(5) - 2, 0, spread == 0 ? 0 : this.random.nextInt(5) - 2);
+            for (int dy = 1; dy >= -2; dy--) {
+                BlockPos candidate = pos.above(dy);
+                if (level.getBlockState(candidate).isAir() && BaseFireBlock.canBePlacedAt(level, candidate, Direction.UP)) {
+                    level.setBlockAndUpdate(candidate, BaseFireBlock.getState(level, candidate));
+                    break;
+                }
+            }
+        }
+    }
+
+    /** Point between the eyes, at the front of the head. */
+    public Vec3 getEyeCenter() {
+        float yaw = this.getYRot() * Mth.DEG_TO_RAD;
+        return getBodyCenter().add(-Mth.sin(yaw) * 6.5D, -0.6D, Mth.cos(yaw) * 6.5D);
+    }
+
+    /** One of the two eyes: side -1 (left) or +1 (right). */
+    public Vec3 getEyePosition(int side) {
+        float yaw = this.getYRot() * Mth.DEG_TO_RAD;
+        return getEyeCenter().add(Mth.cos(yaw) * 1.7D * side, 0.0D, Mth.sin(yaw) * 1.7D * side);
+    }
+
+    /** Where the eye lasers currently end (synced to clients). */
+    public Vec3 getLaserEnd() {
+        return new Vec3(this.entityData.get(DATA_LASER_X), this.entityData.get(DATA_LASER_Y), this.entityData.get(DATA_LASER_Z));
+    }
+
+    /** True once the aiming glare is over and the beams are burning. */
+    public boolean isLaserFiring() {
+        return getPhase() == Phase.LASER && getPhaseTicks() >= LASER_WARMUP_TICKS;
+    }
+
+    // ------------------------------------------------------------------ petrification gate
+
+    public boolean isPetrifyEnabled() {
+        return this.petrifyEnabled;
+    }
+
+    /** The colosseum keeps its guardian from petrifying until a later wave. */
+    public void setPetrifyEnabled(boolean enabled) {
+        if (enabled && !this.petrifyEnabled) {
+            this.petrifyCooldown = Math.min(this.petrifyCooldown, 100); // the first pulse follows soon after
+        }
+        this.petrifyEnabled = enabled;
+    }
+
     private void applyLashDamage() {
         double reach = StormRayConfig.TENTACLE_REACH.get();
         float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
@@ -404,6 +561,9 @@ public class StormRayEntity extends Monster implements GeoEntity {
     private boolean canLash(LivingEntity entity) {
         if (entity == this || !entity.isAlive() || entity instanceof StormRayEntity) {
             return false;
+        }
+        if (entity instanceof PhantomXEntity || entity instanceof PhantomSeaEntity) {
+            return false; // the phantoms fight at its side
         }
         if (entity instanceof Player player && (player.isCreative() || player.isSpectator())) {
             return false;
@@ -674,6 +834,7 @@ public class StormRayEntity extends Monster implements GeoEntity {
         tag.putInt("PetrifyCooldown", this.petrifyCooldown);
         tag.putInt("TentacleCooldown", this.tentacleCooldown);
         tag.putFloat("DamageTakenScale", this.damageTakenScale);
+        tag.putBoolean("PetrifyEnabled", this.petrifyEnabled);
         if (this.anchor != null) {
             tag.putDouble("AnchorX", this.anchor.x);
             tag.putDouble("AnchorY", this.anchor.y);
@@ -685,13 +846,14 @@ public class StormRayEntity extends Monster implements GeoEntity {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         Phase phase = Phase.byId(tag.getInt("RayPhase"));
-        if (phase == Phase.CHARGING || phase == Phase.PULSE || phase == Phase.SWOOP) {
+        if (phase == Phase.CHARGING || phase == Phase.PULSE || phase == Phase.SWOOP || phase == Phase.LASER) {
             phase = Phase.HOVER;
         }
         setPhase(phase, tag.getInt("RayPhaseLength"));
         this.phaseTicks = tag.getInt("RayPhaseTicks");
         this.petrifyCooldown = tag.getInt("PetrifyCooldown");
         this.tentacleCooldown = tag.getInt("TentacleCooldown");
+        this.petrifyEnabled = !tag.contains("PetrifyEnabled") || tag.getBoolean("PetrifyEnabled");
         if (tag.contains("DamageTakenScale")) {
             this.damageTakenScale = tag.getFloat("DamageTakenScale");
         }
@@ -715,7 +877,7 @@ public class StormRayEntity extends Monster implements GeoEntity {
         return switch (getPhase()) {
             case SUMMONING -> state.setAndContinue(ANIM_SUMMON);
             case SWOOP -> state.setAndContinue(ANIM_SWOOP);
-            case CHARGING -> state.setAndContinue(ANIM_CHARGE);
+            case CHARGING, LASER -> state.setAndContinue(ANIM_CHARGE);
             case PULSE -> state.setAndContinue(ANIM_RELEASE);
             default -> state.setAndContinue(ANIM_IDLE);
         };
