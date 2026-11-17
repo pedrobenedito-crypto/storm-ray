@@ -86,7 +86,7 @@ class AssetIntegrityTest {
         checkAnimations("storm_ray", new String[]{"idle", "summon", "swoop", "lash", "charge", "release", "death"});
         checkAnimations("phantom_x", new String[]{"idle", "move", "combo", "reveal", "death"});
         checkAnimations("phantom_sea", new String[]{"idle", "swim", "grab", "lunge", "death"});
-        checkAnimations("phantom_bat", new String[]{"fly", "bite", "death"});
+        checkAnimations("phantom_bat", new String[]{"fly", "dash", "bite", "death"});
     }
 
     @Test

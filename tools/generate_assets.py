@@ -971,6 +971,18 @@ def build_bat_animations():
              "root": {"position": {"0.00": vec(0, 0, 0), "0.22": vec(0, 0, -2.5), "0.40": vec(0, 0, 0)}}}
     anims["animation.phantom_bat.bite"] = {"loop": False, "animation_length": 0.4, "bones": bones}
 
+    # dash: rear back with wings raised, then dive head-first with the wings swept back, jaws snapping
+    bones = {"body": {"rotation": {"0.00": vec(18, 0, 0), "0.18": vec(-28, 0, 0), "0.30": vec(62, 0, 0), "0.60": vec(66, 0, 0), "0.80": vec(18, 0, 0)}},
+             "head": {"rotation": {"0.00": vec(-12, 0, 0), "0.18": vec(10, 0, 0), "0.30": vec(-58, 0, 0), "0.52": vec(-66, 0, 0), "0.62": vec(-20, 0, 0), "0.80": vec(-12, 0, 0)}},
+             "root": {"position": {"0.00": vec(0, 0, 0), "0.18": vec(0, 1.5, 2), "0.30": vec(0, 0, -2), "0.80": vec(0, 0, 0)}},
+             "wing_l": {"rotation": {"0.00": vec(0, 0, 0), "0.18": vec(0, 0, 58), "0.30": vec(0, -52, -18), "0.60": vec(0, -56, -22), "0.80": vec(0, 0, 0)}},
+             "wing_r": {"rotation": {"0.00": vec(0, 0, 0), "0.18": vec(0, 0, -58), "0.30": vec(0, 52, 18), "0.60": vec(0, 56, 22), "0.80": vec(0, 0, 0)}},
+             "wing_l_tip": {"rotation": {"0.00": vec(0, 0, 0), "0.18": vec(0, 0, 30), "0.30": vec(0, -30, -10), "0.60": vec(0, -34, -12), "0.80": vec(0, 0, 0)}},
+             "wing_r_tip": {"rotation": {"0.00": vec(0, 0, 0), "0.18": vec(0, 0, -30), "0.30": vec(0, 30, 10), "0.60": vec(0, 34, 12), "0.80": vec(0, 0, 0)}},
+             "ear_l": {"rotation": {"0.00": vec(0, 0, 0), "0.30": vec(-35, 0, 0), "0.80": vec(0, 0, 0)}},
+             "ear_r": {"rotation": {"0.00": vec(0, 0, 0), "0.30": vec(-35, 0, 0), "0.80": vec(0, 0, 0)}}}
+    anims["animation.phantom_bat.dash"] = {"loop": False, "animation_length": 0.8, "bones": bones}
+
     bones = {"root": {"position": {"0.00": vec(0, 0, 0), "1.00": vec(0, -5, 0)}},
              "body": {"rotation": {"0.00": vec(18, 0, 0), "0.40": vec(-10, 0, 60), "1.00": vec(0, 0, 175)}},
              "wing_l": {"rotation": {"0.00": vec(0, 0, 0), "1.00": vec(0, 0, -70)}},

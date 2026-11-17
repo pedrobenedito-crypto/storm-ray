@@ -236,6 +236,9 @@ public class PhantomXEntity extends Monster implements GeoEntity {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        if (source.getEntity() instanceof StormRayEntity || source.getDirectEntity() instanceof StormRayEntity) {
+            return false; // the Storm Ray never harms its own phantoms
+        }
         boolean hurt = super.hurt(source, amount);
         if (hurt && !this.level().isClientSide) {
             this.revealTicks = Math.max(this.revealTicks, REVEAL_WHEN_HURT);

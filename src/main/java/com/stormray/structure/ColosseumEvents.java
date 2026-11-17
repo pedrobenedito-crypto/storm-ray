@@ -227,12 +227,16 @@ public final class ColosseumEvents {
             double distance = 6.0D + random.nextDouble() * 12.0D;
             double x = centre.getX() + 0.5D + Math.cos(angle) * distance;
             double z = centre.getZ() + 0.5D + Math.sin(angle) * distance;
-            double y = centre.getY() + 6.0D + random.nextDouble() * 4.0D;
+            double y = centre.getY() + 7.0D + random.nextDouble() * 5.0D;
             PhantomBatEntity bat = ModEntities.PHANTOM_BAT.get().create(level);
             if (bat == null) {
                 return spawned;
             }
             bat.moveTo(x, y, z, random.nextFloat() * 360.0F, 0.0F);
+            for (int lift = 0; lift < 4 && !level.noCollision(bat); lift++) {
+                y += 3.0D; // inside a broken pillar: go higher until there is open air
+                bat.moveTo(x, y, z, bat.getYRot(), 0.0F);
+            }
             bat.finalizeSpawn(level, level.getCurrentDifficultyAt(bat.blockPosition()), MobSpawnType.EVENT, null, null);
             bat.setPersistenceRequired();
             if (!level.addFreshEntity(bat)) {

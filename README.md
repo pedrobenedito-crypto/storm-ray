@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.5.0.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.6.0.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -97,7 +97,7 @@ Quando a cabeça cai no chão, ela é consumida, cai um raio e o portal se abre.
 - **Voltar:** pise no portal de volta. Se quebrar um bloco de redstone de um portal aberto, o portal fecha e esse bloco não dropa nada, para os portais não virarem fonte de redstone grátis.
 
 ### Phantom X
-O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só nessa dimensão**, com a mesma frequência de zumbis e esqueletos, em grupos de 1 ou 2. No mundo normal, só aparece por ovo gerador ou comando.
+O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só nessa dimensão**, com frequência maior que a de zumbis e esqueletos, em grupos de 1 a 3. No mundo normal, só aparece por ovo gerador ou comando.
 
 - **Invisível:** fica quase transparente, como um vulto tremido, deixando um rastro leve de fuligem e sussurrando. A rachadura vermelha do rosto também some.
 - **Combo:** chega perto invisível, aparece de repente e dá **4 golpes rápidos** de 1,5 coração cada. Todos acertam, porque ignoram o tempo de invulnerabilidade entre golpes. Depois some de novo, recua e volta a atacar.
@@ -107,7 +107,8 @@ O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só
 ### Phantom Bat
 Um morcego de fuligem com olhos em brasa. Voa em grupos de 2 a 4 no Reflexo de Cinzas e, bem mais raro, em grupos de 2 ou 3 no escuro do mundo normal. Também entra nas ondas do coliseu a partir da onda 3.
 
-- **Mordida:** 1 coração de dano (reduzido pela armadura) e o efeito **Sangramento por 5 segundos**, que tira meio coração a cada 1,25 s (2 corações no total) e ignora a armadura. Leite cura.
+- **Investida:** ele chega perto, recua um instante com as asas erguidas e mergulha em linha reta com as asas para trás. Como o mergulho é reto, dá para desviar dando um passo para o lado.
+- **Mordida:** 1 coração de dano (reduzido pela armadura) e o efeito **Sangramento por 5 segundos**, que tira meio coração a cada 1,25 s (2 corações no total) e ignora a armadura. Enquanto durar, gotas vermelhas de sangue caem de quem foi mordido. Leite cura.
 - **Status:** 8 de vida, imune a fogo. Às vezes dropa uma membrana de phantom.
 
 ### Oceano escuro e Phantom Sea
@@ -203,11 +204,11 @@ Arquivos gerados na primeira execução:
 | dimension | `syncChunksPerTick` / `syncMillisPerTick` | 4 / 8 | Limite de trabalho da cópia por tick (desempenho) |
 | dimension | `lightningAverageIntervalTicks` | 90 | Frequência dos raios vermelhos no reflexo |
 | phantom_x | `health` / `hitDamage` / `comboHits` / `comboCooldownTicks` | 40 / 3 / 4 / 50 | Força do Phantom X |
-| phantom_x | `spawnWeight` | 100 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
+| phantom_x | `naturalSpawnWeight` | 160 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
 | phantom_sea | `health` / `biteDamage` / `pullStrength` / `grabDurationTicks` / `breakFreeDamage` | 30 / 3 / 0,2 / 120 / 6 | Força e agarrão do Phantom Sea |
 | phantom_bat | `health` / `biteDamage` / `bleedTicks` | 8 / 2 / 100 | Força do Phantom Bat e duração do sangramento |
-| phantom_bat | `spawnWeight` / `overworldSpawnWeight` | 50 / 20 | Frequência no Reflexo e no mundo normal (zumbi = 95; 0 desliga) |
-| phantom_sea | `spawnWeight` | 150 | Frequência de spawn na água do Reflexo (0 desliga) |
+| phantom_bat | `naturalSpawnWeight` / `overworldSpawnWeight` | 130 / 20 | Frequência no Reflexo e no mundo normal (zumbi = 95; 0 desliga) |
+| phantom_sea | `naturalSpawnWeight` | 250 | Frequência de spawn na água do Reflexo (0 desliga) |
 | colosseum | `awakenBoss` | true | A Storm Ray emerge quando um jogador entra na arena do coliseu |
 | colosseum | `respawnTicks` | 72000 | Descanso da arena depois da morte da arraia (0 = a luta só acontece uma vez) |
 | colosseum | `bossHealthMultiplier` | 0,75 | Vida da arraia do coliseu em relação à do ritual |
@@ -233,7 +234,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.5.0.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.6.0.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -282,7 +283,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.5.0.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.6.0.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---

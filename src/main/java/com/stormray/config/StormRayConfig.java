@@ -205,7 +205,7 @@ public final class StormRayConfig {
         PHANTOM_COMBO_COOLDOWN = b.comment("Ticks between combos.")
                 .defineInRange("comboCooldownTicks", 50, 10, 1200);
         PHANTOM_SPAWN_WEIGHT = b.comment("Natural spawn weight in the Ashen Reflection (zombie = 95, skeleton = 100). 0 disables.")
-                .defineInRange("spawnWeight", 100, 0, 1000);
+                .defineInRange("naturalSpawnWeight", 160, 0, 1000);
         b.pop();
 
         b.comment("Phantom Sea: drowned wraith that drags swimmers to the sea floor").push("phantom_sea");
@@ -220,7 +220,7 @@ public final class StormRayConfig {
         SEA_BREAK_FREE_DAMAGE = b.comment("Damage the prey must deal to it to break free early.")
                 .defineInRange("breakFreeDamage", 6.0D, 0.0D, 1000.0D);
         SEA_SPAWN_WEIGHT = b.comment("Spawn weight in the Ashen Reflection's water (only counted for underwater positions). 0 disables.")
-                .defineInRange("spawnWeight", 150, 0, 1000);
+                .defineInRange("naturalSpawnWeight", 250, 0, 1000);
         b.pop();
 
         b.comment("Phantom Bat: soot bat whose bite causes bleeding").push("phantom_bat");
@@ -231,7 +231,7 @@ public final class StormRayConfig {
         BAT_BLEED_TICKS = b.comment("Length of the bleeding left by a bite (100 = 5 seconds = 2 hearts, ignoring armor). 0 disables.")
                 .defineInRange("bleedTicks", 100, 0, 6000);
         BAT_SPAWN_WEIGHT = b.comment("Natural spawn weight in the Ashen Reflection (zombie = 95). 0 disables.")
-                .defineInRange("spawnWeight", 50, 0, 1000);
+                .defineInRange("naturalSpawnWeight", 130, 0, 1000);
         BAT_OVERWORLD_SPAWN_WEIGHT = b.comment("Natural spawn weight in the normal world, in the dark like other monsters (zombie = 95). 0 disables.")
                 .defineInRange("overworldSpawnWeight", 20, 0, 1000);
         b.pop();
