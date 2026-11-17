@@ -908,6 +908,50 @@ def sea_textures():
     Image.fromarray(np.clip(glow, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_sea_glowmask.png"))
 
 
+# --------------------------------------------------------------------------- items
+
+def item_textures():
+    """Colosseum Locator: a cracked ashen stone disc (the arena seen from above) with a glowing ember eye."""
+    rng = random.Random(4242)
+    size = 16
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = img.load()
+    cx = cy = 7.5
+    for y in range(size):
+        for x in range(size):
+            d = math.hypot(x - cx, y - cy)
+            if d > 7.3:
+                continue
+            shade = rng.randint(-10, 10)
+            if d > 5.6:        # outer ring: weathered stone, lit from the top-left
+                light = int((cx - x + cy - y) * 5)
+                base = 104 + light + shade
+                col = (base, base - 4, base - 2, 255)
+                if d > 6.6:
+                    col = (base - 44, base - 48, base - 42, 255)
+            elif d > 4.4:      # dark groove: the tiers of seats
+                col = (46 + shade // 2, 40 + shade // 2, 46 + shade // 2, 255)
+            elif d > 2.4:      # arena sand, ash-stained
+                col = (150 + shade, 126 + shade, 96 + shade, 255)
+            else:              # ember eye
+                glow = 1.0 - d / 2.4
+                col = (int(170 + 85 * glow), int(30 + 130 * glow * glow), int(24 + 30 * glow), 255)
+            px[x, y] = tuple(max(0, min(255, c)) for c in col[:3]) + (255,)
+    # arches around the rim and one collapsed gap
+    for k in range(8):
+        a = math.radians(k * 45 + 22.5)
+        x, y = int(round(cx + 6.1 * math.cos(a))), int(round(cy + 6.1 * math.sin(a)))
+        px[x, y] = (38, 30, 36, 255)
+    for (x, y) in ((12, 3), (13, 4), (13, 3), (14, 5)):
+        px[x, y] = (0, 0, 0, 0)
+    # red cracks running from the eye
+    for (x, y) in ((6, 9), (5, 10), (4, 11), (9, 6), (10, 5)):
+        px[x, y] = (200, 40, 36, 255)
+    out = os.path.join(ASSETS, "textures", "item")
+    os.makedirs(out, exist_ok=True)
+    img.save(os.path.join(out, "colosseum_locator.png"))
+
+
 def main():
     geo = build_geometry()
     write_json(os.path.join(ASSETS, "geo", "entity", "storm_ray.geo.json"), geo.to_json())
@@ -926,6 +970,7 @@ def main():
     write_json(os.path.join(ASSETS, "animations", "entity", "phantom_sea.animation.json"), build_sea_animations())
     sea_textures()
     print(f"phantom_sea: {len(sea.bones)} bones, {sum(len(b['cubes']) for b in sea.bones)} cubes")
+    item_textures()
     bones = geo.bones
     print(f"geometry: {len(bones)} bones, {sum(len(b['cubes']) for b in bones)} cubes")
 

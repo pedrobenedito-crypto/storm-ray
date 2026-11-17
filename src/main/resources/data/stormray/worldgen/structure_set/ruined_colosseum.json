@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "stormray:ruined_colosseum",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:concentric_rings",
+    "distance": 22,
+    "spread": 1,
+    "count": 1,
+    "preferred_biomes": "#stormray:colosseum_preferred",
+    "salt": 0
+  }
+}

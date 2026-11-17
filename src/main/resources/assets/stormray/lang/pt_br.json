@@ -38,5 +38,19 @@
   "subtitles.stormray.sea_ambient": "Phantom Sea borbulha",
   "subtitles.stormray.sea_hurt": "Phantom Sea grita",
   "subtitles.stormray.sea_death": "Phantom Sea afunda",
-  "subtitles.stormray.sea_grab": "Phantom Sea agarra"
+  "subtitles.stormray.sea_grab": "Phantom Sea agarra",
+  "item.stormray.colosseum_locator": "Localizador do Coliseu",
+  "item.stormray.colosseum_locator.tooltip": "Use para sentir onde fica o Coliseu em Ruínas",
+  "message.stormray.locator.found": "O Coliseu em Ruínas está a %1$s blocos, para o %2$s",
+  "message.stormray.locator.here": "O Coliseu em Ruínas está aqui.",
+  "message.stormray.locator.nothing": "O localizador não sente nada neste mundo.",
+  "message.stormray.colosseum.awaken": "O coliseu desperta...",
+  "direction.stormray.n": "norte",
+  "direction.stormray.ne": "nordeste",
+  "direction.stormray.e": "leste",
+  "direction.stormray.se": "sudeste",
+  "direction.stormray.s": "sul",
+  "direction.stormray.sw": "sudoeste",
+  "direction.stormray.w": "oeste",
+  "direction.stormray.nw": "noroeste"
 }

@@ -2,6 +2,7 @@ package com.stormray.dimension;
 
 import com.stormray.StormRayMod;
 import com.stormray.config.StormRayConfig;
+import com.stormray.registry.ModStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -80,7 +81,9 @@ public final class MirrorSync {
         if (mirrorChunk == null) {
             return; // not fully loaded; it will be queued again on its next load
         }
-        if (StormRayConfig.COPY_BUILDS.get()) {
+        // Chunks holding a Sky Island or the Colosseum keep what the mirror generated: the overworld
+        // has no island there, and copying it over would erase the structure.
+        if (StormRayConfig.COPY_BUILDS.get() && !ModStructures.touchesModStructure(mirror, mirrorChunk)) {
             ServerLevel overworld = mirror.getServer().overworld();
             ChunkAccess source = overworld.getChunkSource().getChunkNow(pos.x, pos.z);
             if (source == null) {

@@ -38,5 +38,19 @@
   "subtitles.stormray.sea_ambient": "Phantom Sea gurgles",
   "subtitles.stormray.sea_hurt": "Phantom Sea shrieks",
   "subtitles.stormray.sea_death": "Phantom Sea sinks",
-  "subtitles.stormray.sea_grab": "Phantom Sea grabs"
+  "subtitles.stormray.sea_grab": "Phantom Sea grabs",
+  "item.stormray.colosseum_locator": "Colosseum Locator",
+  "item.stormray.colosseum_locator.tooltip": "Use to sense where the Ruined Colosseum lies",
+  "message.stormray.locator.found": "The Ruined Colosseum lies %1$s blocks to the %2$s",
+  "message.stormray.locator.here": "The Ruined Colosseum is here.",
+  "message.stormray.locator.nothing": "The locator senses nothing in this world.",
+  "message.stormray.colosseum.awaken": "The colosseum awakens...",
+  "direction.stormray.n": "north",
+  "direction.stormray.ne": "north-east",
+  "direction.stormray.e": "east",
+  "direction.stormray.se": "south-east",
+  "direction.stormray.s": "south",
+  "direction.stormray.sw": "south-west",
+  "direction.stormray.w": "west",
+  "direction.stormray.nw": "north-west"
 }

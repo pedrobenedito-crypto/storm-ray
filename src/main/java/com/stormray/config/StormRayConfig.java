@@ -65,6 +65,11 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.DoubleValue SEA_BREAK_FREE_DAMAGE;
     public static final ForgeConfigSpec.IntValue SEA_SPAWN_WEIGHT;
 
+    // Ruined Colosseum
+    public static final ForgeConfigSpec.BooleanValue COLOSSEUM_BOSS;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_RESPAWN_TICKS;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_GUARDS;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -177,6 +182,16 @@ public final class StormRayConfig {
                 .defineInRange("breakFreeDamage", 6.0D, 0.0D, 1000.0D);
         SEA_SPAWN_WEIGHT = b.comment("Spawn weight in the Ashen Reflection's water (only counted for underwater positions). 0 disables.")
                 .defineInRange("spawnWeight", 150, 0, 1000);
+        b.pop();
+
+        b.comment("Ruined Colosseum: the single great arena of each world").push("colosseum");
+        COLOSSEUM_BOSS = b.comment("A Storm Ray rises from the arena when a survival player steps onto its floor.")
+                .define("awakenBoss", true);
+        COLOSSEUM_RESPAWN_TICKS = b.comment("Ticks the arena rests after its Storm Ray dies before it can wake again",
+                        "(72000 = 3 Minecraft days). 0 = the fight happens only once per world.")
+                .defineInRange("respawnTicks", 72000, 0, Integer.MAX_VALUE);
+        COLOSSEUM_GUARDS = b.comment("Phantom X guards that appear in the arena together with the Storm Ray.")
+                .defineInRange("guardCount", 4, 0, 16);
         b.pop();
 
         SPEC = b.build();

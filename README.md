@@ -1,6 +1,6 @@
 # Storm Ray — mod para Minecraft Forge 1.20.1
 
-Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o céu de vermelho, traz uma tempestade de raios e petrifica tudo o que estiver vivo embaixo dela.
+Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o céu de vermelho, traz uma tempestade de raios e petrifica tudo o que estiver vivo embaixo dela. O mod também traz o Reflexo de Cinzas (uma dimensão espelhada), o Coliseu em Ruínas e as Ilhas do Céu.
 
 | | |
 |---|---|
@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.0.0.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.1.0.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -110,7 +110,36 @@ O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só
 
 ---
 
-Limitações conhecidas: na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar.
+## 3c. Coliseu em Ruínas, Ilhas do Céu e o Localizador
+
+### Coliseu em Ruínas
+Um anfiteatro redondo enorme (uns 87 blocos de diâmetro e até 24 de altura), destruído e coberto de vinhas: arena de areia, muro do pódio, arquibancadas em degraus sobre um corredor em anel, fachada de três andares de arcos, quatro portões, um setor inteiro desabado e entulho espalhado.
+
+- **É único, como o portal do End:** só existe **1 por mundo**, a cerca de 950 a 1.850 blocos do ponto 0,0. Ele usa o mesmo tipo de posicionamento em anel das fortalezas, com contagem 1.
+- **Existe nos dois mundos, no mesmo lugar:** como o Reflexo de Cinzas é uma cópia 1:1, o mesmo coliseu fica nas mesmas coordenadas no mundo normal (com vinhas verdes e musgo) e no Reflexo (com vinhas vermelhas pendendo dos arcos).
+- **A batalha:** quando um jogador em sobrevivência pisa na areia da arena, a **Storm Ray** emerge do selo no centro e **4 Phantom X** aparecem entre as ruínas. Depois que a arraia morre, a arena descansa por 3 dias de jogo (configurável) antes de poder despertar de novo. Cada mundo (normal e Reflexo) tem a sua própria luta. Não acontece no modo pacífico nem com jogadores em criativo/espectador.
+
+Comando para achar:
+
+```
+/locate structure stormray:ruined_colosseum
+```
+
+### Ilhas do Céu
+Pedaços de terra arrancados do chão e suspensos no ar, com a cratera de onde saíram logo abaixo. **Só existem no Reflexo de Cinzas**, entre 45 e 70 blocos acima do solo, e são de raridade média (em média uma a cada ~380 blocos, um pouco mais comuns que vilas). Em cima há um pequeno santuário em ruínas com um **baú**, que sempre contém um **Localizador do Coliseu** e mais alguns itens (redstone, ossos, minérios, às vezes uma cabeça do Steve). Luzes alaranjadas na parte de baixo ajudam a enxergar a ilha através da névoa.
+
+```
+/locate structure stormray:sky_island
+```
+
+### Localizador do Coliseu
+Clique com o botão direito: um rastro de brasas aponta a direção do coliseu e uma mensagem mostra a distância e o ponto cardeal. Não é consumido e funciona no mundo normal e no Reflexo (as coordenadas são as mesmas). No criativo ele fica na aba **Ferramentas e Utilidades**.
+
+> **Mundos já existentes:** estruturas só são geradas em chunks novos. Se a região onde o coliseu deveria ficar já tiver sido explorada, ele não aparece ali; nesse caso use um mundo novo. O mesmo vale para as ilhas em partes do Reflexo já visitadas.
+
+---
+
+Limitações conhecidas: na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar. Nos chunks do Reflexo ocupados pelo coliseu ou por uma ilha do céu, as construções do mundo original não são copiadas.
 
 ---
 
@@ -150,6 +179,9 @@ Arquivos gerados na primeira execução:
 | phantom_x | `spawnWeight` | 100 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
 | phantom_sea | `health` / `biteDamage` / `pullStrength` / `grabDurationTicks` / `breakFreeDamage` | 30 / 3 / 0,2 / 120 / 6 | Força e agarrão do Phantom Sea |
 | phantom_sea | `spawnWeight` | 150 | Frequência de spawn na água do Reflexo (0 desliga) |
+| colosseum | `awakenBoss` | true | A Storm Ray emerge quando um jogador entra na arena do coliseu |
+| colosseum | `respawnTicks` | 72000 | Descanso da arena depois da morte da arraia (0 = a luta só acontece uma vez) |
+| colosseum | `guardCount` | 4 | Quantos Phantom X aparecem junto com a arraia |
 | client | `skyTintStrength`, `screenTintStrength`, `thickFog`, `lightningFlashes`, `ambientParticles`, `ambienceVolume` | | Intensidade visual e sonora. `lightningFlashes = false` desliga os clarões de tela (fotossensibilidade) |
 
 20 ticks = 1 segundo.
@@ -167,7 +199,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.0.0.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.1.0.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -216,7 +248,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.0.0.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.1.0.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---
@@ -234,6 +266,8 @@ src/main/java/com/stormray/
 ├── storm/                        # evento do céu vermelho no servidor (sincronização, raios)
 ├── dimension/                    # Reflexo de Cinzas: apodrecimento, cópia de chunks, regras de mobs
 ├── portal/                       # portal 4x4: ignição pela cabeça jogada, bloco do portal, viagem
+├── structure/                    # Coliseu em Ruínas e Ilhas do Céu (forma pura testada, peças, luta da arena)
+├── item/                         # Localizador do Coliseu
 ├── network/                      # canal + pacotes servidor→cliente
 ├── util/                         # matemática pura (testada)
 └── client/                       # renderer GeckoLib, céu/névoa, overlays, boss bar, partículas, som, efeitos da dimensão
@@ -254,5 +288,5 @@ tools/                            # geradores de assets e sons
 
 ## 8. Status de testes
 
-- Os testes unitários (`src/test`) passam: formato do ritual e do portal, matemática do céu, ruído determinístico do apodrecimento, presets de dificuldade e integridade dos assets e dados (todo som, sprite, bone e arquivo de dimensão referenciado existe).
+- Os testes unitários (`src/test`) passam: formato do ritual e do portal, forma do coliseu e das ilhas do céu, matemática do céu, ruído determinístico do apodrecimento, presets de dificuldade e integridade dos assets e dados (todo som, sprite, bone e arquivo de dimensão referenciado existe).
 - A compilação completa contra o Forge e o GeckoLib acontece no GitHub Actions. Abra uma issue com o log se algo falhar.

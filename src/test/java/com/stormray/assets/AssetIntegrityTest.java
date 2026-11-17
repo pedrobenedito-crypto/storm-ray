@@ -93,9 +93,25 @@ class AssetIntegrityTest {
         Path data = Path.of("src", "main", "resources", "data", "stormray");
         for (String path : new String[]{"dimension/ashen_reflection.json", "dimension_type/ashen_reflection.json",
                 "worldgen/configured_feature/ashen_rot.json", "worldgen/placed_feature/ashen_rot.json",
-                "forge/biome_modifier/ashen_rot.json"}) {
+                "forge/biome_modifier/ashen_rot.json",
+                "worldgen/structure/ruined_colosseum.json", "worldgen/structure_set/ruined_colosseum.json",
+                "worldgen/structure/sky_island.json", "worldgen/structure_set/sky_islands.json",
+                "tags/worldgen/biome/colosseum_preferred.json", "tags/worldgen/structure/ruined_colosseum.json",
+                "loot_tables/chests/sky_island.json"}) {
             assertTrue(Files.exists(data.resolve(path)), "missing data " + path);
         }
+    }
+
+    @Test
+    void colosseumIsUniqueAndTheIslandChestHoldsTheLocator() throws IOException {
+        Path data = Path.of("src", "main", "resources", "data", "stormray");
+        String set = read(data.resolve("worldgen/structure_set/ruined_colosseum.json"));
+        assertTrue(set.contains("\"minecraft:concentric_rings\""), "the colosseum must use ring placement, like strongholds");
+        assertTrue(Pattern.compile("\"count\":\\s*1\\b").matcher(set).find(), "exactly one colosseum per world");
+        String loot = read(data.resolve("loot_tables/chests/sky_island.json"));
+        assertTrue(loot.contains("\"stormray:colosseum_locator\""), "sky island chests must hold the locator");
+        String tag = read(data.resolve("tags/worldgen/structure/ruined_colosseum.json"));
+        assertTrue(tag.contains("\"stormray:ruined_colosseum\""), "the locator finds the colosseum through this tag");
     }
 
     @Test
@@ -107,7 +123,8 @@ class AssetIntegrityTest {
                 "blockstates/ashen_portal.json", "models/block/ashen_portal.json",
                 "textures/entity/phantom_x.png", "textures/entity/phantom_x_glowmask.png",
                 "models/item/phantom_x_spawn_egg.json", "textures/entity/phantom_sea.png",
-                "textures/entity/phantom_sea_glowmask.png", "models/item/phantom_sea_spawn_egg.json"}) {
+                "textures/entity/phantom_sea_glowmask.png", "models/item/phantom_sea_spawn_egg.json",
+                "models/item/colosseum_locator.json", "textures/item/colosseum_locator.png"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

@@ -10,6 +10,7 @@ import com.stormray.registry.ModFeatures;
 import com.stormray.registry.ModItems;
 import com.stormray.registry.ModParticles;
 import com.stormray.registry.ModSounds;
+import com.stormray.registry.ModStructures;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -33,6 +34,8 @@ public final class StormRayMod {
 
         ModBlocks.BLOCKS.register(modBus);
         ModFeatures.FEATURES.register(modBus);
+        ModStructures.STRUCTURE_TYPES.register(modBus);
+        ModStructures.PIECE_TYPES.register(modBus);
         ModEntities.ENTITY_TYPES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModSounds.SOUND_EVENTS.register(modBus);
