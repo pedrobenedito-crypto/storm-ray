@@ -1,6 +1,7 @@
 package com.stormray.registry;
 
 import com.stormray.StormRayMod;
+import com.stormray.entity.PhantomBatEntity;
 import com.stormray.entity.PhantomSeaEntity;
 import com.stormray.entity.PhantomXEntity;
 import com.stormray.entity.StormRayEntity;
@@ -39,7 +40,16 @@ public final class ModEntities {
                     .clientTrackingRange(8)
                     .build(StormRayMod.id("phantom_sea").toString()));
 
+    /** Soot bat whose bite causes bleeding; flies in small groups. */
+    public static final RegistryObject<EntityType<PhantomBatEntity>> PHANTOM_BAT = ENTITY_TYPES.register("phantom_bat",
+            () -> EntityType.Builder.<PhantomBatEntity>of(PhantomBatEntity::new, MobCategory.MONSTER)
+                    .sized(0.7F, 0.9F)
+                    .fireImmune()
+                    .clientTrackingRange(8)
+                    .build(StormRayMod.id("phantom_bat").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
+        event.put(PHANTOM_BAT.get(), PhantomBatEntity.createAttributes().build());
         event.put(PHANTOM_SEA.get(), PhantomSeaEntity.createAttributes().build());
         event.put(STORM_RAY.get(), StormRayEntity.createAttributes().build());
         event.put(PHANTOM_X.get(), PhantomXEntity.createAttributes().build());

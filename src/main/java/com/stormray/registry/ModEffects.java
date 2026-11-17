@@ -1,6 +1,7 @@
 package com.stormray.registry;
 
 import com.stormray.StormRayMod;
+import com.stormray.effect.BleedingEffect;
 import com.stormray.effect.StoneBreakerEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,6 +21,10 @@ public final class ModEffects {
 
     public static final RegistryObject<MobEffect> STONE_BREAKER =
             MOB_EFFECTS.register("stone_breaker", StoneBreakerEffect::new);
+
+    /** Left by a Phantom Bat's bite. */
+    public static final RegistryObject<MobEffect> BLEEDING =
+            MOB_EFFECTS.register("bleeding", BleedingEffect::new);
 
     /** A vanilla-style potion (also splash, lingering and tipped arrow) with black liquid. */
     public static final RegistryObject<Potion> STONE_BREAKER_POTION = POTIONS.register("stone_breaker",

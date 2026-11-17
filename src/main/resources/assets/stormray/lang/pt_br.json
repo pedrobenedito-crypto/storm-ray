@@ -58,6 +58,12 @@
   "item.minecraft.splash_potion.effect.stone_breaker": "Splash Potion of Stone Breaker",
   "item.minecraft.lingering_potion.effect.stone_breaker": "Lingering Potion of Stone Breaker",
   "item.minecraft.tipped_arrow.effect.stone_breaker": "Arrow of Stone Breaker",
-  "message.stormray.colosseum.wave": "Onda %1$s de Phantom X!",
-  "message.stormray.colosseum.petrify": "A arraia começa a petrificar!"
+  "message.stormray.colosseum.wave": "Onda %1$s!",
+  "message.stormray.colosseum.petrify": "A arraia começa a petrificar!",
+  "entity.stormray.phantom_bat": "Phantom Bat",
+  "item.stormray.phantom_bat_spawn_egg": "Ovo Gerador de Phantom Bat",
+  "effect.stormray.bleeding": "Sangramento",
+  "message.stormray.colosseum.wave_bats": "Onda %1$s! Os Phantom Bats chegaram!",
+  "message.stormray.locator.found_mirror": "O Coliseu fica no Reflexo de Cinzas: a %1$s blocos daqui, para o %2$s",
+  "message.stormray.locator.here_mirror": "O Coliseu está bem aqui, do outro lado: no Reflexo de Cinzas."
 }

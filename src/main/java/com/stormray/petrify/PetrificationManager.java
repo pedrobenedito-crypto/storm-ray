@@ -1,6 +1,7 @@
 package com.stormray.petrify;
 
 import com.stormray.config.StormRayConfig;
+import com.stormray.entity.PhantomBatEntity;
 import com.stormray.entity.PhantomSeaEntity;
 import com.stormray.entity.PhantomXEntity;
 import com.stormray.entity.StormRayEntity;
@@ -27,6 +28,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -113,7 +116,7 @@ public final class PetrificationManager {
         if (entity.getType().is(Tags.EntityTypes.BOSSES) || STATES.containsKey(entity.getUUID())) {
             return false;
         }
-        if (entity instanceof PhantomXEntity || entity instanceof PhantomSeaEntity) {
+        if (entity instanceof PhantomXEntity || entity instanceof PhantomSeaEntity || entity instanceof PhantomBatEntity) {
             return false; // the Storm Ray's own phantoms are not turned to stone
         }
         if (entity instanceof Player player) {
@@ -128,6 +131,14 @@ public final class PetrificationManager {
     /** True while the Stone Breaker effect protects this entity from petrification. */
     public static boolean isStoneBreaker(LivingEntity entity) {
         return entity.hasEffect(ModEffects.STONE_BREAKER.get());
+    }
+
+    /**
+     * True for a Stone Breaker potion (drinkable, splash or lingering). It is the one thing a
+     * petrifying player may still use: drinking it in time breaks the stone.
+     */
+    public static boolean isCure(ItemStack stack) {
+        return !stack.isEmpty() && PotionUtils.getPotion(stack) == ModEffects.STONE_BREAKER_POTION.get();
     }
 
     /** Feedback for a protected entity caught in the pulse: the stone cracks and falls away. */

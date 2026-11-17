@@ -58,6 +58,12 @@
   "item.minecraft.splash_potion.effect.stone_breaker": "Splash Potion of Stone Breaker",
   "item.minecraft.lingering_potion.effect.stone_breaker": "Lingering Potion of Stone Breaker",
   "item.minecraft.tipped_arrow.effect.stone_breaker": "Arrow of Stone Breaker",
-  "message.stormray.colosseum.wave": "Phantom X wave %1$s!",
-  "message.stormray.colosseum.petrify": "The ray begins to petrify!"
+  "message.stormray.colosseum.wave": "Wave %1$s!",
+  "message.stormray.colosseum.petrify": "The ray begins to petrify!",
+  "entity.stormray.phantom_bat": "Phantom Bat",
+  "item.stormray.phantom_bat_spawn_egg": "Phantom Bat Spawn Egg",
+  "effect.stormray.bleeding": "Bleeding",
+  "message.stormray.colosseum.wave_bats": "Wave %1$s! The Phantom Bats have come!",
+  "message.stormray.locator.found_mirror": "The Colosseum lies in the Ashen Reflection: %1$s blocks from here, to the %2$s",
+  "message.stormray.locator.here_mirror": "The Colosseum is right here, on the other side: in the Ashen Reflection."
 }

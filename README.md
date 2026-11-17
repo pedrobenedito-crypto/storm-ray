@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.4.0.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.5.0.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -46,7 +46,7 @@ No vanilla não existe cabeça de jogador no survival, então o mod adiciona uma
 
 Uma cabeça sem dono é a cabeça do Steve. Cabeças com a skin de outro jogador não funcionam, a não ser que `requireSteveHead = false` na config.
 
-Para testes no criativo também existem o **Ovo Gerador de Arraia da Tempestade** o **Ovo Gerador de Phantom X** e o **Ovo Gerador de Phantom Sea**.
+Para testes no criativo também existem o **Ovo Gerador de Arraia da Tempestade** o **Ovo Gerador de Phantom X**, o **Ovo Gerador de Phantom Sea** e o **Ovo Gerador de Phantom Bat**.
 
 ---
 
@@ -104,6 +104,12 @@ O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só
 - **Ferido:** quando leva dano, perde a invisibilidade por um instante.
 - **Status:** 40 de vida (como um Enderman), mas não é um chefe.
 
+### Phantom Bat
+Um morcego de fuligem com olhos em brasa. Voa em grupos de 2 a 4 no Reflexo de Cinzas e, bem mais raro, em grupos de 2 ou 3 no escuro do mundo normal. Também entra nas ondas do coliseu a partir da onda 3.
+
+- **Mordida:** 1 coração de dano (reduzido pela armadura) e o efeito **Sangramento por 5 segundos**, que tira meio coração a cada 1,25 s (2 corações no total) e ignora a armadura. Leite cura.
+- **Status:** 8 de vida, imune a fogo. Às vezes dropa uma membrana de phantom.
+
 ### Oceano escuro e Phantom Sea
 - **Água azul-escura:** no Reflexo, a água de oceanos, rios e lagos fica num azul-marinho profundo. Debaixo d'água, a névoa é quase preta e a visibilidade cai para cerca de 20 blocos. No mundo normal, a água continua igual.
 - **Phantom Sea:** um espectro afogado, parente do Phantom X, com capuz encharcado, rachadura vermelha no rosto, guelras brilhantes, braços de garras e cauda de enguia. Aparece naturalmente **só na água do Reflexo**, em grupos de 1 a 3.
@@ -119,9 +125,19 @@ O espectro de fuligem que caça no Reflexo de Cinzas. Aparece naturalmente **só
 ### Coliseu em Ruínas
 Um anfiteatro redondo enorme (uns 87 blocos de diâmetro e até 24 de altura), destruído e coberto de vinhas: arena de areia, muro do pódio, arquibancadas em degraus sobre um corredor em anel, fachada de três andares de arcos, quatro portões, um setor inteiro desabado e entulho espalhado.
 
-- **É único, como o portal do End:** só existe **1 por mundo**, a cerca de 950 a 1.850 blocos do ponto 0,0. Ele usa o mesmo tipo de posicionamento em anel das fortalezas, com contagem 1.
-- **Existe nos dois mundos, no mesmo lugar:** como o Reflexo de Cinzas é uma cópia 1:1, o mesmo coliseu fica nas mesmas coordenadas no mundo normal (com vinhas verdes e musgo) e no Reflexo (com vinhas vermelhas pendendo dos arcos).
-- **A batalha:** quando um jogador em sobrevivência pisa na areia da arena, a **Storm Ray** emerge do selo no centro junto com a primeira onda de **4 Phantom X**. Enquanto a arraia estiver viva e houver jogadores por perto, uma nova **onda de Phantom X** chega a cada 30 segundos, cada uma com um a mais que a anterior (5, 6, 7...), até o limite de 12 vivos ao mesmo tempo. Eles chegam visíveis por alguns segundos antes de sumir de novo, e a arraia não os fere nem petrifica. A arraia do coliseu só começa a usar a **petrificação a partir da onda 4**; os lasers e os filamentos valem desde a primeira. Depois que a arraia morre, as ondas param e a arena descansa por 3 dias de jogo (configurável) antes de poder despertar de novo. Cada mundo (normal e Reflexo) tem a sua própria luta. Não acontece no modo pacífico nem com jogadores em criativo/espectador.
+- **É único, como o portal do End:** só existe **1**, a cerca de 950 a 1.850 blocos do ponto 0,0. Ele usa o mesmo tipo de posicionamento em anel das fortalezas, com contagem 1.
+- **Só existe no Reflexo de Cinzas:** no mundo normal ele não é gerado.
+- **A batalha:** quando um jogador em sobrevivência pisa na areia da arena, a **Storm Ray** emerge do selo no centro junto com a primeira onda. Enquanto a arraia estiver viva e houver jogadores por perto, chega uma nova onda a cada 45 segundos:
+
+  | Onda | Phantom X | Phantom Bat | Arraia |
+  |---|---|---|---|
+  | 1 e 2 | 2 | - | filamentos e lasers |
+  | 3 | 3 | 2 | filamentos e lasers |
+  | 4 | 3 | 2 | **começa a petrificar** |
+  | 5 e 6 | 4 | 3 | tudo |
+  | depois | +1 a cada duas ondas | +1 a cada duas ondas | tudo |
+
+  Nunca há mais de 6 Phantom X e 6 Phantom Bats vivos ao mesmo tempo. Eles chegam visíveis por alguns segundos, e a arraia não os fere nem petrifica. A arraia do coliseu tem 75% da vida de uma arraia do ritual. O combate foi pensado para armadura de netherite completa: dá para vencer, mas exige atenção (os filamentos tiram cerca de 2 corações, um combo de Phantom X cerca de 1,5, e o sangramento dos morcegos ignora a armadura). Depois que a arraia morre, as ondas param e a arena descansa por 3 dias de jogo (configurável).  Não acontece no modo pacífico nem com jogadores em criativo/espectador.
 - **Um guardião por vez:** a arena lembra da sua arraia. Sair e voltar não invoca outra: a mesma continua lá até ser morta.
 
 Comando para achar:
@@ -131,19 +147,19 @@ Comando para achar:
 ```
 
 ### Ilhas do Céu
-Pedaços de terra arrancados do chão e suspensos no ar, com a cratera de onde saíram logo abaixo. **Só existem no Reflexo de Cinzas**, entre 45 e 70 blocos acima do solo, e são de raridade média (em média uma a cada ~380 blocos, um pouco mais comuns que vilas). Em cima há um pequeno santuário em ruínas com um **baú**, que sempre contém um **Localizador do Coliseu**, tem **20% de chance** de trazer uma **Potion of Stone Breaker** e mais alguns itens (redstone, ossos, minérios, às vezes uma cabeça do Steve). Luzes alaranjadas na parte de baixo ajudam a enxergar a ilha através da névoa.
+Pedaços de terra arrancados do chão e suspensos no ar, com a cratera de onde saíram logo abaixo. Existem **no Reflexo de Cinzas e no mundo normal** (nos mesmos lugares; no mundo normal são de terra e grama, no Reflexo são apodrecidas e com cipós vermelhos), entre 45 e 70 blocos acima do solo, e são de raridade média (em média uma a cada ~380 blocos, um pouco mais comuns que vilas). Em cima há um pequeno santuário em ruínas com um **baú**, que sempre contém um **Localizador do Coliseu**, tem **20% de chance** de trazer uma **Potion of Stone Breaker** e mais alguns itens (redstone, ossos, minérios, às vezes uma cabeça do Steve). No Reflexo, luzes alaranjadas na parte de baixo ajudam a enxergar a ilha através da névoa.
 
 ```
 /locate structure stormray:sky_island
 ```
 
 ### Localizador do Coliseu
-Clique com o botão direito: um rastro de brasas aponta a direção do coliseu e uma mensagem mostra a distância e o ponto cardeal. Não é consumido e funciona no mundo normal e no Reflexo (as coordenadas são as mesmas). No criativo ele fica na aba **Ferramentas e Utilidades**.
+Clique com o botão direito: um rastro de brasas aponta a direção do coliseu e uma mensagem mostra a distância e o ponto cardeal. Não é consumido. O coliseu fica só no Reflexo, mas as coordenadas são as mesmas: usado no mundo normal, o localizador mostra para onde ir antes de atravessar o portal. No criativo ele fica na aba **Ferramentas e Utilidades**.
 
 ### Potion of Stone Breaker
-Uma poção com o visual normal do Minecraft, mas com o líquido **preto**. Dá o efeito **Stone Breaker por 8 minutos**: enquanto durar, o pulso de petrificação da Storm Ray não transforma você em pedra (a pedra racha e cai). Se você beber já petrificando, a petrificação é desfeita na hora. Só é encontrada nos baús das Ilhas do Céu (20% de chance por baú). Para testes: `/give @s minecraft:potion{Potion:"stormray:stone_breaker"}` ou `/effect give @s stormray:stone_breaker 480`.
+Uma poção com o visual normal do Minecraft, mas com o líquido **preto**. Dá o efeito **Stone Breaker por 8 minutos**: enquanto durar, o pulso de petrificação da Storm Ray não transforma você em pedra (a pedra racha e cai). Enquanto vira pedra você não consegue usar nada, **exceto esta poção**: se terminar de beber antes de virar pedra por completo (a petrificação leva 3 segundos e beber leva 1,6), a pedra racha e você se salva. A versão arremessável funciona na hora. Só é encontrada nos baús das Ilhas do Céu (20% de chance por baú). Para testes: `/give @s minecraft:potion{Potion:"stormray:stone_breaker"}` ou `/effect give @s stormray:stone_breaker 480`.
 
-> **Mundos já existentes:** estruturas só são geradas em chunks novos. Se a região onde o coliseu deveria ficar já tiver sido explorada, ele não aparece ali; nesse caso use um mundo novo. O mesmo vale para as ilhas em partes do Reflexo já visitadas.
+> **Mundos já existentes:** estruturas só são geradas em chunks novos. Se a região do Reflexo onde o coliseu deveria ficar já tiver sido explorada, ele não aparece ali; nesse caso use um mundo novo. O mesmo vale para as ilhas em regiões já visitadas. Um coliseu que já tenha sido gerado no mundo normal por uma versão anterior continua lá como construção, mas não invoca mais nada.
 
 ---
 
@@ -180,6 +196,7 @@ Arquivos gerados na primeira execução:
 | petrification | `affectPlayers` / `affectMobs` / `affectCreativePlayers` | true / true / false | Quem é afetado |
 | dimension | `enablePortal` | true | Liga/desliga o portal |
 | dimension | `copyBuilds` | true | Copia as construções do mundo original no primeiro carregamento de cada chunk |
+| dimension | `skyIslandsInOverworld` | true | As Ilhas do Céu também aparecem no mundo normal |
 | dimension | `liveSync` | true | Repete no Reflexo toda mudança de bloco feita depois no mundo normal |
 | dimension | `syncColumnsPerTick` | 64 | Limite de colunas de blocos sincronizadas por tick |
 | dimension | `hostileOnly` | true | Só monstros no reflexo |
@@ -188,12 +205,15 @@ Arquivos gerados na primeira execução:
 | phantom_x | `health` / `hitDamage` / `comboHits` / `comboCooldownTicks` | 40 / 3 / 4 / 50 | Força do Phantom X |
 | phantom_x | `spawnWeight` | 100 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
 | phantom_sea | `health` / `biteDamage` / `pullStrength` / `grabDurationTicks` / `breakFreeDamage` | 30 / 3 / 0,2 / 120 / 6 | Força e agarrão do Phantom Sea |
+| phantom_bat | `health` / `biteDamage` / `bleedTicks` | 8 / 2 / 100 | Força do Phantom Bat e duração do sangramento |
+| phantom_bat | `spawnWeight` / `overworldSpawnWeight` | 50 / 20 | Frequência no Reflexo e no mundo normal (zumbi = 95; 0 desliga) |
 | phantom_sea | `spawnWeight` | 150 | Frequência de spawn na água do Reflexo (0 desliga) |
 | colosseum | `awakenBoss` | true | A Storm Ray emerge quando um jogador entra na arena do coliseu |
 | colosseum | `respawnTicks` | 72000 | Descanso da arena depois da morte da arraia (0 = a luta só acontece uma vez) |
-| colosseum | `guardCount` | 4 | Tamanho da primeira onda de Phantom X (cada onda seguinte tem um a mais) |
-| colosseum | `waveIntervalTicks` | 600 | Intervalo entre as ondas (0 desliga as ondas extras) |
-| colosseum | `maxPhantoms` | 12 | Máximo de Phantom X vivos ao redor da arena |
+| colosseum | `bossHealthMultiplier` | 0,75 | Vida da arraia do coliseu em relação à do ritual |
+| colosseum | `firstWavePhantoms` / `maxPhantomX` | 2 / 6 | Phantom X na primeira onda (+1 a cada duas ondas) e máximo vivo |
+| colosseum | `batsFromWave` / `maxBats` | 3 / 6 | Onda em que os Phantom Bats entram e máximo vivo |
+| colosseum | `ticksBetweenWaves` | 900 | Intervalo entre as ondas (0 desliga as ondas extras) |
 | colosseum | `petrifyFromWave` | 4 | Onda a partir da qual a arraia do coliseu usa a petrificação (não afeta arraias do ritual) |
 | laser | `chance` / `damage` / `setFire` | 0,2 / 4 / true | Chance de o ataque ser o laser dos olhos, dano por acerto e se o chão pega fogo |
 | client | `skyTintStrength`, `screenTintStrength`, `thickFog`, `lightningFlashes`, `ambientParticles`, `ambienceVolume` | | Intensidade visual e sonora. `lightningFlashes = false` desliga os clarões de tela (fotossensibilidade) |
@@ -213,7 +233,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.4.0.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.5.0.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -262,7 +282,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.4.0.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.5.0.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---

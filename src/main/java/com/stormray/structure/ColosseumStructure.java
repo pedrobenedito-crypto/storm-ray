@@ -14,8 +14,8 @@ import java.util.Optional;
 
 /**
  * The Ruined Colosseum. Its structure set uses concentric-ring placement with a count of one,
- * so, like the End portal's stronghold ring, exactly one exists per world. The Ashen Reflection
- * shares the seed, so the same ruin stands at the same coordinates there.
+ * so, like the End portal's stronghold ring, exactly one exists. It generates only in the Ashen
+ * Reflection; the normal world shares the placement but never builds it.
  */
 public class ColosseumStructure extends Structure {
     public static final Codec<ColosseumStructure> CODEC = simpleCodec(ColosseumStructure::new);
@@ -28,6 +28,9 @@ public class ColosseumStructure extends Structure {
     public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext context) {
         ChunkPos chunk = context.chunkPos();
         ChunkGenerator generator = context.chunkGenerator();
+        if (!ModStructures.isMirrorGenerator(generator)) {
+            return Optional.empty(); // the colosseum stands only in the Ashen Reflection
+        }
         int x = chunk.getMiddleBlockX();
         int z = chunk.getMiddleBlockZ();
 

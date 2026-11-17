@@ -67,7 +67,19 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.DoubleValue SEA_BREAK_FREE_DAMAGE;
     public static final ForgeConfigSpec.IntValue SEA_SPAWN_WEIGHT;
 
+    public static final ForgeConfigSpec.BooleanValue ISLANDS_IN_OVERWORLD;
+
+    // Phantom Bat
+    public static final ForgeConfigSpec.DoubleValue BAT_HEALTH;
+    public static final ForgeConfigSpec.DoubleValue BAT_BITE_DAMAGE;
+    public static final ForgeConfigSpec.IntValue BAT_BLEED_TICKS;
+    public static final ForgeConfigSpec.IntValue BAT_SPAWN_WEIGHT;
+    public static final ForgeConfigSpec.IntValue BAT_OVERWORLD_SPAWN_WEIGHT;
+
     // Ruined Colosseum
+    public static final ForgeConfigSpec.DoubleValue COLOSSEUM_BOSS_HEALTH;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_BAT_WAVE;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_MAX_BATS;
     public static final ForgeConfigSpec.BooleanValue COLOSSEUM_BOSS;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_RESPAWN_TICKS;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_GUARDS;
@@ -167,6 +179,9 @@ public final class StormRayConfig {
                 .define("copyBuilds", true);
         HOSTILE_ONLY = b.comment("Only hostile monsters may exist in the mirror (no animals, villagers, fish or bats).")
                 .define("hostileOnly", true);
+        ISLANDS_IN_OVERWORLD = b.comment("Sky Islands also float in the normal world (same places as in the Ashen Reflection).",
+                        "The Ruined Colosseum never generates in the normal world.")
+                .define("skyIslandsInOverworld", true);
         LIVE_SYNC = b.comment("Keep copying: every later block change in the overworld is also applied to the mirror",
                         "(needs copyBuilds). The overworld wins: a synced column replaces mirror-side changes in that column.")
                 .define("liveSync", true);
@@ -208,20 +223,40 @@ public final class StormRayConfig {
                 .defineInRange("spawnWeight", 150, 0, 1000);
         b.pop();
 
+        b.comment("Phantom Bat: soot bat whose bite causes bleeding").push("phantom_bat");
+        BAT_HEALTH = b.comment("Max health.")
+                .defineInRange("health", 8.0D, 1.0D, 1024.0D);
+        BAT_BITE_DAMAGE = b.comment("Damage of the bite itself (reduced by armor).")
+                .defineInRange("biteDamage", 2.0D, 0.0D, 1000.0D);
+        BAT_BLEED_TICKS = b.comment("Length of the bleeding left by a bite (100 = 5 seconds = 2 hearts, ignoring armor). 0 disables.")
+                .defineInRange("bleedTicks", 100, 0, 6000);
+        BAT_SPAWN_WEIGHT = b.comment("Natural spawn weight in the Ashen Reflection (zombie = 95). 0 disables.")
+                .defineInRange("spawnWeight", 50, 0, 1000);
+        BAT_OVERWORLD_SPAWN_WEIGHT = b.comment("Natural spawn weight in the normal world, in the dark like other monsters (zombie = 95). 0 disables.")
+                .defineInRange("overworldSpawnWeight", 20, 0, 1000);
+        b.pop();
+
         b.comment("Ruined Colosseum: the single great arena of each world").push("colosseum");
         COLOSSEUM_BOSS = b.comment("A Storm Ray rises from the arena when a survival player steps onto its floor.")
                 .define("awakenBoss", true);
         COLOSSEUM_RESPAWN_TICKS = b.comment("Ticks the arena rests after its Storm Ray dies before it can wake again",
                         "(72000 = 3 Minecraft days). 0 = the fight happens only once per world.")
                 .defineInRange("respawnTicks", 72000, 0, Integer.MAX_VALUE);
-        COLOSSEUM_GUARDS = b.comment("Size of the first Phantom X wave, which appears together with the Storm Ray.",
-                        "Each later wave is one phantom larger.")
-                .defineInRange("guardCount", 4, 0, 16);
-        COLOSSEUM_WAVE_INTERVAL = b.comment("Ticks between Phantom X waves while the colosseum's Storm Ray is alive and players are near",
-                        "(600 = 30 seconds). 0 disables the extra waves.")
-                .defineInRange("waveIntervalTicks", 600, 0, 72000);
+        COLOSSEUM_BOSS_HEALTH = b.comment("Health multiplier for the colosseum's Storm Ray (on top of boss.health and the difficulty preset).",
+                        "Below 1 because the guardian does not fight alone.")
+                .defineInRange("bossHealthMultiplier", 0.75D, 0.05D, 10.0D);
+        COLOSSEUM_GUARDS = b.comment("Phantom X in the first wave, which appears together with the Storm Ray.",
+                        "Every second wave after that brings one more.")
+                .defineInRange("firstWavePhantoms", 2, 0, 16);
+        COLOSSEUM_WAVE_INTERVAL = b.comment("Ticks between waves while the colosseum's Storm Ray is alive and players are near",
+                        "(900 = 45 seconds). 0 disables the extra waves.")
+                .defineInRange("ticksBetweenWaves", 900, 0, 72000);
         COLOSSEUM_MAX_PHANTOMS = b.comment("Waves never raise the number of living Phantom X around the arena above this.")
-                .defineInRange("maxPhantoms", 12, 1, 64);
+                .defineInRange("maxPhantomX", 6, 1, 64);
+        COLOSSEUM_BAT_WAVE = b.comment("Phantom Bats join the waves from this wave on (2 bats, one more every second wave).")
+                .defineInRange("batsFromWave", 3, 1, 1000);
+        COLOSSEUM_MAX_BATS = b.comment("Waves never raise the number of living Phantom Bats around the arena above this. 0 = no bats.")
+                .defineInRange("maxBats", 6, 0, 64);
         COLOSSEUM_PETRIFY_WAVE = b.comment("The colosseum's Storm Ray only starts using its petrification pulse from this wave on",
                         "(1 = from the start). Storm Rays summoned by the ritual are not affected.")
                 .defineInRange("petrifyFromWave", 4, 1, 1000);

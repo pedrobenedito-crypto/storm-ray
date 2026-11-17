@@ -6,6 +6,7 @@ import com.stormray.client.dimension.AshenSkyEffects;
 import com.stormray.client.dimension.DarkWaterExtensions;
 import com.stormray.client.particle.StormParticle;
 import com.stormray.dimension.ModDimensions;
+import com.stormray.client.render.PhantomBatRenderer;
 import com.stormray.client.render.PhantomSeaRenderer;
 import com.stormray.client.render.PhantomXRenderer;
 import com.stormray.client.render.StormOverlays;
@@ -37,6 +38,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.STORM_RAY.get(), StormRayRenderer::new);
         event.registerEntityRenderer(ModEntities.PHANTOM_X.get(), PhantomXRenderer::new);
         event.registerEntityRenderer(ModEntities.PHANTOM_SEA.get(), PhantomSeaRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHANTOM_BAT.get(), PhantomBatRenderer::new);
     }
 
     @SubscribeEvent

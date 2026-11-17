@@ -562,7 +562,7 @@ public class StormRayEntity extends Monster implements GeoEntity {
         if (entity == this || !entity.isAlive() || entity instanceof StormRayEntity) {
             return false;
         }
-        if (entity instanceof PhantomXEntity || entity instanceof PhantomSeaEntity) {
+        if (entity instanceof PhantomXEntity || entity instanceof PhantomSeaEntity || entity instanceof PhantomBatEntity) {
             return false; // the phantoms fight at its side
         }
         if (entity instanceof Player player && (player.isCreative() || player.isSpectator())) {

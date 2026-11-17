@@ -24,9 +24,9 @@ import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 /**
- * World structures: the Ruined Colosseum (exactly one per world, placed like the stronghold
- * ring, in the overworld and mirrored in the Ashen Reflection) and the Sky Islands of the
- * Ashen Reflection, whose chest holds the Colosseum Locator.
+ * World structures: the Ruined Colosseum (exactly one, placed like the stronghold ring, only in
+ * the Ashen Reflection) and the Sky Islands (in the Ashen Reflection and, at the same places,
+ * in the normal world), whose chest holds the Colosseum Locator.
  * Placement lives in data/stormray/worldgen/structure and structure_set.
  */
 public final class ModStructures {
@@ -77,6 +77,16 @@ public final class ModStructures {
         }
         ServerLevel mirror = server.getLevel(ModDimensions.ASHEN_LEVEL);
         return mirror != null && mirror.getChunkSource().getGenerator() == generator;
+    }
+
+    /** True if the generator belongs to the normal world. */
+    public static boolean isOverworldGenerator(ChunkGenerator generator) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return false;
+        }
+        ServerLevel overworld = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
+        return overworld != null && overworld.getChunkSource().getGenerator() == generator;
     }
 
     /** True if a Colosseum or Sky Island overlaps this chunk. */

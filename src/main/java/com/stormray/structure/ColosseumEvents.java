@@ -3,6 +3,7 @@ package com.stormray.structure;
 import com.stormray.StormRayMod;
 import com.stormray.config.StormRayConfig;
 import com.stormray.dimension.ModDimensions;
+import com.stormray.entity.PhantomBatEntity;
 import com.stormray.entity.PhantomXEntity;
 import com.stormray.entity.StormRayEntity;
 import com.stormray.registry.ModEntities;
@@ -21,8 +22,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.Vec3;
@@ -51,7 +54,7 @@ public final class ColosseumEvents {
     }
 
     private static boolean hasColosseum(ServerLevel level) {
-        return level.dimension() == Level.OVERWORLD || ModDimensions.isMirror(level);
+        return ModDimensions.isMirror(level);
     }
 
     @SubscribeEvent
@@ -135,6 +138,12 @@ public final class ColosseumEvents {
         ray.moveTo(ground.x, ground.y, ground.z, level.random.nextFloat() * 360.0F, 0.0F);
         ray.finalizeSpawn(level, level.getCurrentDifficultyAt(centre), MobSpawnType.EVENT, null, null);
         ray.setPetrifyEnabled(StormRayConfig.COLOSSEUM_PETRIFY_WAVE.get() <= 1);
+        // The guardian has an army, so it gets less health than a ritual Storm Ray.
+        AttributeInstance health = ray.getAttribute(Attributes.MAX_HEALTH);
+        if (health != null) {
+            health.setBaseValue(Math.max(1.0D, health.getBaseValue() * StormRayConfig.COLOSSEUM_BOSS_HEALTH.get()));
+            ray.setHealth(ray.getMaxHealth());
+        }
         level.addFreshEntity(ray);
         data.bossAwakened(ray.getUUID(), now);
 
@@ -153,7 +162,7 @@ public final class ColosseumEvents {
     /**
      * Runs once a second while the guardian exists and players are near: unlocks its
      * petrification at the configured wave and sends the next wave of Phantom X when it is due.
-     * Each wave is one phantom larger than the last.
+     * Waves grow slowly, and Phantom Bats join them from a later wave on.
      */
     private static void tickWaves(ServerLevel level, ColosseumData data, BlockPos centre) {
         Entity boss = level.getEntity(data.bossId());
@@ -173,27 +182,66 @@ public final class ColosseumEvents {
         if (interval <= 0 || now - data.lastWaveAt() < interval || ray.getPhase() == StormRayEntity.Phase.SUMMONING) {
             return;
         }
-        double cx = centre.getX() + 0.5D;
-        double cz = centre.getZ() + 0.5D;
-        int alive = level.getEntities(ModEntities.PHANTOM_X.get(), phantom -> {
-            double dx = phantom.getX() - cx;
-            double dz = phantom.getZ() - cz;
-            return phantom.isAlive() && dx * dx + dz * dz <= FIGHT_RADIUS * FIGHT_RADIUS;
-        }).size();
-        int room = StormRayConfig.COLOSSEUM_MAX_PHANTOMS.get() - alive;
-        int size = Math.min(StormRayConfig.COLOSSEUM_GUARDS.get() + data.wave(), room);
-        if (size <= 0) {
-            return; // the arena is full; the wave comes as soon as some phantoms fall
+        // Wave sizes grow slowly: the fight should stay winnable in netherite, but never relaxed.
+        int next = data.wave() + 1;
+        int phantoms = Math.min(StormRayConfig.COLOSSEUM_GUARDS.get() + (next - 1) / 2,
+                StormRayConfig.COLOSSEUM_MAX_PHANTOMS.get() - countNear(level, ModEntities.PHANTOM_X.get(), centre));
+        int bats = 0;
+        int batWave = StormRayConfig.COLOSSEUM_BAT_WAVE.get();
+        if (next >= batWave) {
+            bats = Math.min(2 + (next - batWave) / 2,
+                    StormRayConfig.COLOSSEUM_MAX_BATS.get() - countNear(level, ModEntities.PHANTOM_BAT.get(), centre));
         }
-        int spawned = spawnPhantoms(level, centre, size);
-        if (spawned == 0) {
+        if (phantoms <= 0 && bats <= 0) {
+            return; // the arena is full; the wave comes as soon as some of them fall
+        }
+        int spawnedPhantoms = spawnPhantoms(level, centre, Math.max(0, phantoms));
+        int spawnedBats = spawnBats(level, centre, Math.max(0, bats));
+        if (spawnedPhantoms + spawnedBats == 0) {
             return;
         }
         data.waveSent(now);
-        StormRayMod.LOGGER.info("Colosseum wave {}: {} Phantom X", data.wave(), spawned);
+        StormRayMod.LOGGER.info("Colosseum wave {}: {} Phantom X, {} Phantom Bats", data.wave(), spawnedPhantoms, spawnedBats);
         level.playSound(null, ground.x, ground.y + 2.0D, ground.z, ModSounds.PHANTOM_REVEAL.get(), SoundSource.HOSTILE, 4.0F, 0.6F);
-        announce(level, ground, Component.translatable("message.stormray.colosseum.wave", data.wave())
-                .withStyle(ChatFormatting.RED));
+        announce(level, ground, Component.translatable(spawnedBats > 0 ? "message.stormray.colosseum.wave_bats" : "message.stormray.colosseum.wave",
+                data.wave()).withStyle(ChatFormatting.RED));
+    }
+
+    /** Living mobs of one kind around the arena. */
+    private static <T extends Entity> int countNear(ServerLevel level, EntityType<T> type, BlockPos centre) {
+        double cx = centre.getX() + 0.5D;
+        double cz = centre.getZ() + 0.5D;
+        return level.getEntities(type, mob -> {
+            double dx = mob.getX() - cx;
+            double dz = mob.getZ() - cz;
+            return mob.isAlive() && dx * dx + dz * dz <= FIGHT_RADIUS * FIGHT_RADIUS;
+        }).size();
+    }
+
+    /** Phantom Bats swoop in above the arena. Returns how many appeared. */
+    private static int spawnBats(ServerLevel level, BlockPos centre, int count) {
+        RandomSource random = level.random;
+        int spawned = 0;
+        for (int n = 0; n < count; n++) {
+            double angle = random.nextDouble() * Math.PI * 2.0D;
+            double distance = 6.0D + random.nextDouble() * 12.0D;
+            double x = centre.getX() + 0.5D + Math.cos(angle) * distance;
+            double z = centre.getZ() + 0.5D + Math.sin(angle) * distance;
+            double y = centre.getY() + 6.0D + random.nextDouble() * 4.0D;
+            PhantomBatEntity bat = ModEntities.PHANTOM_BAT.get().create(level);
+            if (bat == null) {
+                return spawned;
+            }
+            bat.moveTo(x, y, z, random.nextFloat() * 360.0F, 0.0F);
+            bat.finalizeSpawn(level, level.getCurrentDifficultyAt(bat.blockPosition()), MobSpawnType.EVENT, null, null);
+            bat.setPersistenceRequired();
+            if (!level.addFreshEntity(bat)) {
+                continue;
+            }
+            level.sendParticles(ModParticles.SOOT.get(), x, y + 0.4D, z, 20, 0.3D, 0.3D, 0.3D, 0.03D);
+            spawned++;
+        }
+        return spawned;
     }
 
     private static void announce(ServerLevel level, Vec3 ground, Component message) {

@@ -908,6 +908,140 @@ def sea_textures():
     Image.fromarray(np.clip(glow, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_sea_glowmask.png"))
 
 
+# --------------------------------------------------------------------------- Phantom Bat (soot bat)
+
+def build_bat_geometry():
+    g = Geo("geometry.phantom_bat", PX_TEX, PX_GLOW, PX_VEIN, PX_ORGANIC_MAX_Y, max_uv=32.0, bounds=(3, 2, 0.5),
+            min_uv=2.0, vein_max=(PX_VEIN[2] - 1.0, PX_VEIN[3] - 1.0))
+    g.bone("root", None, [0, 0, 0])
+    body = g.bone("body", "root", [0, 7, 0])
+    g.cube(body, [-2, 4, -2], [4, 6, 4])                          # furry torso
+    g.cube(body, [-2.4, 7.5, -2.3], [4.8, 2.2, 4.6])              # ragged ruff
+    g.cube(body, [-1.5, 1.8, 0.4], [3, 2.6, 0.8])                 # tattered tail membrane
+    g.cube(body, [-0.3, 5, -2.1], [0.6, 3, 0.2], zone="vein")     # glowing chest crack
+    for x in (-1.4, 0.8):                                         # dangling feet
+        g.cube(body, [x, 2.8, -0.6], [0.6, 1.4, 0.6])
+    head = g.bone("head", "body", [0, 10, -1])
+    g.cube(head, [-2.5, 9.5, -4.5], [5, 4.5, 4.5])
+    g.cube(head, [-1.2, 9.6, -5.3], [2.4, 1.6, 1.0])              # snout
+    for x in (-1.9, 0.9):                                         # burning eyes
+        g.cube(head, [x, 11.8, -4.62], [1.0, 0.8, 0.2], zone="glow")
+    g.cube(head, [-0.25, 12.4, -4.6], [0.5, 1.5, 0.2], zone="glow")  # crack between the eyes
+    for x in (-1.0, 0.5):                                         # fangs
+        g.cube(head, [x, 8.7, -5.1], [0.5, 1.1, 0.5])
+    for side, name in ((-1, "ear_r"), (1, "ear_l")):
+        ear = g.bone(name, "head", [1.6 * side, 14, -2])
+        o, sz = [0.9, 13.6, -2.6], [1.6, 3.4, 0.8]
+        g.cube(ear, o if side > 0 else mirror(o, sz), sz)
+    for side, name in ((-1, "wing_r"), (1, "wing_l")):
+        wing = g.bone(name, "body", [2 * side, 9, 0])
+        o, sz = [2, 5, -0.3], [7, 5, 0.6]
+        g.cube(wing, o if side > 0 else mirror(o, sz), sz)
+        o, sz = [2, 9.6, -0.5], [7, 0.8, 1.0]                     # arm bone along the top edge
+        g.cube(wing, o if side > 0 else mirror(o, sz), sz)
+        tip = g.bone(name + "_tip", name, [9 * side, 9, 0])
+        o, sz = [9, 5.8, -0.25], [7, 4, 0.5]
+        g.cube(tip, o if side > 0 else mirror(o, sz), sz)
+        o, sz = [9, 9.5, -0.4], [7.5, 0.6, 0.8]
+        g.cube(tip, o if side > 0 else mirror(o, sz), sz)
+        x = 9.0
+        while x < 15.5:                                           # torn trailing edge
+            w = RNG.uniform(0.8, 1.6)
+            o, sz = [x, 5.8 - RNG.uniform(0.6, 1.8), -0.2], [w, 1.8, 0.4]
+            g.cube(tip, o if side > 0 else mirror(o, sz), sz)
+            x += w + RNG.uniform(0.2, 0.5)
+    return g
+
+
+def build_bat_animations():
+    anims = {}
+    flap = 1440
+    bones = {"root": {"position": vec(0, f"math.sin(query.anim_time * {flap}) * 0.8", 0)},
+             "body": {"rotation": vec(18, 0, 0)},
+             "head": {"rotation": vec(-12, 0, 0)},
+             "wing_l": {"rotation": vec(0, 0, f"math.sin(query.anim_time * {flap}) * 42")},
+             "wing_r": {"rotation": vec(0, 0, f"-1 * math.sin(query.anim_time * {flap}) * 42")},
+             "wing_l_tip": {"rotation": vec(0, 0, f"math.sin(query.anim_time * {flap} - 70) * 34")},
+             "wing_r_tip": {"rotation": vec(0, 0, f"-1 * math.sin(query.anim_time * {flap} - 70) * 34")},
+             "ear_l": {"rotation": vec(0, 0, f"math.sin(query.anim_time * 360) * 6")},
+             "ear_r": {"rotation": vec(0, 0, f"-1 * math.sin(query.anim_time * 360) * 6")}}
+    anims["animation.phantom_bat.fly"] = {"loop": True, "animation_length": 1.0, "bones": bones}
+
+    bones = {"head": {"rotation": {"0.00": vec(-30, 0, 0), "0.12": vec(-38, 0, 0), "0.22": vec(28, 0, 0), "0.40": vec(-12, 0, 0)}},
+             "root": {"position": {"0.00": vec(0, 0, 0), "0.22": vec(0, 0, -2.5), "0.40": vec(0, 0, 0)}}}
+    anims["animation.phantom_bat.bite"] = {"loop": False, "animation_length": 0.4, "bones": bones}
+
+    bones = {"root": {"position": {"0.00": vec(0, 0, 0), "1.00": vec(0, -5, 0)}},
+             "body": {"rotation": {"0.00": vec(18, 0, 0), "0.40": vec(-10, 0, 60), "1.00": vec(0, 0, 175)}},
+             "wing_l": {"rotation": {"0.00": vec(0, 0, 0), "1.00": vec(0, 0, -70)}},
+             "wing_r": {"rotation": {"0.00": vec(0, 0, 0), "1.00": vec(0, 0, 70)}},
+             "wing_l_tip": {"rotation": {"0.00": vec(0, 0, 0), "1.00": vec(0, 0, -60)}},
+             "wing_r_tip": {"rotation": {"0.00": vec(0, 0, 0), "1.00": vec(0, 0, 60)}}}
+    anims["animation.phantom_bat.death"] = {"loop": "hold_on_last_frame", "animation_length": 1.0, "bones": bones}
+    return {"format_version": "1.8.0", "animations": anims, "geckolib_format_version": 2}
+
+
+def bat_textures():
+    rng = np.random.default_rng(1313)
+    n = PX_TEX
+    base = fbm(n, 6, 5, rng)
+    fur = fbm(n, 28, 3, rng)
+    shade = 0.2 + 0.55 * base * (0.6 + 0.4 * fur)
+    r = 20 + 34 * shade
+    g = 14 + 20 * shade
+    b = 22 + 34 * shade
+    img = np.stack([r, g, b, np.full_like(r, 255)], axis=-1)
+    glow = np.zeros((n, n, 4))
+    x, y, w, h = PX_GLOW
+    img[y:y + h, x:x + w] = [255, 60, 40, 255]
+    glow[y:y + h, x:x + w] = [255, 80, 50, 255]
+    x, y, w, h = PX_VEIN
+    vz = 1.0 - np.abs(fbm(64, 4, 3, rng)[:h, :w] - 0.5) * 2.0
+    vmask = np.clip((vz - 0.75) / 0.25, 0, 1)
+    img[y:y + h, x:x + w, 0] = 26 + 150 * vmask
+    img[y:y + h, x:x + w, 1] = 14 + 10 * vmask
+    img[y:y + h, x:x + w, 2] = 24 + 8 * vmask
+    glow[y:y + h, x:x + w, 0] = 200 * vmask
+    glow[y:y + h, x:x + w, 1] = 25 * vmask
+    glow[y:y + h, x:x + w, 3] = 255 * vmask
+    out = os.path.join(ASSETS, "textures", "entity")
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_bat.png"))
+    Image.fromarray(np.clip(glow, 0, 255).astype(np.uint8), "RGBA").save(os.path.join(out, "phantom_bat_glowmask.png"))
+
+
+def write_bat():
+    bat = build_bat_geometry()
+    write_json(os.path.join(ASSETS, "geo", "entity", "phantom_bat.geo.json"), bat.to_json())
+    write_json(os.path.join(ASSETS, "animations", "entity", "phantom_bat.animation.json"), build_bat_animations())
+    bat_textures()
+    bleeding_icon()
+    print(f"phantom_bat: {len(bat.bones)} bones, {sum(len(b['cubes']) for b in bat.bones)} cubes")
+
+
+def bleeding_icon():
+    """Bleeding status icon (18x18): a dark red drop."""
+    size = 18
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = img.load()
+    for y in range(size):
+        for x in range(size):
+            if y >= 8:
+                inside = math.hypot(x - 8.5, y - 10.5) <= 4.6
+            else:
+                inside = abs(x - 8.5) <= (y - 1.5) * 0.62 and y >= 2
+            if not inside:
+                continue
+            light = (8.5 - x) * 9 + (10 - y) * 5
+            edge = (math.hypot(x - 8.5, y - 10.5) > 3.7) if y >= 8 else abs(x - 8.5) > (y - 1.5) * 0.62 - 1.0
+            base = 96 if edge else 178
+            px[x, y] = (max(40, min(255, int(base + light))), 10 + (0 if edge else 12), 16 + (0 if edge else 10), 255)
+    for (x, y) in ((6, 9), (6, 10), (7, 8)):
+        px[x, y] = (255, 170, 170, 255)                               # highlight
+    out = os.path.join(ASSETS, "textures", "mob_effect")
+    os.makedirs(out, exist_ok=True)
+    img.save(os.path.join(out, "bleeding.png"))
+
+
 # --------------------------------------------------------------------------- items
 
 def item_textures():
@@ -999,6 +1133,7 @@ def main():
     sea_textures()
     print(f"phantom_sea: {len(sea.bones)} bones, {sum(len(b['cubes']) for b in sea.bones)} cubes")
     item_textures()
+    write_bat()
     bones = geo.bones
     print(f"geometry: {len(bones)} bones, {sum(len(b['cubes']) for b in bones)} cubes")
 

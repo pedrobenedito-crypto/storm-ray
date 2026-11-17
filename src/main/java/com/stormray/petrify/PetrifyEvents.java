@@ -71,7 +71,7 @@ public final class PetrifyEvents {
 
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (PetrificationManager.isPetrified(event.getEntity())) {
+        if (PetrificationManager.isPetrified(event.getEntity()) && !PetrificationManager.isCure(event.getItemStack())) {
             event.setCancellationResult(InteractionResult.FAIL);
             event.setCanceled(true);
         }
@@ -79,7 +79,8 @@ public final class PetrifyEvents {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (PetrificationManager.isPetrified(event.getEntity())) {
+        if (PetrificationManager.isPetrified(event.getEntity()) && !PetrificationManager.isCure(event.getItemStack())) {
+            // (a Stone Breaker potion can still be drunk while looking at a block)
             event.setCancellationResult(InteractionResult.FAIL);
             event.setCanceled(true);
         }
@@ -102,7 +103,7 @@ public final class PetrifyEvents {
 
     @SubscribeEvent
     public static void onUseItem(LivingEntityUseItemEvent.Start event) {
-        if (PetrificationManager.isPetrified(event.getEntity())) {
+        if (PetrificationManager.isPetrified(event.getEntity()) && !PetrificationManager.isCure(event.getItem())) {
             event.setCanceled(true);
         }
     }

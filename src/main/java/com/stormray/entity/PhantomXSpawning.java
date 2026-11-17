@@ -30,7 +30,17 @@ public final class PhantomXSpawning {
 
         @SubscribeEvent
         public static void onPotentialSpawns(LevelEvent.PotentialSpawns event) {
-            if (event.getMobCategory() != MobCategory.MONSTER || !ModDimensions.isMirror(event.getLevel())) {
+            if (event.getMobCategory() != MobCategory.MONSTER) {
+                return;
+            }
+            if (!ModDimensions.isMirror(event.getLevel())) {
+                // The normal world only gets the bats, and far fewer of them.
+                int overworldBats = StormRayConfig.BAT_OVERWORLD_SPAWN_WEIGHT.get();
+                if (overworldBats > 0 && event.getLevel() instanceof net.minecraft.world.level.Level level
+                        && level.dimension() == net.minecraft.world.level.Level.OVERWORLD
+                        && !level.getFluidState(event.getPos()).is(FluidTags.WATER)) {
+                    event.addSpawnerData(new MobSpawnSettings.SpawnerData(ModEntities.PHANTOM_BAT.get(), overworldBats, 2, 3));
+                }
                 return;
             }
             if (event.getLevel().getFluidState(event.getPos()).is(FluidTags.WATER)) {
@@ -45,6 +55,10 @@ public final class PhantomXSpawning {
             if (weight > 0) {
                 event.addSpawnerData(new MobSpawnSettings.SpawnerData(ModEntities.PHANTOM_X.get(), weight, 1, 2));
             }
+            int batWeight = StormRayConfig.BAT_SPAWN_WEIGHT.get();
+            if (batWeight > 0) {
+                event.addSpawnerData(new MobSpawnSettings.SpawnerData(ModEntities.PHANTOM_BAT.get(), batWeight, 2, 4));
+            }
         }
     }
 
@@ -56,6 +70,9 @@ public final class PhantomXSpawning {
         @SubscribeEvent
         public static void registerPlacements(SpawnPlacementRegisterEvent event) {
             event.register(ModEntities.PHANTOM_X.get(), SpawnPlacements.Type.ON_GROUND,
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules,
+                    SpawnPlacementRegisterEvent.Operation.REPLACE);
+            event.register(ModEntities.PHANTOM_BAT.get(), SpawnPlacements.Type.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules,
                     SpawnPlacementRegisterEvent.Operation.REPLACE);
             event.register(ModEntities.PHANTOM_SEA.get(), SpawnPlacements.Type.IN_WATER,

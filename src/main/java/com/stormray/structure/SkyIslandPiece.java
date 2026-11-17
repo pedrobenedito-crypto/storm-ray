@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -19,7 +20,8 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 
 /**
  * Builds a Sky Island from {@link SkyIslandShape} and digs the crater it was torn from in
- * the ground below. The top of the bounding box minus {@link SkyIslandShape#TOP} is the
+ * the ground below. In the Ashen Reflection it is rotten and hung with red vines; in the normal
+ * world it is a grassy lump of earth. The top of the bounding box minus {@link SkyIslandShape#TOP} is the
  * island's soil surface.
  */
 public class SkyIslandPiece extends StructurePiece {
@@ -45,7 +47,8 @@ public class SkyIslandPiece extends StructurePiece {
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structureManager, ChunkGenerator generator,
                             RandomSource random, BoundingBox box, ChunkPos chunkPos, BlockPos pivot) {
-        if (!ModDimensions.isMirror(level.getLevel())) {
+        boolean mirror = ModDimensions.isMirror(level.getLevel());
+        if (!mirror && level.getLevel().dimension() != Level.OVERWORLD) {
             return;
         }
         BoundingBox bounds = this.getBoundingBox();
@@ -66,7 +69,7 @@ public class SkyIslandPiece extends StructurePiece {
                 int dz = z - centreZ;
                 digCrater(level, x, z, dx, dz, seed, bounds.minY(), seaLevel, pos);
                 if (SkyIslandShape.depth(dx, dz, seed) > 0) {
-                    buildColumn(level, box, random, x, z, dx, dz, topY, seed, pos);
+                    buildColumn(level, box, random, x, z, dx, dz, topY, seed, mirror, pos);
                 }
             }
         }
@@ -103,7 +106,7 @@ public class SkyIslandPiece extends StructurePiece {
     }
 
     private void buildColumn(WorldGenLevel level, BoundingBox box, RandomSource random, int x, int z, int dx, int dz,
-                             int topY, int seed, BlockPos.MutableBlockPos pos) {
+                             int topY, int seed, boolean mirror, BlockPos.MutableBlockPos pos) {
         int hanging = 0;
         byte previous = SkyIslandShape.AIR;
         for (int y = SkyIslandShape.TOP; y >= -SkyIslandShape.DEPTH - 7; y--) {
@@ -114,10 +117,10 @@ public class SkyIslandPiece extends StructurePiece {
             if (kind == SkyIslandShape.CHEST) {
                 this.createChest(level, box, random, pos.immutable(), ModStructures.SKY_ISLAND_LOOT, null);
             } else if (kind != SkyIslandShape.AIR) {
-                level.setBlock(pos, blockFor(kind, h), FLAGS);
+                level.setBlock(pos, blockFor(kind, h, mirror), FLAGS);
             } else if (y == 1 && previous == SkyIslandShape.AIR && SkyIslandShape.at(dx, 0, dz, seed) == SkyIslandShape.TOPSOIL
                     && h < 0.07F) {
-                level.setBlock(pos, Blocks.DEAD_BUSH.defaultBlockState(), FLAGS);
+                level.setBlock(pos, (mirror ? Blocks.DEAD_BUSH : Blocks.GRASS).defaultBlockState(), FLAGS);
             } else if (y < 0) {
                 // the underside: dangling roots and strands of red vine
                 if (hanging > 0) {
@@ -127,7 +130,7 @@ public class SkyIslandPiece extends StructurePiece {
                 } else if (previous != SkyIslandShape.AIR && previous != SkyIslandShape.GLOW) {
                     if (previous == SkyIslandShape.DIRT && h < 0.5F) {
                         level.setBlock(pos, Blocks.HANGING_ROOTS.defaultBlockState(), FLAGS);
-                    } else if (h < 0.3F) {
+                    } else if (mirror && h < 0.3F) {
                         int length = (int) (RotNoise.unit(x, worldY, z, seed + 32) * 6.0F);
                         boolean tip = length == 0;
                         level.setBlock(pos, (tip ? Blocks.WEEPING_VINES : Blocks.WEEPING_VINES_PLANT).defaultBlockState(), FLAGS);
@@ -139,7 +142,19 @@ public class SkyIslandPiece extends StructurePiece {
         }
     }
 
-    private static BlockState blockFor(byte kind, float h) {
+    private static BlockState blockFor(byte kind, float h, boolean mirror) {
+        if (!mirror) {
+            // the normal world's islands are alive: grass on top, plain stone instead of nether glow
+            if (kind == SkyIslandShape.TOPSOIL) {
+                return (h < 0.8F ? Blocks.GRASS_BLOCK : h < 0.92F ? Blocks.COARSE_DIRT : Blocks.MOSS_BLOCK).defaultBlockState();
+            }
+            if (kind == SkyIslandShape.GLOW) {
+                return Blocks.STONE.defaultBlockState();
+            }
+            if (kind == SkyIslandShape.LOG) {
+                return Blocks.OAK_LOG.defaultBlockState();
+            }
+        }
         switch (kind) {
             case SkyIslandShape.TOPSOIL:
                 if (h < 0.5F) return Blocks.COARSE_DIRT.defaultBlockState();

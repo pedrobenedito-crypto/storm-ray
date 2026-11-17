@@ -86,6 +86,7 @@ class AssetIntegrityTest {
         checkAnimations("storm_ray", new String[]{"idle", "summon", "swoop", "lash", "charge", "release", "death"});
         checkAnimations("phantom_x", new String[]{"idle", "move", "combo", "reveal", "death"});
         checkAnimations("phantom_sea", new String[]{"idle", "swim", "grab", "lunge", "death"});
+        checkAnimations("phantom_bat", new String[]{"fly", "bite", "death"});
     }
 
     @Test
@@ -127,7 +128,9 @@ class AssetIntegrityTest {
                 "models/item/phantom_x_spawn_egg.json", "textures/entity/phantom_sea.png",
                 "textures/entity/phantom_sea_glowmask.png", "models/item/phantom_sea_spawn_egg.json",
                 "models/item/colosseum_locator.json", "textures/item/colosseum_locator.png",
-                "textures/mob_effect/stone_breaker.png"}) {
+                "textures/mob_effect/stone_breaker.png", "textures/mob_effect/bleeding.png",
+                "textures/entity/phantom_bat.png", "textures/entity/phantom_bat_glowmask.png",
+                "models/item/phantom_bat_spawn_egg.json"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

@@ -1,6 +1,7 @@
 package com.stormray.structure;
 
 import com.mojang.serialization.Codec;
+import com.stormray.config.StormRayConfig;
 import com.stormray.registry.ModStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
@@ -13,8 +14,8 @@ import java.util.Optional;
 
 /**
  * A Sky Island: a piece of ground ripped out of the earth and left hanging high above the
- * crater it came from. Only generates in the Ashen Reflection; its chest always holds a
- * Colosseum Locator.
+ * crater it came from. Generates in the Ashen Reflection and (unless disabled in the config) at
+ * the same places in the normal world; its chest always holds a Colosseum Locator.
  */
 public class SkyIslandStructure extends Structure {
     public static final Codec<SkyIslandStructure> CODEC = simpleCodec(SkyIslandStructure::new);
@@ -26,7 +27,9 @@ public class SkyIslandStructure extends Structure {
     @Override
     public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext context) {
         ChunkGenerator generator = context.chunkGenerator();
-        if (!ModStructures.isMirrorGenerator(generator)) {
+        boolean allowed = ModStructures.isMirrorGenerator(generator)
+                || (StormRayConfig.ISLANDS_IN_OVERWORLD.get() && ModStructures.isOverworldGenerator(generator));
+        if (!allowed) {
             return Optional.empty();
         }
         ChunkPos chunk = context.chunkPos();

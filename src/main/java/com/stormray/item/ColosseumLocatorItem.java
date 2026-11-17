@@ -25,8 +25,9 @@ import java.util.List;
 
 /**
  * Found in Sky Island chests. Using it sends a streak of embers towards the Ruined Colosseum
- * and tells the holder how far away it is. It is not used up. The colosseum stands at the
- * same coordinates in the overworld and in the Ashen Reflection, so it works in both.
+ * and tells the holder how far away it is. It is not used up. The colosseum stands only in the
+ * Ashen Reflection, but coordinates match, so in the normal world it points to the spot to
+ * cross over at.
  */
 public class ColosseumLocatorItem extends Item {
     private static final String TAG_X = "ColosseumX";
@@ -55,10 +56,12 @@ public class ColosseumLocatorItem extends Item {
         double dz = target.getZ() + 0.5D - player.getZ();
         double distance = Math.sqrt(dx * dx + dz * dz);
         if (distance < ARRIVED_DISTANCE) {
-            player.displayClientMessage(Component.translatable("message.stormray.locator.here").withStyle(ChatFormatting.DARK_RED), true);
+            String key = ModDimensions.isMirror(serverLevel) ? "message.stormray.locator.here" : "message.stormray.locator.here_mirror";
+            player.displayClientMessage(Component.translatable(key).withStyle(ChatFormatting.DARK_RED), true);
         } else {
             Component direction = Component.translatable("direction.stormray." + DIRECTIONS[compassIndex(dx, dz)]);
-            player.displayClientMessage(Component.translatable("message.stormray.locator.found", (int) Math.round(distance), direction)
+            String key = ModDimensions.isMirror(serverLevel) ? "message.stormray.locator.found" : "message.stormray.locator.found_mirror";
+            player.displayClientMessage(Component.translatable(key, (int) Math.round(distance), direction)
                     .withStyle(ChatFormatting.RED), true);
             // a streak of embers pointing the way
             Vec3 eye = player.getEyePosition();
@@ -89,7 +92,12 @@ public class ColosseumLocatorItem extends Item {
         if (tag != null && tag.contains(TAG_X) && tag.contains(TAG_Z)) {
             return new BlockPos(tag.getInt(TAG_X), 0, tag.getInt(TAG_Z));
         }
-        BlockPos found = level.findNearestMapStructure(ModStructures.COLOSSEUM_TAG, origin, 100, false);
+        // The colosseum only stands in the Ashen Reflection; coordinates there match the normal world.
+        ServerLevel mirror = level.getServer().getLevel(ModDimensions.ASHEN_LEVEL);
+        if (mirror == null) {
+            return null;
+        }
+        BlockPos found = mirror.findNearestMapStructure(ModStructures.COLOSSEUM_TAG, origin, 100, false);
         if (found == null) {
             return null;
         }
