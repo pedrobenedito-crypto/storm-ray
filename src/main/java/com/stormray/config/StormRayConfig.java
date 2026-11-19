@@ -69,6 +69,7 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.IntValue SEA_SPAWN_WEIGHT;
 
     public static final ForgeConfigSpec.BooleanValue ISLANDS_IN_OVERWORLD;
+    public static final ForgeConfigSpec.DoubleValue ISLANDS_OVERWORLD_CHANCE;
 
     // Phantom gear
     public static final ForgeConfigSpec.BooleanValue GAZE_ENABLED;
@@ -198,6 +199,9 @@ public final class StormRayConfig {
         ISLANDS_IN_OVERWORLD = b.comment("Sky Islands also float in the normal world (same places as in the Ashen Reflection).",
                         "The Ruined Colosseum never generates in the normal world.")
                 .define("skyIslandsInOverworld", true);
+        ISLANDS_OVERWORLD_CHANCE = b.comment("Share of the island spots that are actually built in the normal world",
+                        "(0.15 = one in about seven, so they are far rarer there than in the Ashen Reflection).")
+                .defineInRange("skyIslandsOverworldChance", 0.15D, 0.0D, 1.0D);
         LIVE_SYNC = b.comment("Keep copying: every later block change in the overworld is also applied to the mirror",
                         "(needs copyBuilds). The overworld wins: a synced column replaces mirror-side changes in that column.")
                 .define("liveSync", true);

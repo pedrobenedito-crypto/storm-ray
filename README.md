@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.7.1.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.7.3.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -150,7 +150,7 @@ Comando para achar:
 ```
 
 ### Ilhas do Céu
-Pedaços de terra arrancados do chão e suspensos no ar, com a cratera de onde saíram logo abaixo. Existem **no Reflexo de Cinzas e no mundo normal** (nos mesmos lugares; no mundo normal são de terra e grama, no Reflexo são apodrecidas e com cipós vermelhos), entre 45 e 70 blocos acima do solo, e são de raridade média (em média uma a cada ~380 blocos, um pouco mais comuns que vilas). Em cima há um pequeno santuário em ruínas com um **baú**, que sempre contém um **Localizador do Coliseu**, tem **20% de chance** de trazer uma **Potion of Stone Breaker** e mais alguns itens (redstone, ossos, minérios, às vezes uma cabeça do Steve). No Reflexo, luzes alaranjadas na parte de baixo ajudam a enxergar a ilha através da névoa.
+Pedaços de terra arrancados do chão e suspensos no ar, com a cratera de onde saíram logo abaixo. Existem **no Reflexo de Cinzas e, bem mais raras, no mundo normal** (nos mesmos lugares; no mundo normal são de terra e grama, no Reflexo são apodrecidas e com cipós vermelhos), entre 45 e 70 blocos acima do solo, e são de raridade média (em média uma a cada ~380 blocos, um pouco mais comuns que vilas). Em cima há um pequeno santuário em ruínas com um **baú**, que sempre contém um **Localizador do Coliseu**, tem **20% de chance** de trazer uma **Potion of Stone Breaker** e mais alguns itens (redstone, ossos, minérios, às vezes uma cabeça do Steve). No Reflexo, luzes alaranjadas na parte de baixo ajudam a enxergar a ilha através da névoa.
 
 ```
 /locate structure stormray:sky_island
@@ -174,7 +174,7 @@ Cada Storm Ray derrotada dropa **8 Escamas de Phantom**. Como a arraia do colise
 - **Escama de Phantom Reforçada:** 2 escamas na bancada (sem formato) viram 1 reforçada.
 
 ### Armadura de Phantom
-Placas negras com veios vermelhos e vinhas escuras, com o brilho de item encantado de fábrica. Forjada com escamas no formato normal de armadura: elmo 5, peitoral 8, calças 7 e botas 4.
+Placas pesadas no estilo netherite, pretas com veios vermelhos e vinhas escuras, com o brilho de item encantado de fábrica. O elmo é aberto: o rosto fica à mostra, emoldurado pela testeira e pelas laterais. Forjada com escamas no formato normal de armadura: elmo 5, peitoral 8, calças 7 e botas 4.
 
 - **Proteção:** 20 no total (entre diamante e netherite), resistência 2,5 e um pouco de resistência a repulsão. Conserta com escamas.
 - **Olhar petrificante:** com o **conjunto completo**, mire em um inimigo e aperte **R**. Ele começa a virar pedra igual ao pulso da arraia e leva 20 de dano quando a petrificação termina. Alcance de 24 blocos e recarga de 30 segundos, que aparece como cooldown no elmo. A tecla pode ser trocada em Opções > Controles > Storm Ray.
@@ -223,6 +223,7 @@ Arquivos gerados na primeira execução:
 | dimension | `enablePortal` | true | Liga/desliga o portal |
 | dimension | `copyBuilds` | true | Copia as construções do mundo original no primeiro carregamento de cada chunk |
 | dimension | `skyIslandsInOverworld` | true | As Ilhas do Céu também aparecem no mundo normal |
+| dimension | `skyIslandsOverworldChance` | 0,15 | Fração dos pontos de ilha que viram ilha no mundo normal |
 | dimension | `liveSync` | true | Repete no Reflexo toda mudança de bloco feita depois no mundo normal |
 | dimension | `syncColumnsPerTick` | 64 | Limite de colunas de blocos sincronizadas por tick |
 | dimension | `hostileOnly` | true | Só monstros no reflexo |
@@ -264,7 +265,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.7.1.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.7.3.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -313,7 +314,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.7.1.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.7.3.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---

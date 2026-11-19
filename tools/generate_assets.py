@@ -1256,41 +1256,163 @@ def gear_item_textures():
 
 
 def armor_layer_textures():
-    """The two worn-armour layers (64x32): black plating veined with green, as the model wraps it."""
-    rng = np.random.default_rng(606)
-    for layer in (1, 2):
-        w, h = 64, 32
-        grain = fbm(64, 10, 4, rng)[:h, :w]
-        plates = fbm(64, 5, 2, rng)[:h, :w]
-        base = 13 + 24 * grain + 9 * plates
-        # black plating with the faintest warm cast, never blue or green
-        img = np.stack([base * 1.18 + 5 * plates, base * 0.86, base * 0.88, np.full((h, w), 255.0)], axis=-1)
+    """
+    The worn-armour layers, drawn as plate armour so the set reads as armour on the body:
+    layer 1 is the helmet, chestplate, pauldrons and boots, layer 2 the leggings.
 
-        # vines: wandering vertical runs, a few per layer
-        count = 7 if layer == 1 else 5
-        for i in range(count):
-            x = float(rng.integers(2, w - 2))
-            for y in range(h):
-                x += float(rng.normal(0.0, 0.45))
-                x = min(max(1.0, x), w - 2.0)
+    Both are 64x32 and follow the vanilla armour UV layout (head at 0,0; legs at 0,16;
+    body at 16,16; arms at 40,16). The plating is original work in the mod's own palette -
+    black with red veins and dark vines - shaped like heavy netherite-grade plate.
+    """
+    base_col = (19, 15, 16)
+    lit_col = (46, 37, 39)
+    dark_col = (7, 6, 6)
+    edge_col = (76, 61, 63)
+    vine_col = (78, 24, 28)
+    leaf_col = (52, 16, 19)
+    ember_col = (188, 34, 28)
+
+    # face rectangles (x, y, w, h) of the vanilla armour layout
+    HEAD = {"top": (8, 0, 8, 8), "bottom": (16, 0, 8, 8), "right": (0, 8, 8, 8),
+            "front": (8, 8, 8, 8), "left": (16, 8, 8, 8), "back": (24, 8, 8, 8)}
+    BODY = {"top": (20, 16, 8, 4), "bottom": (28, 16, 8, 4), "right": (16, 20, 4, 12),
+            "front": (20, 20, 8, 12), "left": (28, 20, 4, 12), "back": (32, 20, 8, 12)}
+    ARM = {"top": (44, 16, 4, 4), "bottom": (48, 16, 4, 4), "right": (40, 20, 4, 12),
+           "front": (44, 20, 4, 12), "left": (48, 20, 4, 12), "back": (52, 20, 4, 12)}
+    LEG = {"top": (4, 16, 4, 4), "bottom": (8, 16, 4, 4), "right": (0, 20, 4, 12),
+           "front": (4, 20, 4, 12), "left": (8, 20, 4, 12), "back": (12, 20, 4, 12)}
+
+    def mix(a, b, t):
+        return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
+
+    def plate(px, rng, rect, rows=None, seams=(), ridge=False, embers=0):
+        """Fills a face with shaded plating; rows limits it to a band (y offsets within the face)."""
+        x0, y0, w, h = rect
+        lo, hi = rows if rows else (0, h)
+        for j in range(lo, hi):
+            for i in range(w):
+                n = rng.randint(-5, 5)
+                t = 1.0 - (j - lo) / max(1, hi - lo - 1)        # lit from above
+                col = mix(base_col, lit_col, 0.15 + 0.35 * t * t)
+                if j in seams:                                   # seam between two plates
+                    col = dark_col
+                elif (j - 1) in seams:                           # the lip of the plate below it
+                    col = edge_col
+                if j == lo:                                      # top edge catches the light
+                    col = edge_col
+                if ridge and i in (w // 2 - 1, w // 2):          # raised centre ridge
+                    col = mix(col, edge_col, 0.55)
+                if i == 0 or i == w - 1:                         # rolled side edges
+                    col = mix(col, dark_col, 0.45)
+                px[x0 + i, y0 + j] = tuple(max(0, min(255, c + n)) for c in col) + (255,)
+        for _ in range(embers):                                  # a glowing crack in a seam
+            i = rng.randrange(1, max(2, w - 1))
+            j = rng.choice([r for r in seams if lo <= r < hi]) if seams else rng.randrange(lo, hi)
+            px[x0 + i, y0 + j] = ember_col + (255,)
+
+    def rivets(px, rect, cells):
+        x0, y0 = rect[0], rect[1]
+        for (i, j) in cells:
+            px[x0 + i, y0 + j] = edge_col + (255,)
+
+    def vine(px, rng, rect, rows, starts):
+        """Dark vines creeping down a face, with the odd leaf."""
+        x0, y0, w, h = rect
+        lo, hi = rows
+        for sx in starts:
+            x = float(sx)
+            for j in range(lo, hi):
+                x = min(max(0.0, x + rng.uniform(-0.55, 0.55)), w - 1.0)
                 xi = int(x)
-                shade = 0.75 + 0.5 * float(rng.random())
-                img[y, xi, 0] = 62 * shade
-                img[y, xi, 1] = 20 * shade
-                img[y, xi, 2] = 23 * shade
-                if y % 5 == 0:                        # a leaf
-                    lx = min(w - 1, max(0, xi + (1 if y % 10 == 0 else -1)))
-                    img[y, lx] = [40, 14, 16, 255]
-        # ember flecks and a brighter top edge so the plates read as metal
-        for _ in range(22):
-            y = int(rng.integers(0, h))
-            x = int(rng.integers(0, w))
-            img[y, x] = [186, 36, 30, 255]
-        img[0:1, :, :3] *= 1.6
-        out = os.path.join(ASSETS, "textures", "models", "armor")
-        os.makedirs(out, exist_ok=True)
-        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(
-            os.path.join(out, f"phantom_layer_{layer}.png"))
+                if px[x0 + xi, y0 + j][3] == 0:
+                    continue
+                px[x0 + xi, y0 + j] = vine_col + (255,)
+                if j % 3 == 0:
+                    lx = xi + (1 if (j // 3) % 2 == 0 else -1)
+                    if 0 <= lx < w and px[x0 + lx, y0 + j][3] != 0:
+                        px[x0 + lx, y0 + j] = leaf_col + (255,)
+
+    out = os.path.join(ASSETS, "textures", "models", "armor")
+    os.makedirs(out, exist_ok=True)
+
+    # ---------------------------------------------------------------- layer 1
+    rng = random.Random(4041)
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    px = img.load()
+
+    # helmet: skull plating, a brow band and a burning visor slit
+    for face in ("top", "right", "left", "back"):
+        plate(px, rng, HEAD[face], seams=(2, 5))
+    plate(px, rng, HEAD["front"], seams=(2,))
+    fx, fy = HEAD["front"][0], HEAD["front"][1]
+    # An open helm: the brow band stays, the face is cut away so the wearer's own face shows,
+    # with a narrow guard running down each temple and jaw.
+    for j in range(2, 8):
+        guard = 1 if j < 6 else 0                           # the jaw opens a little wider
+        for i in range(guard, 8 - guard):
+            px[fx + i, fy + j] = (0, 0, 0, 0)
+    for i in range(8):                                      # brow ridge over the eyes
+        px[fx + i, fy + 1] = edge_col + (255,)
+    for i in (2, 5):                                        # embers set into the brow
+        px[fx + i, fy + 1] = ember_col + (255,)
+    rivets(px, HEAD["front"], ((0, 3), (7, 3)))
+    for face in ("front", "right", "left", "back"):
+        vine(px, rng, HEAD[face], (0, 8), (0, 7) if face == "front" else (3,))
+
+    # chestplate: ribbed breastplate with a belt at the waist
+    plate(px, rng, BODY["top"], seams=())
+    plate(px, rng, BODY["bottom"], seams=())
+    plate(px, rng, BODY["front"], seams=(3, 6, 9), ridge=True, embers=2)
+    plate(px, rng, BODY["back"], seams=(3, 6, 9), embers=1)
+    for face in ("right", "left"):
+        plate(px, rng, BODY[face], seams=(3, 6, 9), embers=1)
+    bx, by = BODY["front"][0], BODY["front"][1]
+    for i in range(8):                                      # belt
+        px[bx + i, by + 10] = dark_col + (255,)
+        px[bx + i, by + 11] = mix(base_col, edge_col, 0.4) + (255,)
+    px[bx + 3, by + 10] = ember_col + (255,)
+    px[bx + 4, by + 10] = ember_col + (255,)
+    rivets(px, BODY["front"], ((0, 1), (7, 1), (0, 4), (7, 4), (0, 7), (7, 7)))
+    for face in ("front", "back", "right", "left"):
+        starts = (1, 6) if face in ("front", "back") else (1,)
+        vine(px, rng, BODY[face], (0, 12), starts)
+
+    # pauldrons: heavy on the shoulder, lighter plating down the arm
+    plate(px, rng, ARM["top"], seams=())
+    for face in ("front", "back", "right", "left"):
+        plate(px, rng, ARM[face], seams=(3, 7), embers=1 if face == "front" else 0)
+        vine(px, rng, ARM[face], (0, 12), (1,))
+    for face in ("front", "back", "right", "left"):         # the pauldron rim
+        ax, ay, aw, _ = ARM[face]
+        for i in range(aw):
+            px[ax + i, ay + 2] = edge_col + (255,)
+
+    # boots: only the lower part of the leg is covered
+    plate(px, rng, LEG["bottom"], seams=())
+    for face in ("front", "back", "right", "left"):
+        plate(px, rng, LEG[face], rows=(7, 12), seams=(9,), embers=1 if face == "front" else 0)
+        vine(px, rng, LEG[face], (7, 12), (1,))
+        lx, ly, lw, _ = LEG[face]
+        for i in range(lw):                                  # ankle collar
+            px[lx + i, ly + 7] = edge_col + (255,)
+    img.save(os.path.join(out, "phantom_layer_1.png"))
+
+    # ---------------------------------------------------------------- layer 2 (leggings)
+    rng = random.Random(4042)
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    px = img.load()
+    plate(px, rng, BODY["bottom"], seams=())
+    for face in ("front", "back", "right", "left"):          # hip guard
+        plate(px, rng, BODY[face], rows=(7, 12), seams=(9,), embers=1 if face == "front" else 0)
+        vine(px, rng, BODY[face], (7, 12), (2, 5) if face in ("front", "back") else (1,))
+    for face in ("front", "back", "right", "left"):          # thigh and shin plating
+        plate(px, rng, LEG[face], rows=(0, 10), seams=(3, 6), embers=1 if face == "front" else 0)
+        vine(px, rng, LEG[face], (0, 10), (1,))
+        lx, ly, lw, _ = LEG[face]
+        for i in range(lw):                                  # knee band
+            px[lx + i, ly + 5] = edge_col + (255,)
+    plate(px, rng, LEG["top"], seams=())
+    img.save(os.path.join(out, "phantom_layer_2.png"))
 
 
 def write_gear():

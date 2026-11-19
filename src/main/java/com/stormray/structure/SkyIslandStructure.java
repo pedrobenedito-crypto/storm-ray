@@ -27,10 +27,16 @@ public class SkyIslandStructure extends Structure {
     @Override
     public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext context) {
         ChunkGenerator generator = context.chunkGenerator();
-        boolean allowed = ModStructures.isMirrorGenerator(generator)
-                || (StormRayConfig.ISLANDS_IN_OVERWORLD.get() && ModStructures.isOverworldGenerator(generator));
-        if (!allowed) {
-            return Optional.empty();
+        boolean mirror = ModStructures.isMirrorGenerator(generator);
+        if (!mirror) {
+            if (!StormRayConfig.ISLANDS_IN_OVERWORLD.get() || !ModStructures.isOverworldGenerator(generator)) {
+                return Optional.empty();
+            }
+            // The structure set is shared with the Ashen Reflection, where the islands belong.
+            // In the normal world only a fraction of those spots is kept, so they stay a find.
+            if (context.random().nextFloat() >= StormRayConfig.ISLANDS_OVERWORLD_CHANCE.get()) {
+                return Optional.empty();
+            }
         }
         ChunkPos chunk = context.chunkPos();
         int x = chunk.getMiddleBlockX();
