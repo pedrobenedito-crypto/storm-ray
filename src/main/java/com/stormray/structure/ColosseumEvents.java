@@ -162,7 +162,8 @@ public final class ColosseumEvents {
     /**
      * Runs once a second while the guardian exists and players are near: unlocks its
      * petrification at the configured wave and sends the next wave of Phantom X when it is due.
-     * Waves grow slowly, and Phantom Bats join them from a later wave on.
+     * Waves grow slowly, Phantom Bats join them from a later wave on, and they stop after the
+     * configured last wave.
      */
     private static void tickWaves(ServerLevel level, ColosseumData data, BlockPos centre) {
         Entity boss = level.getEntity(data.bossId());
@@ -178,9 +179,11 @@ public final class ColosseumEvents {
         ray.setPetrifyEnabled(petrify);
 
         int interval = StormRayConfig.COLOSSEUM_WAVE_INTERVAL.get();
+        int maxWaves = StormRayConfig.COLOSSEUM_MAX_WAVES.get();
         long now = level.getGameTime();
-        if (interval <= 0 || now - data.lastWaveAt() < interval || ray.getPhase() == StormRayEntity.Phase.SUMMONING) {
-            return;
+        if (interval <= 0 || data.wave() >= maxWaves || now - data.lastWaveAt() < interval
+                || ray.getPhase() == StormRayEntity.Phase.SUMMONING) {
+            return; // after the last wave it is the player against the ray alone
         }
         // Wave sizes grow slowly: the fight should stay winnable in netherite, but never relaxed.
         int next = data.wave() + 1;
@@ -201,10 +204,14 @@ public final class ColosseumEvents {
             return;
         }
         data.waveSent(now);
-        StormRayMod.LOGGER.info("Colosseum wave {}: {} Phantom X, {} Phantom Bats", data.wave(), spawnedPhantoms, spawnedBats);
+        StormRayMod.LOGGER.info("Colosseum wave {}/{}: {} Phantom X, {} Phantom Bats", data.wave(), maxWaves,
+                spawnedPhantoms, spawnedBats);
         level.playSound(null, ground.x, ground.y + 2.0D, ground.z, ModSounds.PHANTOM_REVEAL.get(), SoundSource.HOSTILE, 4.0F, 0.6F);
-        announce(level, ground, Component.translatable(spawnedBats > 0 ? "message.stormray.colosseum.wave_bats" : "message.stormray.colosseum.wave",
-                data.wave()).withStyle(ChatFormatting.RED));
+        boolean last = data.wave() >= maxWaves;
+        String key = last ? "message.stormray.colosseum.wave_last"
+                : spawnedBats > 0 ? "message.stormray.colosseum.wave_bats" : "message.stormray.colosseum.wave";
+        announce(level, ground, Component.translatable(key, data.wave(), maxWaves)
+                .withStyle(last ? ChatFormatting.DARK_RED : ChatFormatting.RED));
     }
 
     /** Living mobs of one kind around the arena. */

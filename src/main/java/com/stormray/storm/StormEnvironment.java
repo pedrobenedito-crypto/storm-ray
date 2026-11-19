@@ -20,6 +20,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,6 +30,9 @@ import java.util.UUID;
  * renders the sky from it, and it decays to normal on its own if updates stop.
  */
 public final class StormEnvironment {
+    /** Extra distance a player must travel past the bar radius before the bar is taken away. */
+    private static final int BAR_LEAVE_MARGIN = 24;
+
     private StormEnvironment() {
     }
 
@@ -39,7 +43,8 @@ public final class StormEnvironment {
         float strength = ray.environmentStrength();
         StormRayEntity.Phase phase = ray.getPhase();
         int interval = (phase == StormRayEntity.Phase.CHARGING || phase == StormRayEntity.Phase.SUMMONING || ray.isDeadOrDying()) ? 4 : 10;
-        if (ray.tickCount % interval == 0) {
+        // tickCount <= 1: the bar goes up on the boss's very first tick, before any ramp-up
+        if (ray.tickCount <= 1 || ray.tickCount % interval == 0) {
             syncPlayers(ray, level, strength);
         }
 
@@ -60,19 +65,33 @@ public final class StormEnvironment {
     private static void syncPlayers(StormRayEntity ray, ServerLevel level, float strength) {
         double radius = StormRayConfig.ENVIRONMENT_RADIUS.get();
         double fade = Math.min(32.0D, radius * 0.25D);
+        // The boss bar has its own radius and does not depend on the sky effect, so it stays up
+        // while the boss rises, while it dies, and wherever the red sky happens to be weak.
+        double barRadius = StormRayConfig.BOSS_BAR_RADIUS.get();
+        // Hysteresis: shown from barRadius, hidden only past barRadius + LEAVE_MARGIN, so a player
+        // standing near the edge (or a boss swooping about) cannot make it flicker on and off.
+        double barLeave = barRadius + BAR_LEAVE_MARGIN;
         float charge = ray.chargeProgress(0.0F);
         Set<UUID> tracked = ray.environmentPlayers();
 
         for (ServerPlayer player : level.players()) {
             double dx = player.getX() - ray.getX();
             double dz = player.getZ() - ray.getZ();
-            float intensity = strength * StormMath.edgeFalloff(Math.sqrt(dx * dx + dz * dz), radius, fade);
+            double distance = Math.sqrt(dx * dx + dz * dz);
+
+            boolean showBar = distance <= (ray.getBossEvent().getPlayers().contains(player) ? barLeave : barRadius);
+            if (showBar) {
+                // re-adding every sync also covers a player who respawned or reconnected
+                ray.getBossEvent().addPlayer(player);
+            } else {
+                ray.getBossEvent().removePlayer(player);
+            }
+
+            float intensity = strength * StormMath.edgeFalloff(distance, radius, fade);
             if (intensity > 0.0F) {
                 tracked.add(player.getUUID());
-                ray.getBossEvent().addPlayer(player);
                 ModNetwork.sendTo(player, new StormStatePacket(intensity, charge));
             } else if (tracked.remove(player.getUUID())) {
-                ray.getBossEvent().removePlayer(player);
                 ModNetwork.sendTo(player, new StormStatePacket(0.0F, 0.0F));
             }
         }
@@ -86,9 +105,14 @@ public final class StormEnvironment {
             if (player == null || player.level() != level) {
                 it.remove();
                 if (player != null) {
-                    ray.getBossEvent().removePlayer(player);
                     ModNetwork.sendTo(player, new StormStatePacket(0.0F, 0.0F));
                 }
+            }
+        }
+        // The boss bar keeps its own list, which can hold players who left this level entirely.
+        for (ServerPlayer player : List.copyOf(ray.getBossEvent().getPlayers())) {
+            if (player.isRemoved() || player.level() != level) {
+                ray.getBossEvent().removePlayer(player);
             }
         }
     }

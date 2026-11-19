@@ -109,7 +109,12 @@ public final class PetrificationManager {
         return count;
     }
 
-    private static boolean canPetrify(LivingEntity entity, StormRayEntity source) {
+    /** Whether this entity may be turned to stone by that source (used by the armour's gaze). */
+    public static boolean canBePetrifiedBy(LivingEntity entity, LivingEntity source) {
+        return canPetrify(entity, source);
+    }
+
+    private static boolean canPetrify(LivingEntity entity, LivingEntity source) {
         if (entity == source || !entity.isAlive() || entity instanceof StormRayEntity || entity instanceof ArmorStand) {
             return false;
         }
@@ -160,7 +165,7 @@ public final class PetrificationManager {
         ModNetwork.sendTracking(entity, new PetrifyPacket(entity.getId(), 0, 0, false));
     }
 
-    public static void petrify(LivingEntity entity, StormRayEntity source, int duration) {
+    public static void petrify(LivingEntity entity, LivingEntity source, int duration) {
         if (isStoneBreaker(entity)) {
             return;
         }
@@ -269,9 +274,12 @@ public final class PetrificationManager {
         level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PETRIFY.get(), SoundSource.HOSTILE, 2.0F, 0.55F);
 
         Entity attacker = level.getEntity(state.source);
-        float damage = StormRayConfig.INSTANT_KILL.get()
-                ? Float.MAX_VALUE
-                : (float) (StormRayConfig.PETRIFY_DAMAGE.get() * StormRayConfig.DIFFICULTY.get().damageMultiplier());
+        // A player's gaze is never the boss's instant kill: it has its own, smaller damage.
+        float damage = attacker instanceof Player
+                ? StormRayConfig.GAZE_DAMAGE.get().floatValue()
+                : StormRayConfig.INSTANT_KILL.get()
+                        ? Float.MAX_VALUE
+                        : (float) (StormRayConfig.PETRIFY_DAMAGE.get() * StormRayConfig.DIFFICULTY.get().damageMultiplier());
         entity.hurt(ModDamageTypes.petrification(level, attacker), damage);
 
         boolean died = !entity.isAlive();

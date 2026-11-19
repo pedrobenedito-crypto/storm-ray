@@ -28,6 +28,7 @@ public final class StormRayConfig {
 
     // Environment
     public static final ForgeConfigSpec.DoubleValue ENVIRONMENT_RADIUS;
+    public static final ForgeConfigSpec.DoubleValue BOSS_BAR_RADIUS;
     public static final ForgeConfigSpec.BooleanValue LIGHTNING_ENABLED;
     public static final ForgeConfigSpec.IntValue LIGHTNING_INTERVAL;
 
@@ -69,6 +70,17 @@ public final class StormRayConfig {
 
     public static final ForgeConfigSpec.BooleanValue ISLANDS_IN_OVERWORLD;
 
+    // Phantom gear
+    public static final ForgeConfigSpec.BooleanValue GAZE_ENABLED;
+    public static final ForgeConfigSpec.DoubleValue GAZE_RANGE;
+    public static final ForgeConfigSpec.IntValue GAZE_COOLDOWN;
+    public static final ForgeConfigSpec.IntValue GAZE_PETRIFY_TICKS;
+    public static final ForgeConfigSpec.DoubleValue GAZE_DAMAGE;
+    public static final ForgeConfigSpec.IntValue SWORD_FIRE_SECONDS;
+    public static final ForgeConfigSpec.DoubleValue SWORD_DASH_POWER;
+    public static final ForgeConfigSpec.IntValue SWORD_DASH_TICKS;
+    public static final ForgeConfigSpec.IntValue SWORD_DASH_COOLDOWN;
+
     // Phantom Bat
     public static final ForgeConfigSpec.DoubleValue BAT_HEALTH;
     public static final ForgeConfigSpec.DoubleValue BAT_BITE_DAMAGE;
@@ -86,6 +98,7 @@ public final class StormRayConfig {
     public static final ForgeConfigSpec.IntValue COLOSSEUM_WAVE_INTERVAL;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_MAX_PHANTOMS;
     public static final ForgeConfigSpec.IntValue COLOSSEUM_PETRIFY_WAVE;
+    public static final ForgeConfigSpec.IntValue COLOSSEUM_MAX_WAVES;
 
     // Eye lasers
     public static final ForgeConfigSpec.DoubleValue LASER_CHANCE;
@@ -141,7 +154,10 @@ public final class StormRayConfig {
         b.pop();
 
         b.comment("Red sky event").push("environment");
-        ENVIRONMENT_RADIUS = b.comment("Players within this horizontal distance of the boss see the red sky, fog and boss bar.")
+        BOSS_BAR_RADIUS = b.comment("Players within this horizontal distance of the boss see its health bar.",
+                        "Independent of the red sky, so the bar stays up while the boss rises and while it dies.")
+                .defineInRange("bossBarRadius", 192.0D, 16.0D, 2048.0D);
+        ENVIRONMENT_RADIUS = b.comment("Players within this horizontal distance of the boss see the red sky and fog.")
                 .defineInRange("radius", 160.0D, 16.0D, 2048.0D);
         LIGHTNING_ENABLED = b.comment("Spawn harmless visual lightning around the boss.")
                 .define("lightning", true);
@@ -223,6 +239,28 @@ public final class StormRayConfig {
                 .defineInRange("naturalSpawnWeight", 250, 0, 1000);
         b.pop();
 
+        b.comment("Phantom gear: armour and sword forged from the scales of a slain Storm Ray").push("gear");
+        GAZE_ENABLED = b.comment("A full set of phantom armour lets the wearer petrify what they look at.")
+                .define("petrifyingGaze", true);
+        GAZE_RANGE = b.comment("How far the gaze reaches, in blocks.")
+                .defineInRange("gazeRange", 24.0D, 2.0D, 128.0D);
+        GAZE_COOLDOWN = b.comment("Ticks before the gaze can be used again (600 = 30 seconds).",
+                        "Shown as a cooldown on the helmet.")
+                .defineInRange("gazeCooldownTicks", 600, 0, 72000);
+        GAZE_PETRIFY_TICKS = b.comment("Ticks the victim spends turning to stone.")
+                .defineInRange("gazePetrifyTicks", 60, 5, 2400);
+        GAZE_DAMAGE = b.comment("Damage dealt when the petrification completes. The boss's instantKill never applies here.")
+                .defineInRange("gazeDamage", 20.0D, 0.0D, 1000.0D);
+        SWORD_FIRE_SECONDS = b.comment("Seconds the phantom sword sets its target on fire (Fire Aspect II burns for 8).")
+                .defineInRange("swordFireSeconds", 8, 0, 120);
+        SWORD_DASH_POWER = b.comment("Strength of the right-click dash.")
+                .defineInRange("swordDashPower", 1.9D, 0.1D, 10.0D);
+        SWORD_DASH_TICKS = b.comment("Ticks the dasher stays invisible (30 = 1.5 seconds).")
+                .defineInRange("swordDashInvisibleTicks", 30, 1, 1200);
+        SWORD_DASH_COOLDOWN = b.comment("Ticks before the dash can be used again (120 = 6 seconds).")
+                .defineInRange("swordDashCooldownTicks", 120, 0, 72000);
+        b.pop();
+
         b.comment("Phantom Bat: soot bat whose bite causes bleeding").push("phantom_bat");
         BAT_HEALTH = b.comment("Max health.")
                 .defineInRange("health", 8.0D, 1.0D, 1024.0D);
@@ -257,6 +295,9 @@ public final class StormRayConfig {
                 .defineInRange("batsFromWave", 3, 1, 1000);
         COLOSSEUM_MAX_BATS = b.comment("Waves never raise the number of living Phantom Bats around the arena above this. 0 = no bats.")
                 .defineInRange("maxBats", 6, 0, 64);
+        COLOSSEUM_MAX_WAVES = b.comment("The fight has at most this many waves; after the last one no more mobs are sent",
+                        "and only the Storm Ray itself is left to beat.")
+                .defineInRange("maxWaves", 9, 1, 1000);
         COLOSSEUM_PETRIFY_WAVE = b.comment("The colosseum's Storm Ray only starts using its petrification pulse from this wave on",
                         "(1 = from the start). Storm Rays summoned by the ritual are not affected.")
                 .defineInRange("petrifyFromWave", 4, 1, 1000);

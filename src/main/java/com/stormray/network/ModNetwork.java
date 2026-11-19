@@ -11,6 +11,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 /**
  * Server -> client synchronisation. All game logic stays on the server; these packets only
  * carry what the client needs to draw: sky intensity, lightning flashes, petrification progress.
+ * One packet goes the other way: the key press that asks to use the phantom armour's gaze.
  */
 public final class ModNetwork {
     private static final String PROTOCOL = "1";
@@ -43,10 +44,19 @@ public final class ModNetwork {
                 .decoder(PetrifyPacket::decode)
                 .consumerMainThread(PetrifyPacket::handle)
                 .add();
+        CHANNEL.messageBuilder(PetrifyAbilityPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(PetrifyAbilityPacket::encode)
+                .decoder(PetrifyAbilityPacket::decode)
+                .consumerMainThread(PetrifyAbilityPacket::handle)
+                .add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), message);
+    }
+
+    public static void sendToServer(Object message) {
+        CHANNEL.sendToServer(message);
     }
 
     public static void sendTracking(Entity entity, Object message) {

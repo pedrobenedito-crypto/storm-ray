@@ -98,9 +98,20 @@ class AssetIntegrityTest {
                 "worldgen/structure/ruined_colosseum.json", "worldgen/structure_set/ruined_colosseum.json",
                 "worldgen/structure/sky_island.json", "worldgen/structure_set/sky_islands.json",
                 "tags/worldgen/biome/colosseum_preferred.json", "tags/worldgen/structure/ruined_colosseum.json",
-                "loot_tables/chests/sky_island.json"}) {
+                "loot_tables/chests/sky_island.json",
+                "recipes/reinforced_phantom_scale.json", "recipes/phantom_sword.json",
+                "recipes/phantom_helmet.json", "recipes/phantom_chestplate.json",
+                "recipes/phantom_leggings.json", "recipes/phantom_boots.json"}) {
             assertTrue(Files.exists(data.resolve(path)), "missing data " + path);
         }
+    }
+
+    @Test
+    void slainBossDropsEightScales() throws IOException {
+        String loot = read(Path.of("src", "main", "resources", "data", "stormray", "loot_tables", "entities", "storm_ray.json"));
+        assertTrue(loot.contains("\"stormray:phantom_scale\""), "the boss must drop phantom scales");
+        assertTrue(Pattern.compile("phantom_scale[\\s\\S]{0,200}\"count\":\\s*8\\b").matcher(loot).find(),
+                "eight scales per boss");
     }
 
     @Test
@@ -130,7 +141,15 @@ class AssetIntegrityTest {
                 "models/item/colosseum_locator.json", "textures/item/colosseum_locator.png",
                 "textures/mob_effect/stone_breaker.png", "textures/mob_effect/bleeding.png",
                 "textures/entity/phantom_bat.png", "textures/entity/phantom_bat_glowmask.png",
-                "models/item/phantom_bat_spawn_egg.json"}) {
+                "models/item/phantom_bat_spawn_egg.json",
+                "textures/item/phantom_scale.png", "textures/item/reinforced_phantom_scale.png",
+                "textures/item/phantom_sword.png", "textures/item/phantom_helmet.png",
+                "textures/item/phantom_chestplate.png", "textures/item/phantom_leggings.png",
+                "textures/item/phantom_boots.png", "textures/models/armor/phantom_layer_1.png",
+                "textures/models/armor/phantom_layer_2.png", "models/item/phantom_sword.json",
+                "models/item/phantom_scale.json", "models/item/reinforced_phantom_scale.json",
+                "models/item/phantom_helmet.json", "models/item/phantom_chestplate.json",
+                "models/item/phantom_leggings.json", "models/item/phantom_boots.json"}) {
             assertTrue(Files.exists(ASSETS.resolve(path)), "missing " + path);
         }
     }

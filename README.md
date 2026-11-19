@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.6.0.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.7.1.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -136,7 +136,9 @@ Um anfiteatro redondo enorme (uns 87 blocos de diâmetro e até 24 de altura), d
   | 3 | 3 | 2 | filamentos e lasers |
   | 4 | 3 | 2 | **começa a petrificar** |
   | 5 e 6 | 4 | 3 | tudo |
-  | depois | +1 a cada duas ondas | +1 a cada duas ondas | tudo |
+  | 7 a 9 | +1 a cada duas ondas | +1 a cada duas ondas | tudo |
+
+  São **9 ondas no total**. Depois da nona não vêm mais mobs: sobra só a arraia para derrotar.
 
   Nunca há mais de 6 Phantom X e 6 Phantom Bats vivos ao mesmo tempo. Eles chegam visíveis por alguns segundos, e a arraia não os fere nem petrifica. A arraia do coliseu tem 75% da vida de uma arraia do ritual. O combate foi pensado para armadura de netherite completa: dá para vencer, mas exige atenção (os filamentos tiram cerca de 2 corações, um combo de Phantom X cerca de 1,5, e o sangramento dos morcegos ignora a armadura). Depois que a arraia morre, as ondas param e a arena descansa por 3 dias de jogo (configurável).  Não acontece no modo pacífico nem com jogadores em criativo/espectador.
 - **Um guardião por vez:** a arena lembra da sua arraia. Sair e voltar não invoca outra: a mesma continua lá até ser morta.
@@ -164,6 +166,28 @@ Uma poção com o visual normal do Minecraft, mas com o líquido **preto**. Dá 
 
 ---
 
+## 3d. Equipamento de Phantom
+
+### Escama de Phantom
+Cada Storm Ray derrotada dropa **8 Escamas de Phantom**. Como a arraia do coliseu renasce depois de um descanso, dá para juntar o bastante para o conjunto inteiro (24 escamas) e ainda sobrar para a espada.
+
+- **Escama de Phantom Reforçada:** 2 escamas na bancada (sem formato) viram 1 reforçada.
+
+### Armadura de Phantom
+Placas negras com veios vermelhos e vinhas escuras, com o brilho de item encantado de fábrica. Forjada com escamas no formato normal de armadura: elmo 5, peitoral 8, calças 7 e botas 4.
+
+- **Proteção:** 20 no total (entre diamante e netherite), resistência 2,5 e um pouco de resistência a repulsão. Conserta com escamas.
+- **Olhar petrificante:** com o **conjunto completo**, mire em um inimigo e aperte **R**. Ele começa a virar pedra igual ao pulso da arraia e leva 20 de dano quando a petrificação termina. Alcance de 24 blocos e recarga de 30 segundos, que aparece como cooldown no elmo. A tecla pode ser trocada em Opções > Controles > Storm Ray.
+
+### Espada de Phantom
+Lâmina preta com fio em brasa e vinhas escuras, também com brilho de encantada. Feita com **2 escamas reforçadas + 1 graveto**.
+
+- **Dano:** 8, igual à espada de netherite.
+- **Fogo de fábrica:** põe fogo no inimigo por 8 segundos, o mesmo que Fire Aspect II, sem gastar encantamento.
+- **Investida:** clique com o botão direito para avançar na direção em que você olha, invisível por 1,5 segundo. Recarga de 6 segundos.
+
+---
+
 Limitações conhecidas: na primeira visita as construções copiadas podem "aparecer" alguns segundos depois de o chunk carregar. Nos chunks do Reflexo ocupados pelo coliseu ou por uma ilha do céu, as construções do mundo original não são copiadas.
 
 ---
@@ -187,6 +211,7 @@ Arquivos gerados na primeira execução:
 | summoning | `requireSteveHead` | true | Exige a cabeça do Steve |
 | summoning | `summonDurationTicks` | 140 | Duração da emergência |
 | summoning | `allowMultipleBosses` / `minDistanceBetweenBosses` | false / 256 | Evita várias ao mesmo tempo |
+| environment | `bossBarRadius` | 192 | Distância em que a barra de vida do chefe aparece |
 | environment | `radius` | 160 | Raio do céu vermelho, da névoa e da barra de vida |
 | environment | `lightning` / `lightningAverageIntervalTicks` | true / 60 | Raios visuais (não causam fogo nem dano) |
 | petrification | `radius` | 22 | Raio do pulso |
@@ -206,11 +231,16 @@ Arquivos gerados na primeira execução:
 | phantom_x | `health` / `hitDamage` / `comboHits` / `comboCooldownTicks` | 40 / 3 / 4 / 50 | Força do Phantom X |
 | phantom_x | `naturalSpawnWeight` | 160 | Frequência de spawn no Reflexo (zumbi = 95; 0 desliga) |
 | phantom_sea | `health` / `biteDamage` / `pullStrength` / `grabDurationTicks` / `breakFreeDamage` | 30 / 3 / 0,2 / 120 / 6 | Força e agarrão do Phantom Sea |
+| gear | `petrifyingGaze` / `gazeRange` / `gazeCooldownTicks` | true / 24 / 600 | Olhar petrificante do conjunto de armadura |
+| gear | `gazeDamage` / `gazePetrifyTicks` | 20 / 60 | Dano e tempo da petrificação causada pelo jogador |
+| gear | `swordFireSeconds` | 8 | Segundos de fogo da espada |
+| gear | `swordDashPower` / `swordDashInvisibleTicks` / `swordDashCooldownTicks` | 1,9 / 30 / 120 | Investida da espada |
 | phantom_bat | `health` / `biteDamage` / `bleedTicks` | 8 / 2 / 100 | Força do Phantom Bat e duração do sangramento |
 | phantom_bat | `naturalSpawnWeight` / `overworldSpawnWeight` | 130 / 20 | Frequência no Reflexo e no mundo normal (zumbi = 95; 0 desliga) |
 | phantom_sea | `naturalSpawnWeight` | 250 | Frequência de spawn na água do Reflexo (0 desliga) |
 | colosseum | `awakenBoss` | true | A Storm Ray emerge quando um jogador entra na arena do coliseu |
 | colosseum | `respawnTicks` | 72000 | Descanso da arena depois da morte da arraia (0 = a luta só acontece uma vez) |
+| colosseum | `maxWaves` | 9 | Número de ondas da luta; depois da última só resta a arraia |
 | colosseum | `bossHealthMultiplier` | 0,75 | Vida da arraia do coliseu em relação à do ritual |
 | colosseum | `firstWavePhantoms` / `maxPhantomX` | 2 / 6 | Phantom X na primeira onda (+1 a cada duas ondas) e máximo vivo |
 | colosseum | `batsFromWave` / `maxBats` | 3 / 6 | Onda em que os Phantom Bats entram e máximo vivo |
@@ -234,7 +264,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.6.0.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.7.1.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -283,7 +313,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.6.0.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.7.1.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---
@@ -303,7 +333,8 @@ src/main/java/com/stormray/
 ├── portal/                       # portal 4x4: ignição pela cabeça jogada, bloco do portal, viagem
 ├── structure/                    # Coliseu em Ruínas e Ilhas do Céu (forma pura testada, peças, luta da arena)
 ├── item/                         # Localizador do Coliseu
-├── effect/                       # efeito Stone Breaker (imunidade à petrificação)
+├── effect/                       # efeitos Stone Breaker e Sangramento
+├── ability/                      # olhar petrificante do conjunto de armadura
 ├── network/                      # canal + pacotes servidor→cliente
 ├── util/                         # matemática pura (testada)
 └── client/                       # renderer GeckoLib, céu/névoa, overlays, boss bar, partículas, som, efeitos da dimensão

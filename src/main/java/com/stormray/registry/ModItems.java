@@ -2,6 +2,10 @@ package com.stormray.registry;
 
 import com.stormray.StormRayMod;
 import com.stormray.item.ColosseumLocatorItem;
+import com.stormray.item.PhantomArmorItem;
+import com.stormray.item.PhantomSwordItem;
+import com.stormray.item.PhantomTier;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -30,6 +34,32 @@ public final class ModItems {
     public static final RegistryObject<Item> COLOSSEUM_LOCATOR = ITEMS.register("colosseum_locator",
             () -> new ColosseumLocatorItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
+    /** Black scale cut from a slain Storm Ray; the base of every phantom tool. */
+    public static final RegistryObject<Item> PHANTOM_SCALE = ITEMS.register("phantom_scale",
+            () -> new Item(new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant()));
+
+    /** Two scales bound together: what the sword is forged from. */
+    public static final RegistryObject<Item> REINFORCED_PHANTOM_SCALE = ITEMS.register("reinforced_phantom_scale",
+            () -> new Item(new Item.Properties().rarity(Rarity.RARE).fireResistant()));
+
+    public static final RegistryObject<Item> PHANTOM_HELMET = ITEMS.register("phantom_helmet",
+            () -> new PhantomArmorItem(ArmorItem.Type.HELMET, armour()));
+    public static final RegistryObject<Item> PHANTOM_CHESTPLATE = ITEMS.register("phantom_chestplate",
+            () -> new PhantomArmorItem(ArmorItem.Type.CHESTPLATE, armour()));
+    public static final RegistryObject<Item> PHANTOM_LEGGINGS = ITEMS.register("phantom_leggings",
+            () -> new PhantomArmorItem(ArmorItem.Type.LEGGINGS, armour()));
+    public static final RegistryObject<Item> PHANTOM_BOOTS = ITEMS.register("phantom_boots",
+            () -> new PhantomArmorItem(ArmorItem.Type.BOOTS, armour()));
+
+    /** Burns what it cuts, and dashes on right-click. */
+    public static final RegistryObject<Item> PHANTOM_SWORD = ITEMS.register("phantom_sword",
+            () -> new PhantomSwordItem(PhantomTier.PHANTOM, 3, -2.4F,
+                    new Item.Properties().rarity(Rarity.RARE).fireResistant()));
+
+    private static Item.Properties armour() {
+        return new Item.Properties().rarity(Rarity.RARE).fireResistant();
+    }
+
     public static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(STORM_RAY_SPAWN_EGG);
@@ -39,6 +69,17 @@ public final class ModItems {
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(COLOSSEUM_LOCATOR);
+        }
+        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(PHANTOM_SCALE);
+            event.accept(REINFORCED_PHANTOM_SCALE);
+        }
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(PHANTOM_SWORD);
+            event.accept(PHANTOM_HELMET);
+            event.accept(PHANTOM_CHESTPLATE);
+            event.accept(PHANTOM_LEGGINGS);
+            event.accept(PHANTOM_BOOTS);
         }
     }
 

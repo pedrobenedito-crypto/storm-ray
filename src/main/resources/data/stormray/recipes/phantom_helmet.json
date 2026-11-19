@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "S S"
+  ],
+  "key": {
+    "S": {
+      "item": "stormray:phantom_scale"
+    }
+  },
+  "result": {
+    "item": "stormray:phantom_helmet",
+    "count": 1
+  }
+}

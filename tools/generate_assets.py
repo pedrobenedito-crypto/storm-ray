@@ -1054,6 +1054,251 @@ def bleeding_icon():
     img.save(os.path.join(out, "bleeding.png"))
 
 
+
+
+# --------------------------------------------------------------------------- phantom gear
+
+# Icons are drawn from 16x16 masks so the silhouettes read clearly at inventory size.
+#   "." nothing   "o" outline   "#" plate   "=" lit plate   "v" vine   "e" ember
+PALETTE = {
+    "o": (7, 5, 6),        # outline: as near black as pixels get
+    "#": (27, 21, 23),     # plate
+    "=": (52, 41, 44),     # lit plate
+    "v": (58, 20, 24),     # vine: dark, dried blood-red
+    "e": (198, 38, 30),    # ember
+}
+
+SCALE_MASK = [
+    "................",
+    ".......oo.......",
+    "......o==o......",
+    ".....o=##=o.....",
+    ".....o=#v#o.....",
+    "....o=##v##o....",
+    "....o=##v##o....",
+    "....o=#v#v#o....",
+    "....o=#v#v#o....",
+    "....o=##v##o....",
+    ".....o=#v#o.....",
+    ".....o=#e#o.....",
+    "......o#e#o.....",
+    ".......oeo......",
+    "........o.......",
+    "................",
+]
+
+REINFORCED_MASK = [
+    "................",
+    "......oooo......",
+    ".....o=##=o.....",
+    "....o=#==#=o....",
+    "...o=##==##=o...",
+    "...ovvvvvvvvo...",
+    "...o=##==##=o...",
+    "...o#e#==#e#o...",
+    "...o=##==##=o...",
+    "...ovvvvvvvvo...",
+    "...o=##==##=o...",
+    "....o=#==#=o....",
+    ".....o=##=o.....",
+    "......oooo......",
+    "................",
+    "................",
+]
+
+HELMET_MASK = [
+    "................",
+    "................",
+    "....oooooooo....",
+    "...o========o...",
+    "...o=##vv##=o...",
+    "...o=#v##v#=o...",
+    "...o##v##v##o...",
+    "...o#e####e#o...",
+    "...oo######oo...",
+    "....o#o..o#o....",
+    "....o#o..o#o....",
+    "....ooo..ooo....",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+CHEST_MASK = [
+    "................",
+    "..oo........oo..",
+    ".o==oooooooo==o.",
+    ".o=#========#=o.",
+    ".o=#=#vv vv#=#=o",
+    ".o=#=#v####v#=#o",
+    ".o==##v####v##=o",
+    ".oo=##v#ee#v##oo",
+    "..o==#vv##vv#o..",
+    "..o==########o..",
+    "..o==###oo###o..",
+    "..oo##oo..oo##o.",
+    "...ooo......ooo.",
+    "................",
+    "................",
+    "................",
+]
+
+LEGGINGS_MASK = [
+    "................",
+    "................",
+    "...oooooooooo...",
+    "..o==########o..",
+    "..o=#vv##vv#=o..",
+    "..o==v####v==o..",
+    "..o==v####v==o..",
+    "..o==##oo##==o..",
+    "..o=#eo..oe#=o..",
+    "..o=#vo..ov#=o..",
+    "..o=##o..o##=o..",
+    "..o=##o..o##=o..",
+    "..o=#vo..ov#=o..",
+    "..oo#oo..oo#oo..",
+    "...ooo....ooo...",
+    "................",
+]
+
+BOOTS_MASK = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "...oooo..oooo...",
+    "...o==o..o==o...",
+    "...o#vo..ov#o...",
+    "...o#vo..ov#o...",
+    "...o==o..o==o...",
+    "..oo##oo oo##oo.",
+    "..o=###o.o###=o.",
+    "..o#e##o.o##e#o.",
+    "..ooooo..ooooo..",
+    "................",
+    "................",
+    "................",
+]
+
+
+def _draw_mask(mask, rng, name, out):
+    size = 16
+    assert len(mask) == size, f"{name}: {len(mask)} rows"
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = img.load()
+    for y, row in enumerate(mask):
+        assert len(row) == size, f"{name}: row {y} is {len(row)} wide"
+        for x, key in enumerate(row):
+            if key in (".", " "):
+                continue
+            r, g, b = PALETTE[key]
+            if key in "#=":
+                n = rng.randint(-6, 6)
+                lit = (8 - y) // 2          # lit from above
+                r, g, b = r + n + lit, g + n + lit, b + n + lit
+            px[x, y] = tuple(max(0, min(255, c)) for c in (r, g, b)) + (255,)
+    img.save(os.path.join(out, name + ".png"))
+
+
+def _sword_texture(rng, out):
+    """Phantom Sword: black diagonal blade with a burning edge and a vine-wrapped grip."""
+    size = 16
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = img.load()
+
+    def put(x, y, key, jitter=True):
+        if not (0 <= x < size and 0 <= y < size):
+            return
+        r, g, b = PALETTE[key]
+        if jitter and key in "#=":
+            n = rng.randint(-6, 6)
+            r, g, b = r + n, g + n, b + n
+        px[x, y] = tuple(max(0, min(255, c)) for c in (r, g, b)) + (255,)
+
+    for y in range(2, 11):                       # blade, running down-left from the tip
+        put(16 - y, y, "o", jitter=False)        # outline on the blunt side
+        put(15 - y, y, "=")                      # bright edge
+        put(14 - y, y, "#")                      # body
+        put(13 - y, y, "o", jitter=False)        # outline on the cutting side
+    for y in range(3, 10):                       # ember line along the cutting edge
+        if y % 2:
+            put(14 - y, y, "e", jitter=False)
+    put(14, 1, "e", jitter=False)                # tip
+    put(15, 1, "o", jitter=False)
+    put(13, 1, "o", jitter=False)
+
+    for i in range(6):                           # crossguard, across the blade
+        put(2 + i, 7 + i, "=" if i % 2 else "#")
+        put(1 + i, 7 + i, "o", jitter=False)
+        put(3 + i, 8 + i, "o", jitter=False)
+    for i, (x, y) in enumerate(((4, 11), (3, 12), (2, 13))):   # grip
+        put(x, y, "v" if i % 2 == 0 else "#", jitter=False)
+        put(x + 1, y, "o", jitter=False)
+        put(x - 1, y, "o", jitter=False)
+    put(1, 14, "=")                              # pommel
+    put(2, 14, "o", jitter=False)
+    put(0, 14, "o", jitter=False)
+    put(1, 15, "o", jitter=False)
+    img.save(os.path.join(out, "phantom_sword.png"))
+
+
+def gear_item_textures():
+    rng = random.Random(8675)
+    out = os.path.join(ASSETS, "textures", "item")
+    os.makedirs(out, exist_ok=True)
+    for name, mask in (("phantom_scale", SCALE_MASK), ("reinforced_phantom_scale", REINFORCED_MASK),
+                       ("phantom_helmet", HELMET_MASK), ("phantom_chestplate", CHEST_MASK),
+                       ("phantom_leggings", LEGGINGS_MASK), ("phantom_boots", BOOTS_MASK)):
+        _draw_mask(mask, rng, name, out)
+    _sword_texture(rng, out)
+
+
+def armor_layer_textures():
+    """The two worn-armour layers (64x32): black plating veined with green, as the model wraps it."""
+    rng = np.random.default_rng(606)
+    for layer in (1, 2):
+        w, h = 64, 32
+        grain = fbm(64, 10, 4, rng)[:h, :w]
+        plates = fbm(64, 5, 2, rng)[:h, :w]
+        base = 13 + 24 * grain + 9 * plates
+        # black plating with the faintest warm cast, never blue or green
+        img = np.stack([base * 1.18 + 5 * plates, base * 0.86, base * 0.88, np.full((h, w), 255.0)], axis=-1)
+
+        # vines: wandering vertical runs, a few per layer
+        count = 7 if layer == 1 else 5
+        for i in range(count):
+            x = float(rng.integers(2, w - 2))
+            for y in range(h):
+                x += float(rng.normal(0.0, 0.45))
+                x = min(max(1.0, x), w - 2.0)
+                xi = int(x)
+                shade = 0.75 + 0.5 * float(rng.random())
+                img[y, xi, 0] = 62 * shade
+                img[y, xi, 1] = 20 * shade
+                img[y, xi, 2] = 23 * shade
+                if y % 5 == 0:                        # a leaf
+                    lx = min(w - 1, max(0, xi + (1 if y % 10 == 0 else -1)))
+                    img[y, lx] = [40, 14, 16, 255]
+        # ember flecks and a brighter top edge so the plates read as metal
+        for _ in range(22):
+            y = int(rng.integers(0, h))
+            x = int(rng.integers(0, w))
+            img[y, x] = [186, 36, 30, 255]
+        img[0:1, :, :3] *= 1.6
+        out = os.path.join(ASSETS, "textures", "models", "armor")
+        os.makedirs(out, exist_ok=True)
+        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(
+            os.path.join(out, f"phantom_layer_{layer}.png"))
+
+
+def write_gear():
+    gear_item_textures()
+    armor_layer_textures()
+    print("phantom gear: 7 icons, 2 armour layers")
+
+
 # --------------------------------------------------------------------------- items
 
 def item_textures():
@@ -1146,6 +1391,7 @@ def main():
     print(f"phantom_sea: {len(sea.bones)} bones, {sum(len(b['cubes']) for b in sea.bones)} cubes")
     item_textures()
     write_bat()
+    write_gear()
     bones = geo.bones
     print(f"geometry: {len(bones)} bones, {sum(len(b['cubes']) for b in bones)} cubes")
 

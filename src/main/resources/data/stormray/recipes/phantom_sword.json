@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "R",
+    "R",
+    "#"
+  ],
+  "key": {
+    "R": {
+      "item": "stormray:reinforced_phantom_scale"
+    },
+    "#": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "stormray:phantom_sword",
+    "count": 1
+  }
+}
