@@ -17,6 +17,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -60,6 +61,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -227,7 +229,39 @@ public class StormRayEntity extends Monster implements GeoEntity {
             this.clientPhaseTicks++;
             StormRayEffects.clientTick(this);
         } else {
+            updateBossBar();
             StormEnvironment.tick(this);
+        }
+    }
+
+    /**
+     * The boss bar. Kept here, on its own, and run every single tick: it must not depend on the
+     * phase, on the red sky, or on anything that can be switched off, and it has to keep working
+     * while the boss is rising out of the ground and while it is dying.
+     */
+    private void updateBossBar() {
+        this.bossEvent.setProgress(Mth.clamp(this.getHealth() / this.getMaxHealth(), 0.0F, 1.0F));
+        if (!(this.level() instanceof ServerLevel level)) {
+            return;
+        }
+        double radius = StormRayConfig.BOSS_BAR_RADIUS.get();
+        double leave = radius + 24.0D;        // hysteresis, so the edge cannot make it flicker
+        for (ServerPlayer player : level.players()) {
+            boolean shown = this.bossEvent.getPlayers().contains(player);
+            double limit = shown ? leave : radius;
+            double dx = player.getX() - this.getX();
+            double dz = player.getZ() - this.getZ();
+            if (dx * dx + dz * dz <= limit * limit) {
+                this.bossEvent.addPlayer(player);      // a no-op if they already have it
+            } else if (shown) {
+                this.bossEvent.removePlayer(player);
+            }
+        }
+        // players who left this level, logged out, or respawned into a new entity object
+        for (ServerPlayer player : List.copyOf(this.bossEvent.getPlayers())) {
+            if (player.isRemoved() || player.level() != level) {
+                this.bossEvent.removePlayer(player);
+            }
         }
     }
 
@@ -260,7 +294,6 @@ public class StormRayEntity extends Monster implements GeoEntity {
             case PULSE -> tickPulse();
             case LASER -> tickLaser(target);
         }
-        this.bossEvent.setProgress(Mth.clamp(this.getHealth() / this.getMaxHealth(), 0.0F, 1.0F));
     }
 
     private void acquireTarget() {

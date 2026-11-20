@@ -44,6 +44,11 @@ public final class ModNetwork {
                 .decoder(PetrifyPacket::decode)
                 .consumerMainThread(PetrifyPacket::handle)
                 .add();
+        CHANNEL.messageBuilder(DashPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(DashPacket::encode)
+                .decoder(DashPacket::decode)
+                .consumerMainThread(DashPacket::handle)
+                .add();
         CHANNEL.messageBuilder(PetrifyAbilityPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PetrifyAbilityPacket::encode)
                 .decoder(PetrifyAbilityPacket::decode)

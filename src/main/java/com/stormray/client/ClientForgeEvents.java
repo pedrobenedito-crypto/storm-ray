@@ -41,6 +41,7 @@ public final class ClientForgeEvents {
         if (mc.level == null || mc.player == null) {
             ClientStormState.reset();
             PetrifyClientData.clear();
+            DashClientData.clear();
             return;
         }
         if (mc.isPaused()) {
@@ -138,6 +139,12 @@ public final class ClientForgeEvents {
 
     @SubscribeEvent
     public static void onRenderLiving(RenderLivingEvent.Pre<?, ?> event) {
+        // A phantom-sword dash hides the wearer outright; vanilla invisibility would leave
+        // their armour and sword hanging in the air.
+        if (DashClientData.isDashing(event.getEntity())) {
+            event.setCanceled(true);
+            return;
+        }
         PetrifiedEntityRenderer.onRenderLiving(event);
     }
 

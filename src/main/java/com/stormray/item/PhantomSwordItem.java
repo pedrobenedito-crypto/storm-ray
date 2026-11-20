@@ -1,6 +1,8 @@
 package com.stormray.item;
 
 import com.stormray.config.StormRayConfig;
+import com.stormray.network.DashPacket;
+import com.stormray.network.ModNetwork;
 import com.stormray.registry.ModParticles;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -26,7 +28,8 @@ import java.util.List;
 
 /**
  * The Phantom Sword: a blade of bound scales that burns what it cuts, and carries the ray's
- * own vanishing trick. Right-click to dash forward, unseen for as long as the dash lasts.
+ * own vanishing trick. Right-click to dash forward: armour, blade and all vanish for as long
+ * as the dash lasts.
  */
 public class PhantomSwordItem extends SwordItem {
     public PhantomSwordItem(Tier tier, int attackDamage, float attackSpeed, Properties properties) {
@@ -59,6 +62,8 @@ public class PhantomSwordItem extends SwordItem {
 
         if (level instanceof ServerLevel serverLevel) {
             player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, invisible, 0, false, false, true));
+            // tells every client watching to drop this player's armour and blade from the render
+            ModNetwork.sendTracking(player, new DashPacket(player.getId(), invisible));
             player.getCooldowns().addCooldown(this, StormRayConfig.SWORD_DASH_COOLDOWN.get());
             stack.hurtAndBreak(1, player, user -> user.broadcastBreakEvent(hand));
             serverLevel.sendParticles(ModParticles.SOOT.get(), player.getX(), player.getY() + 1.0D, player.getZ(),

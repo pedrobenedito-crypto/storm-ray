@@ -1,5 +1,6 @@
 package com.stormray.client;
 
+import com.stormray.network.DashPacket;
 import com.stormray.network.PetrifyPacket;
 import com.stormray.network.StormFlashPacket;
 import com.stormray.network.StormStatePacket;
@@ -20,5 +21,9 @@ public final class ClientPacketHandler {
 
     public static void handlePetrify(PetrifyPacket packet) {
         PetrifyClientData.update(packet.entityId(), packet.elapsed(), packet.total(), packet.finished());
+    }
+
+    public static void handleDash(DashPacket packet) {
+        DashClientData.receive(packet.entityId(), packet.ticks());
     }
 }

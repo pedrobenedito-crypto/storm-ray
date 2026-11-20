@@ -15,7 +15,7 @@ Uma arraia colossal de cinzas é invocada por um ritual de redstone. Ela tinge o
 
 1. Instale o **Forge 1.20.1** (47.3.0 ou mais recente).
 2. Baixe o **GeckoLib** para *Forge 1.20.1* (versão 4.4.x) no CurseForge ou Modrinth.
-3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.7.3.jar` na pasta `mods` do Minecraft.
+3. Coloque `geckolib-forge-1.20.1-4.4.x.jar` e `stormray-1.20.1-1.8.2.jar` na pasta `mods` do Minecraft.
 4. Abra o jogo com o perfil do Forge.
 
 Em servidor, os dois `.jar` vão na pasta `mods` do servidor **e** de cada jogador.
@@ -174,7 +174,7 @@ Cada Storm Ray derrotada dropa **8 Escamas de Phantom**. Como a arraia do colise
 - **Escama de Phantom Reforçada:** 2 escamas na bancada (sem formato) viram 1 reforçada.
 
 ### Armadura de Phantom
-Placas pesadas no estilo netherite, pretas com veios vermelhos e vinhas escuras, com o brilho de item encantado de fábrica. O elmo é aberto: o rosto fica à mostra, emoldurado pela testeira e pelas laterais. Forjada com escamas no formato normal de armadura: elmo 5, peitoral 8, calças 7 e botas 4.
+Placas pesadas na mesma paleta cinza-violeta do netherite, riscadas por veios vermelhos, com o brilho de item encantado de fábrica. O elmo é aberto: o rosto fica à mostra, emoldurado pela testeira e pelas laterais.
 
 - **Proteção:** 20 no total (entre diamante e netherite), resistência 2,5 e um pouco de resistência a repulsão. Conserta com escamas.
 - **Olhar petrificante:** com o **conjunto completo**, mire em um inimigo e aperte **R**. Ele começa a virar pedra igual ao pulso da arraia e leva 20 de dano quando a petrificação termina. Alcance de 24 blocos e recarga de 30 segundos, que aparece como cooldown no elmo. A tecla pode ser trocada em Opções > Controles > Storm Ray.
@@ -184,7 +184,7 @@ Lâmina preta com fio em brasa e vinhas escuras, também com brilho de encantada
 
 - **Dano:** 8, igual à espada de netherite.
 - **Fogo de fábrica:** põe fogo no inimigo por 8 segundos, o mesmo que Fire Aspect II, sem gastar encantamento.
-- **Investida:** clique com o botão direito para avançar na direção em que você olha, invisível por 1,5 segundo. Recarga de 6 segundos.
+- **Investida:** clique com o botão direito para avançar na direção em que você olha, invisível por 1,5 segundo. Some por completo: corpo, **armadura** e espada, e não só o corpo como na invisibilidade comum. Recarga de 6 segundos.
 
 ---
 
@@ -265,7 +265,7 @@ Arquivos gerados na primeira execução:
 Comandos úteis:
 
 ```bash
-./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.7.3.jar
+./gradlew build        # compila, roda os testes e gera build/libs/stormray-1.20.1-1.8.2.jar
 ./gradlew test         # só os testes
 ./gradlew runClient    # abre o jogo em modo de desenvolvimento
 ```
@@ -314,7 +314,7 @@ git push -u origin main
 2. O workflow **Build Storm Ray** roda sozinho a cada push (ou manualmente em **Run workflow**). Ele:
    instala o Java 17 → configura o Gradle → baixa as dependências do Forge → compila → roda os testes → gera o JAR → publica o JAR como artefato.
 3. O primeiro build leva ~8–15 min (o Forge prepara o Minecraft); os seguintes usam cache.
-4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.7.3.jar` dentro.
+4. Quando ficar verde ✅, abra a execução e baixe o artefato **storm-ray-mod** no fim da página. É um `.zip` com o `stormray-1.20.1-1.8.2.jar` dentro.
 5. Se ficar vermelho ❌, abra o passo que falhou e copie o erro. Os relatórios de teste ficam no artefato **test-reports**.
 
 ---
